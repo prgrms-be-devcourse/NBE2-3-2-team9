@@ -1,4 +1,4 @@
-package com.example.nbe232team9;
+package com.team9.anicare;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
