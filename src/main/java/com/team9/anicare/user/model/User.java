@@ -1,20 +1,46 @@
 package com.team9.anicare.user.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.team9.anicare.common.entities.CommonEntity;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-public class User {
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class User extends CommonEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column( unique = true)
     private String email;
-    private String profileImg;
+
+    @Column()
     private String name;
+
+    @Column()
     private String password;
-    private String role;
-    private int years_of_experience;
+
+    @Column()
+    private String profileImg;
+
+
+    @Column(nullable = false)
+    private int years_of_experience = 0;
+    @Column()
     private String refreshtoken;
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
