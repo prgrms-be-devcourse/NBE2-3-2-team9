@@ -6,7 +6,6 @@ import com.team9.anicare.community.dto.CommunityRequestDTO;
 import com.team9.anicare.community.dto.CommunityResponseDTO;
 import com.team9.anicare.community.model.Community;
 import com.team9.anicare.community.repository.CommunityRepository;
-import com.team9.anicare.user.model.User;
 import com.team9.anicare.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,12 +30,9 @@ public class CommunityService {
         return new Result(ResultCode.SUCCESS, posts);
     }
 
-    public Result createPost(Long userId, CommunityRequestDTO communityDTO) {
-
-        User user = userRepository.findById(userId).orElse(null);
+    public Result createPost(CommunityRequestDTO communityDTO) {
 
         Community community = modelMapper.map(communityDTO, Community.class);
-        community.setUserId(user);
         communityRepository.save(community);
 
         return new Result(ResultCode.SUCCESS, "게시글 작성 성공");

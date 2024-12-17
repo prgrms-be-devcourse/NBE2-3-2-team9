@@ -19,8 +19,8 @@ public class CommunityController {
     }
 
     @PostMapping
-    public Result createPost(Long userId, CommunityRequestDTO communityDTO) {
-        return communityService.createPost(userId, communityDTO);
+    public Result createPost(CommunityRequestDTO communityDTO) {
+        return communityService.createPost(communityDTO);
     }
 
     @PutMapping("/{postingId}")
