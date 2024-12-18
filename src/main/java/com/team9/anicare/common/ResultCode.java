@@ -24,6 +24,12 @@ public enum ResultCode {
     INVALID_USER_PASSWORD(400, "유효하지 않은 비밀번호입니다."),
     USER_ACCOUNT_LOCKED(403, "사용자 계정이 잠겼습니다."),
 
+    // 반려동물 관련
+    NOT_EXISTS_PET(404, "반려동물을 등록하지 않았습니다."),
+
+
+    // 스케줄 관련
+    NOT_EXISTS_SCHEDULE(404, "요청하신 스케줄이 없습니다."),
     // 커뮤니티 관련
     NOT_EXISTS_POST(404, "게시글이 존재하지 않습니다."),
     NOT_EXISTS_COMMENT(404, "댓글이 존재하지 않습니다"),
