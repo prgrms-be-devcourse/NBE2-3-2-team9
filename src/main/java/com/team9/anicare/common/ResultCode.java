@@ -24,6 +24,11 @@ public enum ResultCode {
     INVALID_USER_PASSWORD(400, "유효하지 않은 비밀번호입니다."),
     USER_ACCOUNT_LOCKED(403, "사용자 계정이 잠겼습니다."),
 
+    // 커뮤니티 관련
+    NOT_EXISTS_POST(404, "게시글이 존재하지 않습니다."),
+    NOT_EXISTS_COMMENT(404, "댓글이 존재하지 않습니다"),
+    DUPLICATE_LIKE(409, "이미 좋아요를 누른 상태입니다"),
+
     // 500 Internal Server Error
     DB_ERROR(500, "DB오류 입니다."),
 
