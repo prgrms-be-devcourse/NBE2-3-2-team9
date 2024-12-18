@@ -30,6 +30,10 @@ public enum ResultCode {
 
     // 스케줄 관련
     NOT_EXISTS_SCHEDULE(404, "요청하신 스케줄이 없습니다."),
+    // 커뮤니티 관련
+    NOT_EXISTS_POST(404, "게시글이 존재하지 않습니다."),
+    NOT_EXISTS_COMMENT(404, "댓글이 존재하지 않습니다"),
+    DUPLICATE_LIKE(409, "이미 좋아요를 누른 상태입니다"),
 
     // 500 Internal Server Error
     DB_ERROR(500, "DB오류 입니다."),

@@ -8,10 +8,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CommunityResponseDTO {
-    private String id;
+    private Long id;
+    private Long userId;
     private String title;
     private String content;
     private String picture;
     private String animalSpecies;
     private int commentCount;
+    private int likeCount;
+    private boolean canEdit;
 }
