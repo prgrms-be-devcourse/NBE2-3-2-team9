@@ -1,5 +1,6 @@
 package com.team9.anicare.community.model;
 
+import com.team9.anicare.user.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,5 +18,10 @@ public class Comment {
     @JoinColumn(name = "community_id")
     private Community community;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     private String content;
+
 }

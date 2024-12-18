@@ -4,6 +4,7 @@ import com.team9.anicare.common.Result;
 import com.team9.anicare.common.dto.PageRequestDTO;
 import com.team9.anicare.community.dto.CommunityRequestDTO;
 import com.team9.anicare.community.service.CommunityService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +15,7 @@ public class CommunityController {
 
     private final CommunityService communityService;
 
-    // 게시글 목록 출력 & 검색
+    @Operation(summary = "게시글 목록 출력 & 검색")
     @GetMapping
     public Result showPosts(
             PageRequestDTO pageRequestDTO,
@@ -23,35 +24,35 @@ public class CommunityController {
     ) {
         return communityService.showPosts(pageRequestDTO, keyword, category);
     }
-/*
-    // 내가 작성한 글 출력
+
+    @Operation(summary = "내가 작성한 글 조회")
     @GetMapping("/myPost")
+    public Result showMyPosts(Long userId) {
+        return communityService.showMyPosts(userId);
+    }
 
-
-
- */
-    // 글 상세 보기
+    @Operation(summary = "글 상세 보기")
     @GetMapping("/detail/{postingId}")
-    public Result showPostDetail(@PathVariable Long postingId) {
-        return communityService.showPostDetail(postingId);
+    public Result showPostDetail(Long userId, @PathVariable Long postingId) {
+        return communityService.showPostDetail(userId, postingId);
     }
 
-    // 글 작성
-    @PostMapping
-    public Result createPost(CommunityRequestDTO communityRequestDTO) {
-        return communityService.createPost(communityRequestDTO);
+    @Operation(summary = "글 작성")
+    @PostMapping("/post")
+    public Result createPost(Long userId, CommunityRequestDTO communityRequestDTO) {
+        return communityService.createPost(userId, communityRequestDTO);
     }
 
-    // 글 수정
-    @PutMapping("/{postingId}")
+    @Operation(summary = "글 수정")
+    @PutMapping("/post/{postingId}")
     public Result updatePost(
             @PathVariable Long postingId,
             CommunityRequestDTO communityRequestDTO) {
         return communityService.updatePost(postingId, communityRequestDTO);
     }
 
-    // 글 삭제
-    @DeleteMapping("/{postingId}")
+    @Operation(summary = "글 삭제")
+    @DeleteMapping("/post/{postingId}")
     public Result deletePost(@PathVariable Long postingId) {
         return communityService.deletePost(postingId);
     }

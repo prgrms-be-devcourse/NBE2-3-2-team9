@@ -8,5 +8,7 @@ import lombok.Setter;
 public class CommentResponseDTO {
     private Long Id;
     private Long communityId;
+    private Long userId;
     private String content;
+    private boolean canEdit;
 }

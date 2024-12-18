@@ -1,5 +1,6 @@
 package com.team9.anicare.community.model;
 
+import com.team9.anicare.user.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +16,10 @@ public class Community {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     private String title;
 
     private String content;
@@ -24,6 +29,8 @@ public class Community {
     private String animalSpecies;
 
     private int commentCount;
+
+    private int likeCount;
 
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
