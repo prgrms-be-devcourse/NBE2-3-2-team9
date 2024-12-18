@@ -79,12 +79,19 @@ public class CommentService {
 
         try {
             // 댓글 존재 여부 확인
-            if (!commentRepository.existsById(commentId)) {
+            Comment comment = commentRepository.findById(commentId).orElse(null);
+            if (comment == null) {
                 return new Result(ResultCode.NOT_EXISTS_COMMENT);
             }
 
+            Community community = comment.getCommunity();
+
             // 댓글 삭제
             commentRepository.deleteById(commentId);
+
+            // 해당 게시글 댓글 수 감소
+            community.setCommentCount(community.getCommentCount() - 1);
+            communityRepository.save(community);
 
             return new Result(ResultCode.SUCCESS, "댓글 삭제 성공");
         } catch (Exception e) {
