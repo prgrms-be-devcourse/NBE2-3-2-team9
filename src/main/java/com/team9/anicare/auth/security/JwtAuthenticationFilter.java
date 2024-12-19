@@ -25,20 +25,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = getTokenFromHeader(request);
 
-        //토큰검증
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            Long userId = jwtTokenProvider.getId(token);
+            long userId = jwtTokenProvider.getId(token);
 
             Optional<User> optionalUser = userRepository.findById(userId);
-            if(optionalUser.isPresent()) {
+            if (optionalUser.isPresent()) {
                 User user = optionalUser.get();
 
                 // CustomUserDetails 객체 생성
-                CustomUserDetails userDetails = new CustomUserDetails(user);
+                CustomUserDetails userDetails = new CustomUserDetails(user, userId);
 
                 // Spring Security 인증 객체 생성 및 설정
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
