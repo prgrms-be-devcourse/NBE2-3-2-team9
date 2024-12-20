@@ -9,43 +9,45 @@ import java.util.Collection;
 import java.util.Collections;
 
 @AllArgsConstructor
-public class CustomUserDetails  implements UserDetails {
-    private final User user;
-
+public class CustomUserDetails implements UserDetails {
+    private final User user; // User 객체 추가
+    private final long userId;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 사용자의 Role 권한설정
-        return Collections.singleton(() -> "ROLE_" + user.getRole().name());
+        String role = "ROLE_" + user.getRole().name();
+        return Collections.singleton(() -> role);
+    }
+    public Long getUserId() {
+        return userId; // 추가: ID를 직접 반환
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return null; // 비밀번호를 저장하지 않으므로 null 반환
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return String.valueOf(userId); // User ID를 문자열 형태로 반환
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return true; // 계정이 만료되지 않았다고 가정
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return true; // 계정이 잠기지 않았다고 가정
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return true; // 인증 정보가 만료되지 않았다고 가정
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return true; // 계정이 활성화되어 있다고 가정
     }
-
 }
