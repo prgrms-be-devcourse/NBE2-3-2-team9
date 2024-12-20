@@ -3,6 +3,7 @@ package com.team9.anicare.common.exception;
 
 import com.team9.anicare.common.Result;
 import com.team9.anicare.common.ResultCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -18,15 +19,18 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Result<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
-        }
-        Result<Map<String, String>> result = new Result<>(ResultCode.INVALID_REQUEST, errors);
-        return ResponseEntity.status(ResultCode.INVALID_REQUEST.getCode()).body(result);
+
+    @ExceptionHandler(value = CustomException.class)
+    public ResponseEntity<Result<Void>> handleCustomException(CustomException e) {
+        // ResultCode에서 정보 가져오기
+        Result<Void> result = new Result<>(e.getResultCode());
+
+        return ResponseEntity
+                .status(e.getResultCode().getCode())  // HTTP 상태 설정
+                .body(result);                        // Result 반환
     }
+
+
 
     // JSON 파싱 오류
     @ExceptionHandler(HttpMessageNotReadableException.class)
