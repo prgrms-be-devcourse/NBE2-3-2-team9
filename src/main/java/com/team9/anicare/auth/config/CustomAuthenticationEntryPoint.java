@@ -1,9 +1,8 @@
 package com.team9.anicare.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team9.anicare.common.Result;
-import com.team9.anicare.common.ResultCode;
-import io.swagger.v3.oas.models.responses.ApiResponse;
+import com.team9.anicare.common.response.Result;
+import com.team9.anicare.common.exception.ResultCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
