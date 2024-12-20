@@ -10,6 +10,5 @@ import lombok.Setter;
 public class CommunityRequestDTO {
     private String title;
     private String content;
-    private String picture;
     private String animalSpecies;
 }

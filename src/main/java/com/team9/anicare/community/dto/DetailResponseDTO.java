@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class CommunityDetailResponseDTO {
+public class DetailResponseDTO {
     private CommunityResponseDTO community;
     private List<CommentResponseDTO> comment;
 }

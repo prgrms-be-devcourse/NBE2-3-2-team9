@@ -4,6 +4,9 @@ import com.team9.anicare.user.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -23,5 +26,12 @@ public class Comment {
     private User user;
 
     private String content;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Comment parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private List<Comment> replies;
 
 }
