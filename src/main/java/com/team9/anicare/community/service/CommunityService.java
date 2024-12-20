@@ -1,10 +1,10 @@
 package com.team9.anicare.community.service;
 
-import com.team9.anicare.common.Result;
 import com.team9.anicare.common.ResultCode;
 import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageMetaDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
+import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.community.dto.CommentResponseDTO;
 import com.team9.anicare.community.dto.DetailResponseDTO;
 import com.team9.anicare.community.dto.CommunityRequestDTO;
@@ -40,7 +40,6 @@ public class CommunityService {
     private final S3FileService s3FileService;
 
     public PageDTO<CommunityResponseDTO> showPosts(PageRequestDTO pageRequestDTO, String keyword, String category) {
-
         PageRequest pageRequest = pageRequestDTO.toPageRequest();
 
         Page<Community> communityPage;
@@ -69,7 +68,6 @@ public class CommunityService {
     }
 
     public List<CommunityResponseDTO> showMyPosts(Long userId) {
-
         // 특정 유저의 게시글 조회 -> DTO로 변환
         return communityRepository.findByUserId(userId).stream()
                 .map(community -> modelMapper.map(community, CommunityResponseDTO.class))
@@ -77,10 +75,9 @@ public class CommunityService {
     }
 
     public DetailResponseDTO showPostDetail(Long userId, Long postingId) {
-
         // 게시글 조회
         Community community = communityRepository.findById(postingId)
-                .orElseThrow(() -> new IllegalStateException("게시글 없음"));
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
         // 현재 유저의 게시글 수정 권한 확인
         boolean canEditPost = community.getUser().getId().equals(userId);
@@ -96,7 +93,6 @@ public class CommunityService {
     }
 
     private List<CommentResponseDTO> getCommentsWithReplies(Long userId, Long postingId) {
-
         // 모든 댓글 조회
         List<Comment> allComments = commentRepository.findByCommunityId(postingId);
 
@@ -129,10 +125,9 @@ public class CommunityService {
     }
 
     public CommunityResponseDTO createPost(Long userId, CommunityRequestDTO communityRequestDTO, MultipartFile file) {
-
         // 유저 조회
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("유저 없음"));
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_USER));
 
         // 게시글 생성
         Community community = modelMapper.map(communityRequestDTO, Community.class);
@@ -144,7 +139,7 @@ public class CommunityService {
                 community.setPicture(s3FileService.uploadFile(file, "community"));
             }
         } catch (IOException e) {
-            throw new RuntimeException("파일 업로드 실패");
+            throw new CustomException(ResultCode.FILE_UPLOAD_ERROR);
         }
         communityRepository.save(community);
 
@@ -152,10 +147,9 @@ public class CommunityService {
     }
 
     public CommunityResponseDTO updatePost(Long postingId, CommunityRequestDTO communityRequestDTO, MultipartFile file) {
-
         // 게시글 조회
         Community community = communityRepository.findById(postingId)
-                .orElseThrow(() -> new IllegalStateException("게시글 없음"));
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
         // 게시글 수정
         community.setTitle(communityRequestDTO.getTitle());
@@ -171,7 +165,7 @@ public class CommunityService {
                 community.setPicture(community.getPicture());
             }
         } catch (IOException e) {
-            throw new RuntimeException("파일 업로드 실패");
+            throw new CustomException(ResultCode.FILE_UPLOAD_ERROR);
         }
         communityRepository.save(community);
 
@@ -179,10 +173,9 @@ public class CommunityService {
     }
 
     public void deletePost(Long postingId) {
-
         // 게시글 존재 여부 확인
         Community community = communityRepository.findById(postingId)
-                .orElseThrow(() -> new IllegalStateException("게시글 없음"));
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
         // 게시글 삭제
         communityRepository.deleteById(postingId);

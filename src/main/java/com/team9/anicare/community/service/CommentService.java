@@ -1,7 +1,7 @@
 package com.team9.anicare.community.service;
 
-import com.team9.anicare.common.Result;
 import com.team9.anicare.common.ResultCode;
+import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.community.dto.CommentRequestDTO;
 import com.team9.anicare.community.dto.CommentResponseDTO;
 import com.team9.anicare.community.dto.LikeResponseDTO;
@@ -28,19 +28,18 @@ public class CommentService {
     private final ModelMapper modelMapper;
 
     public CommentResponseDTO createComment(Long userId, Long postId, Long parentId, CommentRequestDTO commentRequestDTO) {
-
         // 게시글 조회
         Community community = communityRepository.findById(postId)
-                .orElseThrow(() -> new IllegalStateException("게시글 없음"));
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
         // 유저 조회
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("유저 없음"));
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_USER));
 
         Comment parentComment = null;
         if(parentId != null) {
             parentComment = commentRepository.findById(parentId)
-                    .orElseThrow(() -> new IllegalStateException("댓글 없음"));
+                    .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_COMMENT));
         }
 
         // 댓글 생성
@@ -58,10 +57,9 @@ public class CommentService {
     }
 
     public CommentResponseDTO updateComment(Long commentId, CommentRequestDTO commentRequestDTO) {
-
         // 댓글 조회
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalStateException("댓글 없음"));
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_COMMENT));
 
         // 댓글 수정
         comment.setContent(commentRequestDTO.getContent());
@@ -71,10 +69,9 @@ public class CommentService {
     }
 
     public void deleteComment(Long commentId) {
-
         // 댓글 존재 여부 확인
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalStateException("댓글 없음"));
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_COMMENT));
 
         Community community = comment.getCommunity();
 
@@ -88,20 +85,19 @@ public class CommentService {
     }
 
     public LikeResponseDTO createLike(Long userId, Long postId) {
-
         // 게시글 조회
         Community community = communityRepository.findById(postId)
-                .orElseThrow(() -> new IllegalStateException("게시글 없음"));
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
 
         // 유저 조회
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("유저 없음"));
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_USER));
 
 
         // 이미 좋아요를 누른 상태인지 확인
         if (communityLikeRepository.existsByCommunityAndUser(community, user)) {
-            throw new IllegalStateException("좋아요 이미 누름");
+            throw new CustomException(ResultCode.DUPLICATE_LIKE);
         }
 
         // 좋아요 생성

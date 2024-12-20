@@ -1,9 +1,7 @@
 package com.team9.anicare.community.controller;
 
-import com.team9.anicare.common.Result;
 import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
-import com.team9.anicare.community.dto.CommentResponseDTO;
 import com.team9.anicare.community.dto.CommunityRequestDTO;
 import com.team9.anicare.community.dto.CommunityResponseDTO;
 import com.team9.anicare.community.dto.DetailResponseDTO;
@@ -15,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.*;
 import java.util.List;
 
 @RestController
@@ -73,7 +70,7 @@ public class CommunityController {
     public ResponseEntity<CommunityResponseDTO> updatePost(
             @PathVariable Long postingId,
             @RequestPart(value = "dto") CommunityRequestDTO communityRequestDTO,
-            @RequestParam(value = "file", required = false) MultipartFile file) {
+            @RequestPart(value = "file", required = false) MultipartFile file) {
 
         CommunityResponseDTO communityResponseDTO = communityService.updatePost(postingId, communityRequestDTO, file);
 
