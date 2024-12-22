@@ -4,6 +4,8 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.team9.anicare.common.exception.CustomException;
+import com.team9.anicare.common.exception.ResultCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,11 +32,12 @@ public class S3FileService {
         String originalFileName = multipartFile.getOriginalFilename();
 
         if (originalFileName == null || originalFileName.isEmpty()) {
-            throw new IllegalArgumentException("파일 이름이 비어 있습니다.");
+            throw new CustomException(ResultCode.EMPTY_FILE_NAME);
         }
 
+        // 이미지 파일인지 검사
         if(!isValidExtension(originalFileName)) {
-            throw new IllegalArgumentException("허용되지 않는 파일 형식입니다");
+            throw new CustomException(ResultCode.INVALID_FILE_EXTENSION);
         }
 
         // 파일명에 UUID 추가
