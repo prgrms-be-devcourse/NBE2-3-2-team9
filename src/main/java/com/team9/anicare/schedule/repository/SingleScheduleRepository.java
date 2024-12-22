@@ -12,7 +12,4 @@ import java.util.List;
 public interface SingleScheduleRepository extends JpaRepository<SingleSchedule,Long> {
     @Query("select s from SingleSchedule s where s.userId = :userId")
     List<SingleSchedule> findSingleSchedulesByUserId(Long userId);
-
-    //@Query("select p.id from Pet p where p.userId = :userId and p.id = :petId")
-    //Long findPetIdByUserIdAndPetId(Long userId, Long petId);
 }

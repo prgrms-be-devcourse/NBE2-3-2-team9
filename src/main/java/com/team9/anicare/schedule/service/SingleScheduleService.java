@@ -55,14 +55,7 @@ public class SingleScheduleService {
                 return new Result(ResultCode.INVALID_REQUEST);
             }
 
-            // 객체간 엄격한 매핑을 위한 코드
             modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-            modelMapper.typeMap(SingleScheduleDTO.addSingleScheduleDTO.class, SingleSchedule.class).addMappings(m -> {
-                m.map(SingleScheduleDTO.addSingleScheduleDTO::getPetId, SingleSchedule::setPetId);
-                m.map(SingleScheduleDTO.addSingleScheduleDTO::getName, SingleSchedule::setName);
-                m.map(SingleScheduleDTO.addSingleScheduleDTO::getStartDatetime, SingleSchedule::setStartDatetime);
-                m.map(SingleScheduleDTO.addSingleScheduleDTO::getEndDatetime, SingleSchedule::setEndDatetime);
-            });
 
             SingleSchedule singleschedule = modelMapper.map(request, SingleSchedule.class);
             singleschedule.setUserId(userId);

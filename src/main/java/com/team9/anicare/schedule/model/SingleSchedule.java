@@ -36,3 +36,5 @@ public class SingleSchedule extends CommonEntity {
     @Column(name = "end_datetime", nullable = false)
     private Date endDatetime;
 }
+
+
