@@ -1,6 +1,6 @@
 package com.team9.anicare.community.service;
 
-import com.team9.anicare.common.ResultCode;
+import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageMetaDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
@@ -86,42 +86,17 @@ public class CommunityService {
         CommunityResponseDTO communityResponseDTO = modelMapper.map(community, CommunityResponseDTO.class);
         communityResponseDTO.setCanEdit(canEditPost);
 
-        // 댓글 목록
-        List<CommentResponseDTO> comments = getCommentsWithReplies(userId, postingId);
+        // 조회된 댓글 -> DTO 변환
+        List<CommentResponseDTO> comments = commentRepository.findByCommunityIdAndParentIsNull(postingId).stream()
+                .map(comment -> {
+                    CommentResponseDTO dto = modelMapper.map(comment, CommentResponseDTO.class);
+                    // 현재 유저의 댓글 수정 권한 확인
+                    dto.setCanEdit(comment.getUser().getId().equals(userId));
+                    return dto;
+                })
+                .toList();
 
         return new DetailResponseDTO(communityResponseDTO, comments);
-    }
-
-    private List<CommentResponseDTO> getCommentsWithReplies(Long userId, Long postingId) {
-        // 모든 댓글 조회
-        List<Comment> allComments = commentRepository.findByCommunityId(postingId);
-
-        Map<Long, CommentResponseDTO> map = new HashMap<>();
-        List<CommentResponseDTO> parentComments = new ArrayList<>();
-
-        for(Comment comment : allComments) {
-            // 현재 유저의 댓글 수정 권한 확인
-            boolean canEditComment = comment.getUser().getId().equals(userId);
-
-            // 조회된 댓글 -> DTO로 변환
-            CommentResponseDTO commentResponseDTO = modelMapper.map(comment, CommentResponseDTO.class);
-            commentResponseDTO.setCanEdit(canEditComment);
-            commentResponseDTO.setReplies(new ArrayList<>());
-
-            map.put(comment.getId(), commentResponseDTO);
-
-            if(comment.getParent() != null) {
-                // parent가 존재한다면 -> 답글
-                CommentResponseDTO parent = map.get(comment.getParent().getId());
-                if(parent != null) {
-                    parent.getReplies().add(commentResponseDTO);
-                }
-            } else {
-                // parent가 존재하지 않으면 -> 댓글
-                parentComments.add(commentResponseDTO);
-            }
-        }
-        return parentComments;
     }
 
     public CommunityResponseDTO createPost(Long userId, CommunityRequestDTO communityRequestDTO, MultipartFile file) {

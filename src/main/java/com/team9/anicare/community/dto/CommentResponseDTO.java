@@ -14,6 +14,4 @@ public class CommentResponseDTO {
     private Long userId;
     private String content;
     private boolean canEdit;
-
-    private List<CommentResponseDTO> replies;
 }

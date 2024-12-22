@@ -1,6 +1,6 @@
 package com.team9.anicare.community.service;
 
-import com.team9.anicare.common.ResultCode;
+import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.community.dto.CommentRequestDTO;
 import com.team9.anicare.community.dto.CommentResponseDTO;
@@ -17,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -27,9 +30,9 @@ public class CommentService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
-    public CommentResponseDTO createComment(Long userId, Long postId, Long parentId, CommentRequestDTO commentRequestDTO) {
+    public CommentResponseDTO createComment(Long userId, Long postingId, Long parentId, CommentRequestDTO commentRequestDTO) {
         // 게시글 조회
-        Community community = communityRepository.findById(postId)
+        Community community = communityRepository.findById(postingId)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
         // 유저 조회
@@ -111,5 +114,15 @@ public class CommentService {
         communityRepository.save(community);
 
         return new LikeResponseDTO(communityLike.getId(), community.getId(), userId);
+    }
+
+    public List<CommentResponseDTO> getReplies(Long userId, Long parentId) {
+        return commentRepository.findByParentId(parentId).stream()
+                .map(comment -> {
+                    CommentResponseDTO dto = modelMapper.map(comment, CommentResponseDTO.class);
+                    dto.setCanEdit(comment.getUser().getId().equals(userId)); // 수정 권한 설정
+                    return dto;
+                })
+                .toList();
     }
 }

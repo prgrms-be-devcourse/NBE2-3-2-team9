@@ -31,8 +31,4 @@ public class Community {
     private int commentCount;
 
     private int likeCount;
-
-    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
-
 }

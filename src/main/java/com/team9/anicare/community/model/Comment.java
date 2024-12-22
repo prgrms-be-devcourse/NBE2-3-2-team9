@@ -30,8 +30,4 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private Comment parent;
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    private List<Comment> replies;
-
 }

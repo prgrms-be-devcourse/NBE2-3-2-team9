@@ -1,8 +1,11 @@
 package com.team9.anicare.community.dto;
 
+import com.team9.anicare.community.model.Comment;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,4 +20,6 @@ public class CommunityResponseDTO {
     private int commentCount;
     private int likeCount;
     private boolean canEdit;
+    private List<Comment> comments;
+
 }
