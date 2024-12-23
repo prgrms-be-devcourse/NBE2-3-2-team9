@@ -6,11 +6,20 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-
+/**
+ * WebSocketConfig 클래스는 WebSocket 메시지 브로커를 구성합니다.
+ * - STOMP 프로토콜을 사용하여 WebSocket 연결을 설정합니다.
+ * - 클라이언트와 서버 간의 메시지 교환 경로를 정의합니다.
+ */
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    /**
+     * STOMP 엔드포인트를 등록하여 클라이언트가 WebSocket에 연결할 수 있도록 설정합니다.
+     *
+     * @param registry StompEndpointRegistry 객체
+     */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 클라이언트 연결을 위한 WebSocket 엔드포인트 설정
@@ -19,6 +28,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .withSockJS();
     }
 
+    /**
+     * 메시지 브로커 구성을 설정합니다.
+     * - 메시지 구독 및 송신 경로를 정의합니다.
+     *
+     * @param registry MessageBrokerRegistry 객체
+     */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // 클라이언트가 메시지를 구독하는 경로
