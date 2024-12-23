@@ -1,7 +1,7 @@
 package com.team9.anicare.user.service;
 
-import com.team9.anicare.common.Result;
-import com.team9.anicare.common.ResultCode;
+import com.team9.anicare.common.exception.CustomException;
+import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.user.dto.CreateAdminDTO;
 import com.team9.anicare.user.dto.UpdateAdminDTO;
 import com.team9.anicare.user.model.Role;
@@ -22,41 +22,42 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
 
-    public Result createAdmin(CreateAdminDTO createAdminDTO) {
-        try {
-            System.out.println(createAdminDTO.getEmail());
-            if (userRepository.existsByEmail(createAdminDTO.getEmail())) {
-                return new Result(ResultCode.EMAIL_ALREADY_EXISTS);
-            }
-            // DTO -> User 매핑
-            User user = modelMapper.map(createAdminDTO, User.class);
-            System.out.println("user: " + user.getEmail());
-
-            // 비밀번호 암호화 후 설정
-            String encodedPassword = passwordEncoder.encode(createAdminDTO.getPassword());
-            user.setPassword(encodedPassword);
-
-            user.setRole(Role.ADMIN);
-            userRepository.save(user);
-            return new Result(ResultCode.SUCCESS, "회원가입 성공");
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return new Result(ResultCode.DB_ERROR);
+    public CreateAdminDTO createAdmin(CreateAdminDTO createAdminDTO) {
+        // 이메일 중복 체크
+        if (userRepository.existsByEmail(createAdminDTO.getEmail())) {
+            throw new CustomException(ResultCode.EMAIL_ALREADY_EXISTS); // 사용자 정의 예외
         }
+
+        // DTO -> User 매핑
+        User user = modelMapper.map(createAdminDTO, User.class);
+
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(createAdminDTO.getPassword());
+        user.setPassword(encodedPassword);
+
+        // 관리자 역할 설정
+        user.setRole(Role.ADMIN);
+
+        // 사용자 저장
+        userRepository.save(user);
+
+        // 저장된 데이터를 DTO로 반환
+        return modelMapper.map(user, CreateAdminDTO.class);
     }
 
 
-    public Result adminInfo(Long id) {
-        // 사용자 정보를 조회하고 없으면 예외 발생
-        Optional<User> userOptional = userRepository.findById(id);
-        User user = userOptional.get();
-        return new Result(ResultCode.SUCCESS, user);
+
+    public User adminInfo(Long userId) {
+        // 관리자 정보 조회 로직
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_FOUND));
+
+        // 필요한 데이터만 DTO로 변환
+        return user;
     }
 
 
-    public Result adminUpdate(Long id, UpdateAdminDTO updateAdminDTO) {
-        try {
+    public String adminUpdate(Long id, UpdateAdminDTO updateAdminDTO) {
             Optional<User> optionalUser = userRepository.findById(id);
 
             User user = optionalUser.get();
@@ -71,25 +72,39 @@ public class UserService {
                 user.setProfileImg(updateAdminDTO.getProfileImg());
             }
             userRepository.save(user);
-            return new Result(ResultCode.SUCCESS, "업데이트 성공");
+            return "업데이트 성공";
 
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return  new Result(ResultCode.DB_ERROR);
-        }
     }
 
-    public Result deleteUser(Long id) {
-        try {
+    public String deleteUser(Long id) {
             Optional<User> optionalUser = userRepository.findById(id);
             User user = optionalUser.get();;
             userRepository.deleteById(user.getId());
-            return new Result(ResultCode.SUCCESS, "삭제 성공");
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return  new Result(ResultCode.DB_ERROR);
+            return "삭제성공";
+    }
+
+
+    public User saveUser(String nickname, String email, String profileImg, Role role) {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
+            return existingUser.get(); // 기존 사용자 반환
         }
 
+        // 새 사용자 저장
+        User user = User.builder()
+                .name(nickname)
+                .email(email)
+                .profileImg(profileImg)
+                .role(role) // Role 설정
+                .build();
+        return userRepository.save(user);
     }
+
+    // User 업데이트 메서드
+    public void updateUser(User user) {
+        // JPA를 사용하여 User 업데이트
+        userRepository.save(user);
+    }
+
 
 }
