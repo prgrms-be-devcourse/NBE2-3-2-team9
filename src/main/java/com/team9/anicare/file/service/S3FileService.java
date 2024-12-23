@@ -28,7 +28,6 @@ public class S3FileService {
     private String bucket;
 
     public String uploadFile(MultipartFile multipartFile, String dirName) throws IOException {
-
         String originalFileName = multipartFile.getOriginalFilename();
 
         if (originalFileName == null || originalFileName.isEmpty()) {
@@ -58,7 +57,6 @@ public class S3FileService {
     }
 
     public void deleteFile(String fileName) {
-
         // 원래 파일 이름만 추출
         String splitFilename = ".com/";
         String originalFileName = fileName.substring(fileName.lastIndexOf(splitFilename) + splitFilename.length());
@@ -71,7 +69,6 @@ public class S3FileService {
     }
 
     public String updateFile(MultipartFile newFile, String oldFileName, String dirName) throws IOException {
-
         // 기존에 파일이 존재하면
         if(oldFileName != null && !oldFileName.isEmpty()) {
             deleteFile(oldFileName);
@@ -82,7 +79,7 @@ public class S3FileService {
     }
 
     private boolean isValidExtension(String originalFileName) {
-        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
+        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1).toLowerCase();
         List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
 
         return allowedExtensions.contains(fileExtension);

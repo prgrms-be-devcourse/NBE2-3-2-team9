@@ -9,7 +9,6 @@ import com.team9.anicare.community.dto.CommentResponseDTO;
 import com.team9.anicare.community.dto.DetailResponseDTO;
 import com.team9.anicare.community.dto.CommunityRequestDTO;
 import com.team9.anicare.community.dto.CommunityResponseDTO;
-import com.team9.anicare.community.model.Comment;
 import com.team9.anicare.community.model.Community;
 import com.team9.anicare.community.repository.CommentRepository;
 import com.team9.anicare.community.repository.CommunityRepository;
@@ -24,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
