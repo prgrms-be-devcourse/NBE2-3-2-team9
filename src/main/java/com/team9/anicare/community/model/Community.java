@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Entity
 @Getter
 @Setter
@@ -32,8 +30,4 @@ public class Community extends CommonEntity {
     private int commentCount;
 
     private int likeCount;
-
-    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
-
 }
