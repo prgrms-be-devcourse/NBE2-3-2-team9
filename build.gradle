@@ -48,6 +48,8 @@ dependencies {
 
 
     implementation 'org.modelmapper:modelmapper:3.2.2'
+
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.1'
 }
 
 tasks.named('test') {
