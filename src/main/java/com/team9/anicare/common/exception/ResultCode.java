@@ -36,7 +36,10 @@ public enum ResultCode {
 
     // 반려동물 관련
     NOT_EXISTS_PET(404, "반려동물을 등록하지 않았습니다."),
+    INVALID_GENDER_VALUE(400,"올바르지 않은 성별입니다"),
 
+    // 종 관련
+    NOT_EXISTS_SPECIES(404, "해당하는 종이 없습니다."),
 
     // 스케줄 관련
     NOT_EXISTS_SCHEDULE(404, "요청하신 스케줄이 없습니다."),
