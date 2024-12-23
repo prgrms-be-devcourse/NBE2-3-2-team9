@@ -1,8 +1,10 @@
 package com.team9.anicare.community.service;
 
-import com.team9.anicare.common.Result;
-import com.team9.anicare.common.ResultCode;
+import com.team9.anicare.common.response.Result;
+import com.team9.anicare.common.exception.ResultCode;
+import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.community.dto.CommentRequestDTO;
+import com.team9.anicare.community.dto.CommentResponseDTO;
 import com.team9.anicare.community.model.Comment;
 import com.team9.anicare.community.model.Community;
 import com.team9.anicare.community.model.CommunityLike;
