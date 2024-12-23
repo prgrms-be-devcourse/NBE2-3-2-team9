@@ -3,10 +3,7 @@ package com.team9.anicare.user.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team9.anicare.common.entities.CommonEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -14,6 +11,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor // Builder를 사용하려면 필요
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends CommonEntity {

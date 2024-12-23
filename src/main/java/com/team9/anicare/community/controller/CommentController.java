@@ -1,10 +1,13 @@
 package com.team9.anicare.community.controller;
 
-import com.team9.anicare.common.Result;
+import com.team9.anicare.common.response.Result;
 import com.team9.anicare.community.dto.CommentRequestDTO;
+import com.team9.anicare.community.dto.CommentResponseDTO;
 import com.team9.anicare.community.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

@@ -1,7 +1,7 @@
 package com.team9.anicare.community.service;
 
-import com.team9.anicare.common.Result;
-import com.team9.anicare.common.ResultCode;
+import com.team9.anicare.common.response.Result;
+import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageMetaDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
