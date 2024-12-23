@@ -1,8 +1,11 @@
 package com.team9.anicare.user.dto;
 
+import com.team9.anicare.community.model.Community;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter

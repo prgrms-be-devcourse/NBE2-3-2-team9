@@ -2,12 +2,14 @@ package com.team9.anicare.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team9.anicare.common.entities.CommonEntity;
+import com.team9.anicare.community.model.Community;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -40,8 +42,13 @@ public class User extends CommonEntity {
     @JsonIgnore
     private String refreshtoken;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Community> communities;
+
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
+
+
 
 
     @PrePersist
