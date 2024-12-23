@@ -1,5 +1,6 @@
-package com.team9.anicare.common;
+package com.team9.anicare.common.response;
 
+import com.team9.anicare.common.exception.ResultCode;
 import lombok.Getter;
 
 import java.time.Instant;

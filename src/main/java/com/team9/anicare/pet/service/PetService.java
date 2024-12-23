@@ -1,7 +1,7 @@
 package com.team9.anicare.pet.service;
 
-import com.team9.anicare.common.Result;
-import com.team9.anicare.common.ResultCode;
+import com.team9.anicare.common.exception.ResultCode;
+import com.team9.anicare.common.response.Result;
 import com.team9.anicare.pet.dto.PetDTO;
 import com.team9.anicare.pet.model.Pet;
 import com.team9.anicare.pet.repository.PetRepository;

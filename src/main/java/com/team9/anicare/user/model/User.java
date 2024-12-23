@@ -1,21 +1,23 @@
 package com.team9.anicare.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team9.anicare.common.entities.CommonEntity;
+import com.team9.anicare.community.model.Community;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor // Builder를 사용하려면 필요
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
+public class User extends CommonEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,6 +29,7 @@ public class User {
     private String name;
 
     @Column()
+    @JsonIgnore
     private String password;
 
     @Column()
@@ -36,32 +39,25 @@ public class User {
     @Column(nullable = false)
     private int years_of_experience = 0;
     @Column()
+    @JsonIgnore
     private String refreshtoken;
 
-    @Column(updatable = false) // 생성 시에만 값 설정
-    private LocalDateTime createdAt;
-
-    @Column
-    private LocalDateTime updatedAt;
-
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Community> communities;
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
 
+
+
     @PrePersist
     public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
         if (this.profileImg == null || this.profileImg.isEmpty()) {
             this.profileImg = generateGravatarUrl(this.email);
         }
     }
 
-    @PreUpdate // 엔티티 업데이트 전에 실행
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 
     private String generateGravatarUrl(String email) {
         try {
@@ -71,7 +67,6 @@ public class User {
             for (byte b : hash) {
                 hexString.append(String.format("%02x", b));
             }
-            // 기본 이미지 스타일: mm
             return "https://www.gravatar.com/avatar/" + hexString + "?s=200&r=pg&d=mm";
         } catch (Exception e) {
             throw new RuntimeException("Error generating Gravatar URL", e);

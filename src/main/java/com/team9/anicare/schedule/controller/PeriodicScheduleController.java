@@ -1,6 +1,6 @@
 package com.team9.anicare.schedule.controller;
 
-import com.team9.anicare.common.Result;
+import com.team9.anicare.common.response.Result;
 import com.team9.anicare.schedule.dto.PeriodicScheduleDTO;
 import com.team9.anicare.schedule.dto.SingleScheduleDTO;
 import com.team9.anicare.schedule.service.PeriodicScheduleService;

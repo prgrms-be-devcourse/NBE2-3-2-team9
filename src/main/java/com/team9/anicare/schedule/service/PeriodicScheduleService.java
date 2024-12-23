@@ -1,8 +1,8 @@
 package com.team9.anicare.schedule.service;
 
 
-import com.team9.anicare.common.Result;
-import com.team9.anicare.common.ResultCode;
+import com.team9.anicare.common.exception.ResultCode;
+import com.team9.anicare.common.response.Result;
 import com.team9.anicare.pet.repository.PetRepository;
 import com.team9.anicare.schedule.dto.PeriodicScheduleDTO;
 import com.team9.anicare.schedule.model.PeriodicSchedule;
