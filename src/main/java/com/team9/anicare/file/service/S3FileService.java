@@ -1,15 +1,17 @@
 package com.team9.anicare.file.service;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+
 import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.common.exception.ResultCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -22,9 +24,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class S3FileService {
 
-    private final AmazonS3Client amazonS3Client;
+    private final S3Client s3Client;
 
-    @Value("${cloud.aws.s3.bucket}")
+    @Value("${spring.cloud.aws.s3.bucket}")
     private String bucket;
 
     public String uploadFile(MultipartFile multipartFile, String dirName) throws IOException {
@@ -45,15 +47,19 @@ public class S3FileService {
         String fileName = dirName + "/" + uniqueFileName;
 
         // 파일에 대한 메타데이터 설정
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(multipartFile.getSize());
-        metadata.setContentType(multipartFile.getContentType());
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(fileName)
+                .acl(ObjectCannedACL.PUBLIC_READ)
+                .contentType(multipartFile.getContentType())
+                .build();
 
         // S3에 파일 업로드
-        amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, multipartFile.getInputStream(), metadata)
-                .withCannedAcl(CannedAccessControlList.PublicRead));
+        s3Client.putObject(putObjectRequest,
+                RequestBody.fromInputStream(multipartFile.getInputStream(), multipartFile.getSize()));
 
-        return amazonS3Client.getUrl(bucket, fileName).toString();
+        return s3Client.utilities().getUrl(builder ->
+                builder.bucket(bucket).key(fileName)).toExternalForm();
     }
 
     public void deleteFile(String fileName) {
@@ -64,8 +70,14 @@ public class S3FileService {
         // 특수문자 처리
         String decodedFileName = URLDecoder.decode(originalFileName, StandardCharsets.UTF_8);
 
+        // 삭제 요청 생성
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(decodedFileName)
+                .build();
+
         // 파일 삭제
-        amazonS3Client.deleteObject(bucket, decodedFileName);
+        s3Client.deleteObject(deleteObjectRequest);
     }
 
     public String updateFile(MultipartFile newFile, String oldFileName, String dirName) throws IOException {
