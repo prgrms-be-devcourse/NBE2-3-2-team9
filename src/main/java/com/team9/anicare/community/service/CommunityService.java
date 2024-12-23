@@ -9,6 +9,7 @@ import com.team9.anicare.community.dto.CommentResponseDTO;
 import com.team9.anicare.community.dto.DetailResponseDTO;
 import com.team9.anicare.community.dto.CommunityRequestDTO;
 import com.team9.anicare.community.dto.CommunityResponseDTO;
+import com.team9.anicare.community.model.Comment;
 import com.team9.anicare.community.model.Community;
 import com.team9.anicare.community.repository.CommentRepository;
 import com.team9.anicare.community.repository.CommunityRepository;
@@ -70,7 +71,9 @@ public class CommunityService {
                 .toList();
     }
 
-    public DetailResponseDTO showPostDetail(Long userId, Long postingId) {
+    public DetailResponseDTO showPostDetail(PageRequestDTO pageRequestDTO, Long userId, Long postingId) {
+        PageRequest pageRequest = pageRequestDTO.toPageRequest();
+
         // 게시글 조회
         Community community = communityRepository.findById(postingId)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
@@ -82,8 +85,10 @@ public class CommunityService {
         CommunityResponseDTO communityResponseDTO = modelMapper.map(community, CommunityResponseDTO.class);
         communityResponseDTO.setCanEdit(canEditPost);
 
+        Page<Comment> commentPage = commentRepository.findByCommunityIdAndParentIsNull(postingId, pageRequest);
+
         // 조회된 댓글 -> DTO 변환
-        List<CommentResponseDTO> comments = commentRepository.findByCommunityIdAndParentIsNull(postingId).stream()
+        List<CommentResponseDTO> comments = commentPage.getContent().stream()
                 .map(comment -> {
                     CommentResponseDTO dto = modelMapper.map(comment, CommentResponseDTO.class);
                     // 현재 유저의 댓글 수정 권한 확인
@@ -92,7 +97,9 @@ public class CommunityService {
                 })
                 .toList();
 
-        return new DetailResponseDTO(communityResponseDTO, comments);
+        PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), commentPage.getTotalElements());
+
+        return new DetailResponseDTO(communityResponseDTO, new PageDTO<>(comments, meta));
     }
 
     public CommunityResponseDTO createPost(Long userId, CommunityRequestDTO communityRequestDTO, MultipartFile file) {
