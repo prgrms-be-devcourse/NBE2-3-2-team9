@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
+                                .requestMatchers("/chat-socket/**", "/topic/**", "/app/**", "/ws/**").permitAll() // WebSocket 경로 허용
                                 .anyRequest().authenticated()
                         )
                         .exceptionHandling(exception -> exception
@@ -47,6 +48,9 @@ public class SecurityConfig {
                         .addFilterBefore(
                                 new JwtAuthenticationFilter(jwtTokenProvider, userRepository),
                                 UsernamePasswordAuthenticationFilter.class
+                        )
+                        .headers(headers -> headers
+                                .frameOptions().disable() // X-Frame-Options 비활성화
                         );
                 return http.build();
             }
@@ -64,4 +68,5 @@ public class SecurityConfig {
             }
         };
     }
-    }
+
+}
