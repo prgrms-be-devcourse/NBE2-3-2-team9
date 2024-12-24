@@ -47,7 +47,6 @@ public class AnimalHospitalDto {
     // (나머지 필드 필요 시 추가)
     @JsonProperty("X")
     private String longitude;
-
     @JsonProperty("Y")
     private String latitude;
 

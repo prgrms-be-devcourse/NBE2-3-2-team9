@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * 서울시 종로구 동물병원 인허가 정보 Entity
+ * 서울시 동물병원 인허가 정보 Entity
  */
 @Entity
 @Table(name = "animal_hospital")
@@ -54,13 +54,4 @@ public class AnimalHospital {
     /** 위도 */
     private String latitude;
 
-
-    // --- 필요시 추가 필드 ---
-    // private String apvCancelYmd;  // 인허가취소일자
-    // private String dtlStateGbn;   // 상세영업상태코드
-    // private String dtlStateNm;    // 상세영업상태명
-    // private String dcbyMd;        // 폐업일자
-    // etc...
-
-    // Lombok으로 getter/setter 처리
 }
