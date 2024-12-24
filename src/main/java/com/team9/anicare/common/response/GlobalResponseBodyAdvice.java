@@ -9,19 +9,28 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.time.Instant;
+
 @ControllerAdvice
 public class GlobalResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return true; //모든컨트롤러 응답적용
+        return returnType.getParameterType() != String.class;
+
     }
+
+
 
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+
+        // String 타입 응답을 Result로 감싸기
         if (body instanceof Result) {
             return body;
         }
+
+
 
         // 공통 응답 구조로 감싸기
         return new Result<>(ResultCode.SUCCESS,  body);
