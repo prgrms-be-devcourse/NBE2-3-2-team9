@@ -1,10 +1,11 @@
 package com.team9.anicare.community.service;
 
-import com.team9.anicare.common.response.Result;
 import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.common.exception.CustomException;
+import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.community.dto.CommentRequestDTO;
 import com.team9.anicare.community.dto.CommentResponseDTO;
+import com.team9.anicare.community.dto.LikeResponseDTO;
 import com.team9.anicare.community.model.Comment;
 import com.team9.anicare.community.model.Community;
 import com.team9.anicare.community.model.CommunityLike;
@@ -17,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -27,106 +30,99 @@ public class CommentService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
-    public Result createComment(Long userId, Long postId, CommentRequestDTO commentRequestDTO) {
+    public CommentResponseDTO createComment(Long userId, Long postingId, Long parentId, CommentRequestDTO commentRequestDTO) {
+        // 게시글 조회
+        Community community = communityRepository.findById(postingId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
-        try {
-            // 게시글 조회
-            Community community = communityRepository.findById(postId).orElse(null);
-            if(community == null) {
-                return new Result(ResultCode.NOT_EXISTS_POST);
-            }
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_USER));
 
-            // 유저 조회
-            User user = userRepository.findById(userId).orElse(null);
-            if(user == null) {
-                return new Result(ResultCode.NOT_EXISTS_USER);
-            }
-
-            // 댓글 생성
-            Comment comment = modelMapper.map(commentRequestDTO, Comment.class);
-            comment.setCommunity(community);
-            comment.setUser(user);
-            commentRepository.save(comment);
-
-            // 해당 게시글 댓글 수 증가
-            community.setCommentCount(community.getCommentCount() + 1);
-            communityRepository.save(community);
-
-            return new Result(ResultCode.SUCCESS, "댓글 작성 성공");
-        } catch (Exception e) {
-            return new Result(ResultCode.DB_ERROR);
+        Comment parentComment = null;
+        if(parentId != null) {
+            parentComment = commentRepository.findById(parentId)
+                    .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_COMMENT));
         }
+
+        // 댓글 생성
+        Comment comment = modelMapper.map(commentRequestDTO, Comment.class);
+        comment.setCommunity(community);
+        comment.setUser(user);
+        comment.setParent(parentComment);
+        commentRepository.save(comment);
+
+        // 해당 게시글 댓글 수 증가
+        community.setCommentCount(community.getCommentCount() + 1);
+        communityRepository.save(community);
+
+        return modelMapper.map(comment, CommentResponseDTO.class);
     }
 
-    public Result updateComment(Long commentId, CommentRequestDTO commentRequestDTO) {
+    public CommentResponseDTO updateComment(Long commentId, CommentRequestDTO commentRequestDTO) {
+        // 댓글 조회
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_COMMENT));
 
-        try {
-            // 댓글 조회
-            Comment comment = commentRepository.findById(commentId).orElse(null);
-            if (comment == null) {
-                return new Result(ResultCode.NOT_EXISTS_COMMENT);
-            }
+        // 댓글 수정
+        comment.setContent(commentRequestDTO.getContent());
+        commentRepository.save(comment);
 
-            // 댓글 수정 내용
-            comment.setContent(commentRequestDTO.getContent());
-            commentRepository.save(comment);
-
-            return new Result(ResultCode.SUCCESS, "댓글 수정 성공");
-        } catch (Exception e) {
-            return new Result(ResultCode.DB_ERROR);
-        }
+        return modelMapper.map(comment, CommentResponseDTO.class);
     }
 
-    public Result deleteComment(Long commentId) {
+    public void deleteComment(Long commentId) {
+        // 댓글 존재 여부 확인
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_COMMENT));
 
-        try {
-            // 댓글 존재 여부 확인
-            if (!commentRepository.existsById(commentId)) {
-                return new Result(ResultCode.NOT_EXISTS_COMMENT);
-            }
+        Community community = comment.getCommunity();
 
-            // 댓글 삭제
-            commentRepository.deleteById(commentId);
+        // 댓글 삭제
+        commentRepository.deleteById(commentId);
 
-            return new Result(ResultCode.SUCCESS, "댓글 삭제 성공");
-        } catch (Exception e) {
-            return new Result(ResultCode.DB_ERROR);
-        }
+        // 해당 게시글 댓글 수 감소
+        community.setCommentCount(community.getCommentCount() - 1);
+        communityRepository.save(community);
+
     }
 
-    public Result createLike(Long userId, Long postId) {
+    public LikeResponseDTO createLike(Long userId, Long postId) {
+        // 게시글 조회
+        Community community = communityRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
-        try {
-            // 게시글 조회
-            Community community = communityRepository.findById(postId).orElse(null);
-            if (community == null) {
-                return new Result(ResultCode.NOT_EXISTS_POST);
-            }
 
-            // 유저 조회
-            User user = userRepository.findById(userId).orElse(null);
-            if (user == null) {
-                return new Result(ResultCode.NOT_EXISTS_USER);
-            }
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_USER));
 
-            // 이미 좋아요를 누른 상태인지 확인
-            if(communityLikeRepository.existsByCommunityAndUser(community, user)){
-                return new Result(ResultCode.DUPLICATE_LIKE);
-            }
 
-            // 좋아요 생성
-            CommunityLike communityLike = new CommunityLike();
-            communityLike.setCommunity(community);
-            communityLike.setUser(user);
-            communityLikeRepository.save(communityLike);
-
-            // 좋아요 개수 증가
-            community.setLikeCount(community.getLikeCount() + 1);
-            communityRepository.save(community);
-
-            return new Result(ResultCode.SUCCESS, "좋아요 생성 성공");
-        } catch (Exception e) {
-            return new Result(ResultCode.DB_ERROR);
+        // 이미 좋아요를 누른 상태인지 확인
+        if (communityLikeRepository.existsByCommunityAndUser(community, user)) {
+            throw new CustomException(ResultCode.DUPLICATE_LIKE);
         }
+
+        // 좋아요 생성
+        CommunityLike communityLike = new CommunityLike();
+        communityLike.setCommunity(community);
+        communityLike.setUser(user);
+        communityLikeRepository.save(communityLike);
+
+        // 좋아요 개수 증가
+        community.setLikeCount(community.getLikeCount() + 1);
+        communityRepository.save(community);
+
+        return new LikeResponseDTO(communityLike.getId(), community.getId(), userId);
+    }
+
+    public List<CommentResponseDTO> getReplies(Long userId, Long parentId) {
+        return commentRepository.findByParentId(parentId).stream()
+                .map(comment -> {
+                    CommentResponseDTO dto = modelMapper.map(comment, CommentResponseDTO.class);
+                    dto.setCanEdit(comment.getUser().getId().equals(userId)); // 수정 권한 설정
+                    return dto;
+                })
+                .toList();
     }
 }
