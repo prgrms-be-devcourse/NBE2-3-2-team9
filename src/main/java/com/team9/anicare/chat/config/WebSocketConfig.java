@@ -1,6 +1,9 @@
 package com.team9.anicare.chat.config;
 
+import com.team9.anicare.auth.security.JwtTokenProvider;
+import com.team9.anicare.chat.handler.WebSocketChatHandler;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -15,6 +18,12 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public WebSocketConfig(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
     /**
      * STOMP 엔드포인트를 등록하여 클라이언트가 WebSocket에 연결할 수 있도록 설정합니다.
      *
@@ -24,7 +33,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 클라이언트 연결을 위한 WebSocket 엔드포인트 설정
         registry.addEndpoint("/chat-socket")
-                .setAllowedOrigins("*")
+                .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
 
@@ -42,4 +51,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setApplicationDestinationPrefixes("/app");
     }
 
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(new StompChannelInterceptor(jwtTokenProvider));
+    }
 }
