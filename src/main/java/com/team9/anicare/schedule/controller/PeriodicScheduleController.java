@@ -1,11 +1,17 @@
 package com.team9.anicare.schedule.controller;
 
+import com.team9.anicare.auth.security.CustomUserDetails;
 import com.team9.anicare.common.response.Result;
 import com.team9.anicare.schedule.dto.PeriodicScheduleDTO;
 import com.team9.anicare.schedule.dto.SingleScheduleDTO;
 import com.team9.anicare.schedule.service.PeriodicScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequestMapping("/api")
 @RestController
@@ -14,22 +20,28 @@ public class PeriodicScheduleController {
     private PeriodicScheduleService periodicScheduleService;
 
     @GetMapping("/periodicSchedules")
-    public Result findPeriodicSchedules(@RequestParam Long userId) {
-        return periodicScheduleService.findPeriodicSchedules(userId);
+    public ResponseEntity<List<PeriodicScheduleDTO>> findPeriodicSchedules(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<PeriodicScheduleDTO> periodicScheduleDTOs = periodicScheduleService.findPeriodicSchedules(userDetails.getUserId());
+        return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTOs);
     }
 
     @PostMapping("/periodicSchedule")
-    public Result addPeriodicSchedule(@RequestBody PeriodicScheduleDTO.addPeriodicScheduleDTO request, @RequestParam Long userId) {
-        return periodicScheduleService.addPeriodicSchedule(request, userId);
+    public ResponseEntity<PeriodicScheduleDTO> addPeriodicSchedule(@RequestBody PeriodicScheduleDTO.addPeriodicScheduleDTO request,
+                                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.addPeriodicSchedule(request, userDetails.getUserId());
+        return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTO);
     }
 
     @PutMapping("/periodicSchedule/{scheduleId}")
-    public Result updatePeriodicSchedule(@RequestBody PeriodicScheduleDTO.updatePeriodicScheduleDTO request, @RequestParam Long userId) {
-        return periodicScheduleService.updatePeriodicSchedule(request, userId);
+    public ResponseEntity<PeriodicScheduleDTO> updatePeriodicSchedule(@RequestBody PeriodicScheduleDTO.updatePeriodicScheduleDTO request,
+                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.updatePeriodicSchedule(request, userDetails.getUserId());
+        return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTO);
     }
 
     @DeleteMapping("/periodicSchedule/{scheduleId}")
-    public Result deleteSingleSchedule(@RequestParam Long periodicScheduleId) {
-        return periodicScheduleService.deletePeriodicSchedule(periodicScheduleId);
+    public ResponseEntity<Void> deleteSingleSchedule(@RequestParam Long periodicScheduleId) {
+        periodicScheduleService.deletePeriodicSchedule(periodicScheduleId);
+        return ResponseEntity.noContent().build();
     }
 }
