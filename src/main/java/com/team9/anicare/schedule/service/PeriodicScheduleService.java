@@ -47,7 +47,10 @@ public class PeriodicScheduleService {
         if (!petRepository.existsById(petId)) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         }
-        if (request.getStartDatetime().getTime() > request.getEndDatetime().getTime()) {
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            throw new CustomException(ResultCode.INVALID_REQUEST);
+        }
+        if (request.getStartTime().isAfter(request.getEndTime())) {
             throw new CustomException(ResultCode.INVALID_REQUEST);
         }
         if (request.getRepeatPattern() == RepeatPattern.DAILY && request.getWeekdays() != null) {
@@ -62,6 +65,7 @@ public class PeriodicScheduleService {
         PeriodicSchedule periodicSchedule = modelMapper.map(request, PeriodicSchedule.class);
         periodicSchedule.setUser(getUserById(userId));
         periodicSchedule.setPet(getPetById(petId));
+        System.out.println(periodicSchedule.getEndDate());
         periodicScheduleRepo.save(periodicSchedule);
 
         PeriodicScheduleDTO periodicScheduleDTO = modelMapper.map(periodicSchedule, PeriodicScheduleDTO.class);
@@ -80,7 +84,10 @@ public class PeriodicScheduleService {
         if (!petRepository.existsById(petId)) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         }
-        if (request.getStartDatetime().getTime() > request.getEndDatetime().getTime()) {
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            throw new CustomException(ResultCode.INVALID_REQUEST);
+        }
+        if (request.getStartTime().isAfter(request.getEndTime())) {
             throw new CustomException(ResultCode.INVALID_REQUEST);
         }
         if (request.getRepeatPattern() == RepeatPattern.DAILY && request.getWeekdays() != null) {

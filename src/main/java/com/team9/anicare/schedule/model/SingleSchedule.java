@@ -23,7 +23,6 @@ public class SingleSchedule extends CommonEntity {
     @Column(name = "id")
     private Long id;
 
-
     @ManyToOne
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;

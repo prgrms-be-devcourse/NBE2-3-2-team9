@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 
 @Getter
@@ -18,8 +20,10 @@ public class PeriodicScheduleDTO {
     private Long userId;
     private Long petId;
     private String name;
-    private Date startDatetime;
-    private Date endDatetime;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private RepeatPattern repeatPattern;
     private String repeatInterval;
     private String weekdays;
@@ -29,8 +33,10 @@ public class PeriodicScheduleDTO {
     public static class addPeriodicScheduleDTO {
         private Long petId;
         private String name;
-        private Date startDatetime;
-        private Date endDatetime;
+        private LocalDate startDate;
+        private LocalDate endDate;
+        private LocalTime startTime;
+        private LocalTime endTime;
         private RepeatPattern repeatPattern;
         private String repeatInterval;
         private String weekdays;
@@ -42,8 +48,10 @@ public class PeriodicScheduleDTO {
         private Long id;
         private Long petId;
         private String name;
-        private Date startDatetime;
-        private Date endDatetime;
+        private LocalDate startDate;
+        private LocalDate endDate;
+        private LocalTime startTime;
+        private LocalTime endTime;
         private RepeatPattern repeatPattern;
         private String repeatInterval;
         private String weekdays;

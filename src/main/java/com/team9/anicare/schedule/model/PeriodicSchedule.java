@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 
 @Entity
@@ -32,11 +34,17 @@ public class PeriodicSchedule {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "start_datetime", nullable = false)
-    private Date startDatetime;
+    @Column(name = "start_date", nullable = false)
+    private LocalDate startDate;
 
-    @Column(name = "end_datetime", nullable = false)
-    private Date endDatetime;
+    @Column(name = "end_date", nullable = false)
+    private LocalDate endDate;
+
+    @Column(name = "start_time", nullable = false)
+    private LocalTime startTime;
+
+    @Column(name = "end_time", nullable = false)
+    private LocalTime endTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "repeat_pattern", nullable = false)
