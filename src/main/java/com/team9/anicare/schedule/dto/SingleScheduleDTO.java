@@ -1,6 +1,7 @@
 package com.team9.anicare.schedule.dto;
 
 
+import com.team9.anicare.schedule.model.PeriodicSchedule;
 import lombok.*;
 
 import java.util.Date;
@@ -14,6 +15,7 @@ public class SingleScheduleDTO {
     private Long petId;
     private Long userId;
     private String name;
+    private PeriodicSchedule periodicSchedule;
     private Date startDatetime;
     private Date endDatetime;
 

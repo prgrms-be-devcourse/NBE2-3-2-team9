@@ -3,10 +3,13 @@ package com.team9.anicare.schedule.service;
 import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.common.response.Result;
+import com.team9.anicare.pet.model.Pet;
 import com.team9.anicare.pet.repository.PetRepository;
 import com.team9.anicare.schedule.dto.SingleScheduleDTO;
 import com.team9.anicare.schedule.model.SingleSchedule;
 import com.team9.anicare.schedule.repository.SingleScheduleRepository;
+import com.team9.anicare.user.model.User;
+import com.team9.anicare.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -23,9 +26,10 @@ public class SingleScheduleService {
     private final SingleScheduleRepository singlescheduleRepository;
     private final PetRepository petRepository;
     private final ModelMapper modelMapper;
+    private final UserRepository userRepository;
 
     public List<SingleScheduleDTO> findSingleSchedules(Long userId) {
-        List<SingleSchedule> lists = singlescheduleRepository.findSingleSchedulesByUserId(userId);
+        List<SingleSchedule> lists = singlescheduleRepository.findSingleSchedulesByUser(getUserById(userId));
 
         if (lists.isEmpty()) {
             throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
@@ -39,9 +43,9 @@ public class SingleScheduleService {
     }
 
     public SingleScheduleDTO addSingleSchedule(SingleScheduleDTO.addSingleScheduleDTO request, Long userId) {
-        Long PetId = request.getPetId();
+        Long petId = request.getPetId();
 
-        if (!petRepository.existsById(PetId)) {
+        if (!petRepository.existsById(petId)) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         } else if (request.getStartDatetime().getTime() > request.getEndDatetime().getTime()) {
             throw new CustomException(ResultCode.INVALID_REQUEST);
@@ -50,29 +54,41 @@ public class SingleScheduleService {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         SingleSchedule singleschedule = modelMapper.map(request, SingleSchedule.class);
-        singleschedule.setUserId(userId);
+        singleschedule.setUser(getUserById(userId));
+        singleschedule.setPet(getPetById(petId));
         singlescheduleRepository.save(singleschedule);
+
         SingleScheduleDTO singleScheduleDTO = modelMapper.map(singleschedule, SingleScheduleDTO.class);
+        singleScheduleDTO.setUserId(userId);
+        singleScheduleDTO.setPetId(petId);
 
         return singleScheduleDTO;
     }
 
     public SingleScheduleDTO updateSingleSchedule(SingleScheduleDTO.updateSingleScheduleDTO request, Long userId) {
         Long Id = request.getId();
-        Long PetId = request.getPetId();
+        Long petId = request.getPetId();
 
         if (!singlescheduleRepository.existsById(Id)) {
             throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
-        } else if (petRepository.findById(PetId).isEmpty()) {
+        } else if (petRepository.findById(petId).isEmpty()) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         } else if (request.getStartDatetime().getTime() > request.getEndDatetime().getTime()) {
             throw new CustomException(ResultCode.INVALID_REQUEST);
         }
 
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
         SingleSchedule singleschedule = modelMapper.map(request, SingleSchedule.class);
-        singleschedule.setUserId(userId);
+        singleschedule.setUser(getUserById(userId));
+        singleschedule.setPet(getPetById(petId));
         singlescheduleRepository.save(singleschedule);
+
+
         SingleScheduleDTO singleScheduleDTO = modelMapper.map(singleschedule, SingleScheduleDTO.class);
+        singleScheduleDTO.setUserId(userId);
+        singleScheduleDTO.setPetId(petId);
+
         return singleScheduleDTO;
     }
 
@@ -82,6 +98,13 @@ public class SingleScheduleService {
         } else {
             throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
         }
+    }
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(RuntimeException::new);
+    }
+
+    private Pet getPetById(Long petId) {
+        return petRepository.findById(petId).orElseThrow(RuntimeException::new);
     }
 }
 

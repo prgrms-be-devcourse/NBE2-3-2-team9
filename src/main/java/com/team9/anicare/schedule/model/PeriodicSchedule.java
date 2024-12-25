@@ -1,6 +1,8 @@
 package com.team9.anicare.schedule.model;
 
 
+import com.team9.anicare.pet.model.Pet;
+import com.team9.anicare.user.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,11 +21,13 @@ public class PeriodicSchedule {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "pet_id", nullable = false)
+    private Pet pet;
 
-    @Column(name = "pet_id", nullable = false)
-    private Long petId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -35,14 +39,14 @@ public class PeriodicSchedule {
     private Date endDatetime;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "repeat_type", nullable = false)
-    private RepeatType repeatType;
+    @Column(name = "repeat_pattern", nullable = false)
+    private RepeatPattern repeatPattern;
 
     @Column(name = "repeat_interval")
     private String repeatInterval;
 
-    @Column(name = "weekdays")
-    private String weekdays;
+    @Column(name = "repeat_days")
+    private String repeatDays;
 
     @PrePersist
     private void setDefaultValue() {

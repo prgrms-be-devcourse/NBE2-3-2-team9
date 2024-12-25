@@ -24,6 +24,14 @@ public class PetController {
         return ResponseEntity.status(HttpStatus.OK).body(petDTOs);
     }
 
+
+//    @GetMapping("/pets")
+//    public ResponseEntity<List<PetDTO>> findPets() {
+//        Long userId = 1L;
+//        List<PetDTO> petDTOs = petService.findPets(userId);
+//        return ResponseEntity.status(HttpStatus.OK).body(petDTOs);
+//    }
+
     @PostMapping("/pet")
     public ResponseEntity<PetDTO> addPets(@RequestBody PetDTO.AddPetDTO request,
                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -31,9 +39,11 @@ public class PetController {
         return ResponseEntity.status(HttpStatus.OK).body(petDTO);
     }
 
+
+
     @PutMapping("/pet/{petId}")
     public ResponseEntity<PetDTO> updatePets(@RequestBody PetDTO.UpdatePetDTO request,
-                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
         PetDTO petDTO = petService.updatePet(request, userDetails.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body(petDTO);
     }

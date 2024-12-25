@@ -2,6 +2,8 @@ package com.team9.anicare.schedule.model;
 
 
 import com.team9.anicare.common.entities.CommonEntity;
+import com.team9.anicare.pet.model.Pet;
+import com.team9.anicare.user.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,11 +23,18 @@ public class SingleSchedule extends CommonEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "pet_id", nullable = false)
-    private Long petId;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "pet_id", nullable = false)
+    private Pet pet;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "periodic_schedule_id")
+    private PeriodicSchedule periodicSchedule;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -35,6 +44,7 @@ public class SingleSchedule extends CommonEntity {
 
     @Column(name = "end_datetime", nullable = false)
     private Date endDatetime;
+
 }
 
 

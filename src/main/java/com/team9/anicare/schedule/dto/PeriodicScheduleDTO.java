@@ -1,7 +1,7 @@
 package com.team9.anicare.schedule.dto;
 
 
-import com.team9.anicare.schedule.model.RepeatType;
+import com.team9.anicare.schedule.model.RepeatPattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +20,7 @@ public class PeriodicScheduleDTO {
     private String name;
     private Date startDatetime;
     private Date endDatetime;
-    private RepeatType repeatType;
+    private RepeatPattern repeatPattern;
     private String repeatInterval;
     private String weekdays;
 
@@ -31,7 +31,7 @@ public class PeriodicScheduleDTO {
         private String name;
         private Date startDatetime;
         private Date endDatetime;
-        private RepeatType repeatType;
+        private RepeatPattern repeatPattern;
         private String repeatInterval;
         private String weekdays;
     }
@@ -44,7 +44,7 @@ public class PeriodicScheduleDTO {
         private String name;
         private Date startDatetime;
         private Date endDatetime;
-        private RepeatType repeatType;
+        private RepeatPattern repeatPattern;
         private String repeatInterval;
         private String weekdays;
     }
