@@ -49,8 +49,7 @@ public class PetController {
     }
 
     @DeleteMapping("/pet/{petId}")
-    public ResponseEntity<String> deletePets(@RequestParam Long petId) {
-        String result = petService.deletePet(petId);
-        return ResponseEntity.status(HttpStatus.OK).body(result);
+    public void deletePets(@RequestParam Long petId) {
+        petService.deletePet(petId);
     }
 }

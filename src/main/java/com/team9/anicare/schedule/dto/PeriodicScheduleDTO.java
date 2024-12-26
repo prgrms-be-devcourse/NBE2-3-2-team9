@@ -25,8 +25,8 @@ public class PeriodicScheduleDTO {
     private LocalTime startTime;
     private LocalTime endTime;
     private RepeatPattern repeatPattern;
-    private String repeatInterval;
-    private String weekdays;
+    private int repeatInterval;
+    private String repeatDays;
 
     @Getter
     @Setter
@@ -38,8 +38,8 @@ public class PeriodicScheduleDTO {
         private LocalTime startTime;
         private LocalTime endTime;
         private RepeatPattern repeatPattern;
-        private String repeatInterval;
-        private String weekdays;
+        private int repeatInterval;
+        private String repeatDays;
     }
 
     @Getter
@@ -53,7 +53,7 @@ public class PeriodicScheduleDTO {
         private LocalTime startTime;
         private LocalTime endTime;
         private RepeatPattern repeatPattern;
-        private String repeatInterval;
-        private String weekdays;
+        private int repeatInterval;
+        private String repeatDays;
     }
 }

@@ -6,7 +6,9 @@ import com.team9.anicare.common.response.Result;
 import com.team9.anicare.pet.model.Pet;
 import com.team9.anicare.pet.repository.PetRepository;
 import com.team9.anicare.schedule.dto.SingleScheduleDTO;
+import com.team9.anicare.schedule.model.PeriodicSchedule;
 import com.team9.anicare.schedule.model.SingleSchedule;
+import com.team9.anicare.schedule.repository.PeriodicScheduleRepository;
 import com.team9.anicare.schedule.repository.SingleScheduleRepository;
 import com.team9.anicare.user.model.User;
 import com.team9.anicare.user.repository.UserRepository;
@@ -27,6 +29,8 @@ public class SingleScheduleService {
     private final PetRepository petRepository;
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
+    private final SingleScheduleRepository singleScheduleRepository;
+    private final PeriodicScheduleRepository periodicScheduleRepository;
 
     public List<SingleScheduleDTO> findSingleSchedules(Long userId) {
         List<SingleSchedule> lists = singlescheduleRepository.findSingleSchedulesByUser(getUserById(userId));
@@ -47,7 +51,7 @@ public class SingleScheduleService {
 
         if (!petRepository.existsById(petId)) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
-        } else if (request.getStartDatetime().getTime() > request.getEndDatetime().getTime()) {
+        } else if (request.getStartDatetime().isAfter(request.getEndDatetime())) {
             throw new CustomException(ResultCode.INVALID_REQUEST);
         }
 
@@ -73,7 +77,7 @@ public class SingleScheduleService {
             throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
         } else if (petRepository.findById(petId).isEmpty()) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
-        } else if (request.getStartDatetime().getTime() > request.getEndDatetime().getTime()) {
+        } else if (request.getStartDatetime().isAfter(request.getEndDatetime())) {
             throw new CustomException(ResultCode.INVALID_REQUEST);
         }
 
@@ -94,7 +98,17 @@ public class SingleScheduleService {
 
     public void deleteSingleSchedule(Long singleScheduleId) {
         if (singlescheduleRepository.existsById(singleScheduleId)) {
-            singlescheduleRepository.deleteById(singleScheduleId);
+            PeriodicSchedule periodicSchedule = singleScheduleRepository.findPeriodicScheduleById(singleScheduleId);
+            if (periodicSchedule != null) {
+               if (singleScheduleRepository.countByPeriodicScheduleId(periodicSchedule) == 1) {
+                   singleScheduleRepository.deleteById(singleScheduleId);
+                   periodicScheduleRepository.deleteById(periodicSchedule.getId());
+               }  else {
+                   singleScheduleRepository.deleteById(singleScheduleId);
+               }
+            } else {
+                singleScheduleRepository.deleteById(singleScheduleId);
+            }
         } else {
             throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
         }

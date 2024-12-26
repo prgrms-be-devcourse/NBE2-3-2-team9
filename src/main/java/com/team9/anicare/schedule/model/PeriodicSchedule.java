@@ -11,6 +11,7 @@ import lombok.ToString;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "periodic_schedule")
@@ -51,17 +52,13 @@ public class PeriodicSchedule {
     private RepeatPattern repeatPattern;
 
     @Column(name = "repeat_interval")
-    private String repeatInterval;
+    private int repeatInterval;
 
     @Column(name = "repeat_days")
     private String repeatDays;
 
-    @PrePersist
-    private void setDefaultValue() {
-        if(this.repeatInterval == null) {
-            this.repeatInterval = "1";
-        }
-    }
+    @OneToMany(mappedBy = "periodicSchedule", cascade = CascadeType.REMOVE)
+    private List<SingleSchedule> singleSchedules;
 }
 
 

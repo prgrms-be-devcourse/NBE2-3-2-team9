@@ -81,12 +81,11 @@ public class PetService {
         return petDTO;
     }
 
-    public String deletePet(Long petId) {
+    public void deletePet(Long petId) {
         if (petRepository.existsById(petId)) {
             petRepository.deleteById(petId);
         } else {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         }
-        return "반려동물이 삭제되었습니다";
     }
 }

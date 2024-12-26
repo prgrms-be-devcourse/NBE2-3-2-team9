@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 
@@ -39,10 +40,10 @@ public class SingleSchedule extends CommonEntity {
     private String name;
 
     @Column(name = "start_datetime", nullable = false)
-    private Date startDatetime;
+    private LocalDateTime startDatetime;
 
     @Column(name = "end_datetime", nullable = false)
-    private Date endDatetime;
+    private LocalDateTime endDatetime;
 
 }
 

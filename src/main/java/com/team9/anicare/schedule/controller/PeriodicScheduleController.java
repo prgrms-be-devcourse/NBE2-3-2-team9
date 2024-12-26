@@ -61,8 +61,7 @@ public class PeriodicScheduleController {
     }
 
     @DeleteMapping("/periodicSchedule/{scheduleId}")
-    public ResponseEntity<Void> deleteSingleSchedule(@RequestParam Long periodicScheduleId) {
+    public void deleteSingleSchedule(@RequestParam Long periodicScheduleId) {
         periodicScheduleService.deletePeriodicSchedule(periodicScheduleId);
-        return ResponseEntity.noContent().build();
     }
 }

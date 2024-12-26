@@ -60,8 +60,7 @@ public class SingleScheduleController {
     }
 
     @DeleteMapping("/singleSchedule/{scheduleId}")
-    public ResponseEntity<Void> deleteSingleSchedule(@RequestParam Long singleScheduleId) {
+    public void deleteSingleSchedule(@RequestParam Long singleScheduleId) {
         singleScheduleService.deleteSingleSchedule(singleScheduleId);
-        return ResponseEntity.noContent().build();
     }
 }
