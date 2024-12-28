@@ -19,46 +19,46 @@ public class PeriodicScheduleController {
     @Autowired
     private PeriodicScheduleService periodicScheduleService;
 
-//    @GetMapping("/periodicSchedules")
-//    public ResponseEntity<List<PeriodicScheduleDTO>> findPeriodicSchedules(@AuthenticationPrincipal CustomUserDetails userDetails) {
-//        List<PeriodicScheduleDTO> periodicScheduleDTOs = periodicScheduleService.findPeriodicSchedules(userDetails.getUserId());
-//        return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTOs);
-//    }
-
     @GetMapping("/periodicSchedules")
-    public ResponseEntity<List<PeriodicScheduleDTO>> findPeriodicSchedules() {
-        Long userId = 1L;
-        List<PeriodicScheduleDTO> periodicScheduleDTOs = periodicScheduleService.findPeriodicSchedules(userId);
+    public ResponseEntity<List<PeriodicScheduleDTO>> findPeriodicSchedules(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<PeriodicScheduleDTO> periodicScheduleDTOs = periodicScheduleService.findPeriodicSchedules(userDetails.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTOs);
     }
 
-//    @PostMapping("/periodicSchedule")
-//    public ResponseEntity<PeriodicScheduleDTO> addPeriodicSchedule(@RequestBody PeriodicScheduleDTO.addPeriodicScheduleDTO request,
-//                                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
-//        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.addPeriodicSchedule(request, userDetails.getUserId());
-//        return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTO);
+//    @GetMapping("/periodicSchedules")
+//    public ResponseEntity<List<PeriodicScheduleDTO>> findPeriodicSchedules() {
+//        Long userId = 1L;
+//        List<PeriodicScheduleDTO> periodicScheduleDTOs = periodicScheduleService.findPeriodicSchedules(userId);
+//        return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTOs);
 //    }
 
     @PostMapping("/periodicSchedule")
-    public ResponseEntity<PeriodicScheduleDTO> addPeriodicSchedule(@RequestBody PeriodicScheduleDTO.addPeriodicScheduleDTO request) {
-        Long userId = 1L;
-        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.addPeriodicSchedule(request, userId);
+    public ResponseEntity<PeriodicScheduleDTO> addPeriodicSchedule(@RequestBody PeriodicScheduleDTO.addPeriodicScheduleDTO request,
+                                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.addPeriodicSchedule(request, userDetails.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTO);
     }
 
-//    @PutMapping("/periodicSchedule/{scheduleId}")
-//    public ResponseEntity<PeriodicScheduleDTO> updatePeriodicSchedule(@RequestBody PeriodicScheduleDTO.updatePeriodicScheduleDTO request,
-//                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
-//        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.updatePeriodicSchedule(request, userDetails.getUserId());
+//    @PostMapping("/periodicSchedule")
+//    public ResponseEntity<PeriodicScheduleDTO> addPeriodicSchedule(@RequestBody PeriodicScheduleDTO.addPeriodicScheduleDTO request) {
+//        Long userId = 1L;
+//        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.addPeriodicSchedule(request, userId);
 //        return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTO);
 //    }
 
     @PutMapping("/periodicSchedule/{scheduleId}")
-    public ResponseEntity<PeriodicScheduleDTO> updatePeriodicSchedule(@RequestBody PeriodicScheduleDTO.updatePeriodicScheduleDTO request) {
-        Long userId = 1L;
-        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.updatePeriodicSchedule(request, userId);
+    public ResponseEntity<PeriodicScheduleDTO> updatePeriodicSchedule(@RequestBody PeriodicScheduleDTO.updatePeriodicScheduleDTO request,
+                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.updatePeriodicSchedule(request, userDetails.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTO);
     }
+
+//    @PutMapping("/periodicSchedule/{scheduleId}")
+//    public ResponseEntity<PeriodicScheduleDTO> updatePeriodicSchedule(@RequestBody PeriodicScheduleDTO.updatePeriodicScheduleDTO request) {
+//        Long userId = 1L;
+//        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.updatePeriodicSchedule(request, userId);
+//        return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTO);
+//    }
 
     @DeleteMapping("/periodicSchedule/{scheduleId}")
     public void deleteSingleSchedule(@RequestParam Long periodicScheduleId) {

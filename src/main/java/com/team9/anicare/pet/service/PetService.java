@@ -2,6 +2,7 @@ package com.team9.anicare.pet.service;
 
 import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.common.exception.ResultCode;
+import com.team9.anicare.file.service.S3FileService;
 import com.team9.anicare.pet.dto.PetDTO;
 import com.team9.anicare.pet.model.Pet;
 import com.team9.anicare.pet.repository.PetRepository;
@@ -11,7 +12,9 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +24,7 @@ public class PetService {
     private final PetRepository petRepository;
     private final ModelMapper modelMapper;
     private final SpeciesRepository speciesRepository;
+    private final S3FileService s3FileService;
 
     public List<PetDTO> findPets(Long userId) {
         List<Pet> lists = petRepository.findAllByUserId(userId);
@@ -36,7 +40,7 @@ public class PetService {
         return petDTOs;
     }
 
-    public PetDTO addPet(PetDTO.AddPetDTO request, Long userId) {
+    public PetDTO addPet(PetDTO.AddPetDTO request, Long userId, MultipartFile file) {
         if (request.getName() == null) {
             throw new CustomException(ResultCode.MISSING_PARAMETER);
         }
@@ -47,9 +51,18 @@ public class PetService {
             throw new CustomException(ResultCode.NOT_EXISTS_SPECIES);
         }
 
+
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         Pet pet = modelMapper.map(request, Pet.class);
+
+        try {
+            if (file != null && !file.isEmpty()) {
+                pet.setPicture(s3FileService.updateFile(file, pet.getPicture(), "pet"));
+            }
+        } catch (IOException e) {
+            throw new CustomException(ResultCode.FILE_UPLOAD_ERROR);
+        }
         pet.setUserId(userId);
 
         petRepository.save(pet);
@@ -57,7 +70,7 @@ public class PetService {
         return petDTO;
     }
 
-    public PetDTO updatePet(PetDTO.UpdatePetDTO request, Long userId) {
+    public PetDTO updatePet(PetDTO.UpdatePetDTO request, Long userId, MultipartFile file) {
         if (petRepository.findById(request.getId()).isEmpty()) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         }
@@ -74,6 +87,18 @@ public class PetService {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         Pet pet = modelMapper.map(request, Pet.class);
+
+        try {
+            if (file != null && !file.isEmpty()) {
+                pet.setPicture(s3FileService.updateFile(file, pet.getPicture(), "pet"));
+            } else if (pet.getPicture() != null) {
+                // 새로운 파일이 없다면 -> 기존 이미지 설정
+                pet.setPicture(pet.getPicture());
+            }
+        } catch (IOException e) {
+            throw new CustomException(ResultCode.FILE_UPLOAD_ERROR);
+        }
+
         pet.setUserId(userId);
 
         petRepository.save(pet);

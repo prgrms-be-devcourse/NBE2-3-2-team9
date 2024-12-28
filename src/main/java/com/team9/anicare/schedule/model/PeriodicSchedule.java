@@ -1,6 +1,7 @@
 package com.team9.anicare.schedule.model;
 
 
+import com.team9.anicare.common.entities.CommonEntity;
 import com.team9.anicare.pet.model.Pet;
 import com.team9.anicare.user.model.User;
 import jakarta.persistence.*;
@@ -18,7 +19,7 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
-public class PeriodicSchedule {
+public class PeriodicSchedule extends CommonEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

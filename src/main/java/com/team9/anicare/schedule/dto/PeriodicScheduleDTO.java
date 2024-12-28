@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 
@@ -27,6 +28,8 @@ public class PeriodicScheduleDTO {
     private RepeatPattern repeatPattern;
     private int repeatInterval;
     private String repeatDays;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @Getter
     @Setter

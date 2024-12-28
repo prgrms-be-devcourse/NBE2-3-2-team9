@@ -19,6 +19,8 @@ public class SingleScheduleDTO {
     private Long periodicScheduleId;
     private LocalDateTime startDatetime;
     private LocalDateTime endDatetime;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @Getter
     @Setter

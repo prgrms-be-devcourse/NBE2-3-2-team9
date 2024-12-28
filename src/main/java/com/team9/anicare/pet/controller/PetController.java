@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,36 +21,34 @@ public class PetController {
 
     @GetMapping("/pets")
     public ResponseEntity<List<PetDTO>> findPets(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<PetDTO> petDTOs = petService.findPets(userDetails  .getUserId());
+        List<PetDTO> petDTOs = petService.findPets(userDetails.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body(petDTOs);
     }
 
 
-//    @GetMapping("/pets")
-//    public ResponseEntity<List<PetDTO>> findPets() {
-//        Long userId = 1L;
-//        List<PetDTO> petDTOs = petService.findPets(userId);
-//        return ResponseEntity.status(HttpStatus.OK).body(petDTOs);
-//    }
-
     @PostMapping("/pet")
-    public ResponseEntity<PetDTO> addPets(@RequestBody PetDTO.AddPetDTO request,
+    public ResponseEntity<PetDTO> addPets(@RequestPart(value = "dto") PetDTO.AddPetDTO request,
+                                          @RequestPart(value = "file",required = false) MultipartFile file,
                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
-        PetDTO petDTO = petService.addPet(request, userDetails.getUserId());
+        PetDTO petDTO = petService.addPet(request, userDetails.getUserId(), file);
         return ResponseEntity.status(HttpStatus.OK).body(petDTO);
     }
 
 
 
     @PutMapping("/pet/{petId}")
-    public ResponseEntity<PetDTO> updatePets(@RequestBody PetDTO.UpdatePetDTO request,
+    public ResponseEntity<PetDTO> updatePets(@RequestPart(value = "dto") PetDTO.UpdatePetDTO request,
+                                             @RequestPart(value = "file",required = false) MultipartFile file,
                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
-        PetDTO petDTO = petService.updatePet(request, userDetails.getUserId());
+
+        PetDTO petDTO = petService.updatePet(request, userDetails.getUserId(), file);
         return ResponseEntity.status(HttpStatus.OK).body(petDTO);
     }
+
 
     @DeleteMapping("/pet/{petId}")
     public void deletePets(@RequestParam Long petId) {
         petService.deletePet(petId);
     }
 }
+

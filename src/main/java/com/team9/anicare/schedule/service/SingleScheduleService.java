@@ -66,6 +66,7 @@ public class SingleScheduleService {
         singleScheduleDTO.setUserId(userId);
         singleScheduleDTO.setPetId(petId);
 
+
         return singleScheduleDTO;
     }
 
