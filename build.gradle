@@ -47,9 +47,16 @@ dependencies {
 
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
-
     implementation 'org.modelmapper:modelmapper:3.2.2'
 
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'org.apache.commons:commons-pool2'
+
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
     // MapStruct 의존성 추가
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'

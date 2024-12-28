@@ -90,13 +90,24 @@ public class KakaoService {
 
         if (response.getStatusCode().is2xxSuccessful()) {
             try {
+//                ObjectMapper objectMapper = new ObjectMapper();
+//                JsonNode rootNode = objectMapper.readTree(response.getBody());
+//
+//                // 사용자 정보 추출
+//                String nickname = rootNode.get("kakao_account").get("profile").get("nickname").asText();
+//                String email = rootNode.get("kakao_account").get("email").asText();
+//                String profileImg = rootNode.get("kakao_account").get("profile").get("profile_image_url").asText();
+
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(response.getBody());
+
                 JsonNode kakaoAccountNode = rootNode.path("kakao_account");
                 JsonNode profileNode = kakaoAccountNode.path("profile");
+
                 String nickname = profileNode.path("nickname").asText("Unknown");
                 String email = kakaoAccountNode.path("email").asText("Unknown");
                 String profileImg = profileNode.path("profile_image_url").asText("");
+
                 // 사용자 저장 또는 기존 사용자 반환
                 User user = userService.saveUser(nickname, email, profileImg, Role.USER);
 

@@ -52,10 +52,13 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(tokenResponseDTO);
     }
 
+
+
+
     @GetMapping("/logout")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> logout(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletResponse response) {
-        return ResponseEntity.status(HttpStatus.OK).body(authService.logout(userDetails.getUserId(), response));
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public String logout(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletResponse response) {
+        return authService.logout(userDetails.getUserId(), response);
     }
 
     @PostMapping("/new-token")
@@ -96,6 +99,4 @@ public class AuthController {
 
         return ResponseEntity.ok(tokenResponseDTO); // ResponseEntity로 반환
     }
-
-
 }
