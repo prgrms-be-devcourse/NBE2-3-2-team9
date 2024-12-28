@@ -1,7 +1,10 @@
 package com.team9.anicare.chat.config;
 
+import com.team9.anicare.chat.dto.ChatMessageDTO;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
@@ -51,24 +54,22 @@ public class RedisConfig {
         return new StringRedisTemplate(connectionFactory);
     }
 
-    /**
-     * RedisMessageListenerContainer 객체 반환 메서드
-     * 외부에서 RedisMessageListenerContainer 객체를 접근할 수 있도록 제공합니다.
-     *
-     * @return RedisMessageListenerContainer 객체
-     */
-    public RedisMessageListenerContainer getRedisMessageListenerContainer() {
-        return redisMessageListenerContainer;
+    @Bean
+    public RedisMessageListenerContainer redisMessageListenerContainer() {
+        return this.redisMessageListenerContainer;
     }
 
-    /**
-     * StringRedisTemplate 객체 반환 메서드
-     * 외부에서 StringRedisTemplate 객체를 접근할 수 있도록 제공합니다.
-     *
-     * @return StringRedisTemplate 객체
-     */
-    public StringRedisTemplate getRedisTemplate() {
-        return redisTemplate;
+    @Bean
+    public StringRedisTemplate redisTemplate() {
+        return this.redisTemplate;
+    }
+
+    // RedisTemplate<String, ChatMessageDTO> 추가
+    @Bean
+    public RedisTemplate<String, ChatMessageDTO> chatMessageRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, ChatMessageDTO> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        return template;
     }
 
 }
