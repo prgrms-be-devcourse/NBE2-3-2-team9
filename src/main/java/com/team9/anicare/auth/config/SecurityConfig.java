@@ -38,7 +38,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
-                                .requestMatchers("/chat-socket/**", "/topic/**", "/app/**", "/ws/**").permitAll() // WebSocket 경로 허용
+                                .requestMatchers("/chat-socket/**", "/topic/**", "/app/chat/**", "/ws/**").permitAll() // WebSocket 경로 허용
                                 .anyRequest().authenticated()
                         )
                         .exceptionHandling(exception -> exception
@@ -61,7 +61,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // 모든 경로에 대해
-                        .allowedOrigins("http://localhost:8080", "http://localhost:3000", "http://127.0.0.1:3000") // 허용할 도메인 설정
+                        .allowedOrigins("http://localhost:8080", "http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:63342") // 허용할 도메인 설정
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 허용할 HTTP 메서드 설정
                         .allowedHeaders("*") // 모든 헤더 허용
                         .allowCredentials(true); // 인증 정보 허용
