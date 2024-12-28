@@ -6,67 +6,69 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * 실제 서울시 공공데이터 JSON의 "row"마다 맵핑될 DTO
- */
 @Getter
 @Setter
 @NoArgsConstructor
 public class AnimalHospitalDto {
 
     @JsonProperty("OPNSFTEAMCODE")
-    private String opnsfTeamCode;  // 개방자치단체코드
+    private String opnsfTeamCode;
 
     @JsonProperty("MGTNO")
-    private String mgtNo;          // 관리번호
+    private String mgtNo;
 
     @JsonProperty("APVPERMYMD")
-    private String apvPermYmd;     // 인허가일자
+    private String apvPermYmd;
 
     @JsonProperty("TRDSTATEGBN")
-    private String trdStateGbn;    // 영업상태코드
+    private String trdStateGbn;
 
     @JsonProperty("TRDSTATENM")
-    private String trdStateNm;     // 영업상태명
+    private String trdStateNm;
 
     @JsonProperty("SITETEL")
-    private String siteTel;        // 전화번호
+    private String siteTel;
 
     @JsonProperty("SITEWHLADDR")
-    private String siteWhlAddr;    // 지번주소
+    private String siteWhlAddr;
 
     @JsonProperty("RDNWHLADDR")
-    private String rdnWhlAddr;     // 도로명주소
+    private String rdnWhlAddr;
 
     @JsonProperty("BPLCNM")
-    private String bplcNm;         // 사업장명
+    private String bplcNm;
 
     @JsonProperty("UPTAENM")
-    private String uptaeNm;        // 업태구분명
+    private String uptaeNm;
 
-    // (나머지 필드 필요 시 추가)
     @JsonProperty("X")
-    private String longitude;
+    private String xCode;
+
     @JsonProperty("Y")
+    private String yCode;
+
+    @JsonProperty("latitude")
     private String latitude;
 
-    /**
-     * DTO → Entity 변환 메서드
-     */
+    @JsonProperty("longitude")
+    private String longitude;
+
     public AnimalHospital toEntity() {
-        AnimalHospital entity = new AnimalHospital();
-        entity.setMgtNo(this.mgtNo);
-        entity.setOpnsfTeamCode(this.opnsfTeamCode);
-        entity.setApvPermYmd(this.apvPermYmd);
-        entity.setTrdStateGbn(this.trdStateGbn);
-        entity.setTrdStateNm(this.trdStateNm);
-        entity.setSiteTel(this.siteTel);
-        entity.setSiteWhlAddr(this.siteWhlAddr);
-        entity.setRdnWhlAddr(this.rdnWhlAddr);
-        entity.setBplcNm(this.bplcNm);
-        entity.setUptaeNm(this.uptaeNm);
-        entity.setLongitude(this.longitude);
-        entity.setLatitude(this.latitude);
-        return entity;
+        return AnimalHospital.builder()
+                .opnsfTeamCode(this.opnsfTeamCode)
+                .mgtNo(this.mgtNo)
+                .apvPermYmd(this.apvPermYmd)
+                .trdStateGbn(this.trdStateGbn)
+                .trdStateNm(this.trdStateNm)
+                .siteTel(this.siteTel)
+                .siteWhlAddr(this.siteWhlAddr)
+                .rdnWhlAddr(this.rdnWhlAddr)
+                .bplcNm(this.bplcNm)
+                .uptaeNm(this.uptaeNm)
+                .xCode(this.xCode)
+                .yCode(this.yCode)
+                .latitude(this.latitude)
+                .longitude(this.longitude)
+                .build();
     }
 }

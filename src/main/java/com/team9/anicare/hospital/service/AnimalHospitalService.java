@@ -9,64 +9,92 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * OpenAPI 호출 및 DB 저장 처리
- */
 @Service
 @RequiredArgsConstructor
 public class AnimalHospitalService {
 
     private final AnimalHospitalRepository animalHospitalRepository;
+    private final CoordinateConverter coordinateConverter;
 
-    // .env 파일의 환경 변수 값 주입
     @Value("${API_KEY}")
     private String apiKey;
 
     @Value("${API_URI}")
     private String apiUri;
 
-    /**
-     * 서울시 동물병원 인허가 OpenAPI를 호출하고, 결과를 DB에 저장
-     */
     public void fetchAndSaveData() {
-        int startIndex = 1;
-        int endIndex = 1000;
+        String url = String.format("%s/%s/json/LOCALDATA_020301/1/1000", apiUri, apiKey);
 
-        // .env 설정 값을 사용해 URL 생성
-        String url = String.format("%s/%s/json/LOCALDATA_020301/%d/%d",
-                apiUri, apiKey, startIndex, endIndex);
-
-        // Spring에서 제공하는 RestTemplate
         RestTemplate restTemplate = new RestTemplate();
-
-        // 응답을 AnimalHospitalApiResponse 구조로 맵핑
         AnimalHospitalApiResponse response = restTemplate.getForObject(url, AnimalHospitalApiResponse.class);
 
         if (response != null && response.getLocaldata020301() != null) {
-            // 최상위 객체 안에 row 리스트가 있다고 가정
             List<AnimalHospitalDto> rows = response.getLocaldata020301().getRow();
-            if (rows != null) {
-                for (AnimalHospitalDto dto : rows) {
-                    if ("폐업".equals(dto.getTrdStateNm())) {
-                        System.out.println("폐업 병원 제외: " + dto.getBplcNm());
-                        continue; // 저장하지 않고 다음 병원으로 넘어감
-                    } else if ("취소/말소/만료/정지/중지".equals(dto.getTrdStateNm())) {
-                        System.out.println("취소/말소/만료/정지/중지 병원 제외: " + dto.getBplcNm());
-                        continue; // 저장하지 않고 다음 병원으로 넘어감
-                    } else if ("".equals(dto.getLatitude())) {
-                        System.out.println("위도가 없습니다 : " + dto.getLatitude());
-                        continue; // 저장하지 않고 다음 병원으로 넘어감
-                    } else if ("".equals(dto.getLongitude())) {
-                        System.out.println("경도가 없습니다 : " + dto.getLongitude());
-                        continue; // 저장하지 않고 다음 병원으로 넘어감
-                    }
-                    // DTO → Entity
-                    AnimalHospital entity = dto.toEntity();
-                    // JPA 저장 (PK 중복이면 update됨)
-                    animalHospitalRepository.save(entity);
-                }
-            }
+            rows.stream()
+                    .filter(this::isValidHospital) // 병원 상태 및 좌표 필터링
+                    .forEach(dto -> {
+                        try {
+                            double x = Double.parseDouble(dto.getXCode());
+                            double y = Double.parseDouble(dto.getYCode());
+                            double[] latLon = coordinateConverter.convertEPSG5179ToWGS84(x, y);
+
+                            dto.setLatitude(String.valueOf(latLon[0]));
+                            dto.setLongitude(String.valueOf(latLon[1]));
+
+                            AnimalHospital entity = dto.toEntity();
+                            animalHospitalRepository.save(entity);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
         }
+    }
+
+    // 유효한 병원인지 확인하는 메서드
+    private boolean isValidHospital(AnimalHospitalDto dto) {
+        // 1. 병원 상태 필터링
+        String state = dto.getTrdStateNm();
+        if (state == null || state.matches(".*(폐업|취소|말소|만료|정지|중지).*")) {
+            return false; // 유효하지 않은 상태인 경우 제외
+        }
+
+        // 2. 좌표 필터링
+        if (dto.getXCode() == null || dto.getXCode().trim().isEmpty() ||
+                dto.getYCode() == null || dto.getYCode().trim().isEmpty()) {
+            return false; // 좌표가 없는 경우 제외
+        }
+
+        return true; // 유효한 병원
+    }
+
+    public List<AnimalHospital> findHospitalsNearLocation(double latitude, double longitude) {
+        // 모든 병원을 조회하고 필터링
+        return animalHospitalRepository.findAll().stream()
+                .filter(hospital -> {
+                    try {
+                        // 위경도 값 확인 및 거리 계산
+                        double hospitalLat = Double.parseDouble(hospital.getLatitude());
+                        double hospitalLon = Double.parseDouble(hospital.getLongitude());
+                        double distance = calculateDistance(latitude, longitude, hospitalLat, hospitalLon);
+                        return distance <= 0.5; // 반경 2km 이내인지 확인
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return false; // 좌표가 유효하지 않으면 제외
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final double EARTH_RADIUS = 6371; // 지구 반지름 (km)
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return EARTH_RADIUS * c; // 거리 반환
     }
 }
