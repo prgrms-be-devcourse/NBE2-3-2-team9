@@ -84,22 +84,23 @@ public class PetService {
             throw new CustomException(ResultCode.NOT_EXISTS_SPECIES);
         }
 
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-        Pet pet = modelMapper.map(request, Pet.class);
+        Pet pet = petRepository.findById(request.getId())
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_PET));
+        pet.setUserId(userId);
+        pet.setSpeciesId(request.getSpeciesId());
+        pet.setName(request.getName());
+        pet.setAge(request.getAge());
+        pet.setGender(request.getGender());
 
         try {
             if (file != null && !file.isEmpty()) {
                 pet.setPicture(s3FileService.updateFile(file, pet.getPicture(), "pet"));
             } else if (pet.getPicture() != null) {
-                // 새로운 파일이 없다면 -> 기존 이미지 설정
                 pet.setPicture(pet.getPicture());
             }
         } catch (IOException e) {
             throw new CustomException(ResultCode.FILE_UPLOAD_ERROR);
         }
-
-        pet.setUserId(userId);
 
         petRepository.save(pet);
         PetDTO petDTO = modelMapper.map(pet,PetDTO.class);

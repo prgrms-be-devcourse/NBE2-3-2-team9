@@ -92,9 +92,6 @@ public class PeriodicScheduleService {
         Long Id = request.getId();
         Long petId = request.getPetId();
 
-        if (!periodicScheduleRepo.existsById(Id)) {
-            throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
-        }
         if (!petRepository.existsById(petId)) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         }
@@ -114,12 +111,18 @@ public class PeriodicScheduleService {
             throw new CustomException(ResultCode.INVALID_REQUEST);
         }
 
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-        PeriodicSchedule periodicSchedule = modelMapper.map(request, PeriodicSchedule.class);
-
+        PeriodicSchedule periodicSchedule = periodicScheduleRepo.findById(Id)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_SCHEDULE));
         periodicSchedule.setUser(getUserById(userId));
         periodicSchedule.setPet(getPetById(petId));
+        periodicSchedule.setName(request.getName());
+        periodicSchedule.setStartDate(request.getStartDate());
+        periodicSchedule.setEndDate(request.getEndDate());
+        periodicSchedule.setStartTime(request.getStartTime());
+        periodicSchedule.setEndTime(request.getEndTime());
+        periodicSchedule.setRepeatPattern(request.getRepeatPattern());
+        periodicSchedule.setRepeatInterval(request.getRepeatInterval());
+        periodicSchedule.setRepeatDays(request.getRepeatDays());
         periodicScheduleRepo.save(periodicSchedule);
 
         singleScheduleRepository.deleteByPeriodicSchedule(periodicSchedule);
