@@ -3,6 +3,8 @@ package com.team9.anicare.user.controller;
 import com.team9.anicare.auth.security.CustomUserDetails;
 import com.team9.anicare.user.dto.CreateAdminDTO;
 import com.team9.anicare.user.dto.UpdateAdminDTO;
+import com.team9.anicare.user.dto.UserDetailResponseDTO;
+import com.team9.anicare.user.dto.UserResponseDTO;
 import com.team9.anicare.user.model.User;
 import com.team9.anicare.user.service.UserService;
 import jakarta.validation.Valid;
@@ -14,14 +16,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api")
 public class UserController {
     @Autowired
     private UserService userService;
 
 
     // 관리자 생성
-    @PostMapping
+    @PostMapping("/admin")
     public ResponseEntity<CreateAdminDTO> signup(@Valid @RequestBody CreateAdminDTO createAdminDTO) {
         // 서비스에서 관리자 생성
         CreateAdminDTO savedAdmin = userService.createAdmin(createAdminDTO);
@@ -45,18 +47,23 @@ public class UserController {
     // 관리자 정보 업데이트
     @PutMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> adminUpdate(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public String adminUpdate(@AuthenticationPrincipal CustomUserDetails userDetails,
                               @Valid @RequestBody UpdateAdminDTO updateAdminDTO) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(userService.adminUpdate(userDetails.getUserId(), updateAdminDTO ));
+        return userService.adminUpdate(userDetails.getUserId(), updateAdminDTO );
     }
 
     // 사용자 삭제
     @DeleteMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> delete(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public String delete(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return userService.deleteUser(userDetails.getUserId());
+    }
+
+    @GetMapping("/user")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<UserDetailResponseDTO> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(userService.deleteUser(userDetails.getUserId()));
+                .body(userService.getUserInfo(userDetails.getUserId()));
     }
 
 }

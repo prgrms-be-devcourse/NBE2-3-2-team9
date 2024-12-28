@@ -23,7 +23,7 @@ public class Pet extends CommonEntity {
     @Column(name = "species_id")
     private Long speciesId;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "age")

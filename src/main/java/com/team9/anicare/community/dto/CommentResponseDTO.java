@@ -1,7 +1,10 @@
 package com.team9.anicare.community.dto;
 
+import com.team9.anicare.community.model.Comment;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter

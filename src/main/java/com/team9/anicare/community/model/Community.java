@@ -1,16 +1,15 @@
 package com.team9.anicare.community.model;
 
+import com.team9.anicare.common.entities.CommonEntity;
 import com.team9.anicare.user.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Entity
 @Getter
 @Setter
-public class Community {
+public class Community extends CommonEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,8 +30,4 @@ public class Community {
     private int commentCount;
 
     private int likeCount;
-
-    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
-
 }
