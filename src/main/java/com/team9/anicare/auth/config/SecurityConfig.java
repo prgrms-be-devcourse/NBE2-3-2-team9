@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").permitAll() // 다른 API도 허용
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/chat-socket/**", "/topic/**", "/app/chat/**", "/ws/**").permitAll() // WebSocket 경로 허용
                         .anyRequest().authenticated() // 다른 모든 요청은 인증 필요
                 )
                 .exceptionHandling(exception -> exception
@@ -47,16 +48,20 @@ public class SecurityConfig {
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtTokenProvider, userRepository),
                         UsernamePasswordAuthenticationFilter.class
+                )
+                .headers(headers -> headers
+                        .frameOptions().disable() // X-Frame-Options 비활성화
                 );
         return http.build();
     }
+  
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000") // 허용할 프론트엔드 주소
+                        .allowedOrigins("http://localhost:3000", "http://localhost:63342") // 허용할 프론트엔드 주소 & 웹 소켓 주소
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true); // credentials 허용
