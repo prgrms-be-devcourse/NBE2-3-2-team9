@@ -26,8 +26,9 @@ public class ChatRoomController {
             @RequestParam String roomName,
             @RequestParam String description,
             @RequestParam String participantName) {
-        return chatRoomService.createRoom(roomName, description, participantName);
-    }
+        ChatRoomDTO createdRoom = chatRoomService.createRoom(roomName, description, participantName);
+        System.out.println("Created Room ID in Controller: " + createdRoom.getRoomId()); // 디버깅용
+        return createdRoom;    }
 
     /**
      * 채팅방 목록 조회
