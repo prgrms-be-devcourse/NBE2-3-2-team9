@@ -74,18 +74,17 @@ public class SingleScheduleService {
         Long Id = request.getId();
         Long petId = request.getPetId();
 
-        if (!singlescheduleRepository.existsById(Id)) {
-            throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
-        } else if (petRepository.findById(petId).isEmpty()) {
+        if (petRepository.findById(petId).isEmpty()) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         } else if (request.getStartDatetime().isAfter(request.getEndDatetime())) {
             throw new CustomException(ResultCode.INVALID_REQUEST);
         }
 
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-        SingleSchedule singleschedule = modelMapper.map(request, SingleSchedule.class);
-        singleschedule.setUser(getUserById(userId));
+        SingleSchedule singleschedule = singlescheduleRepository.findById(Id)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_SCHEDULE));
+        singleschedule.setName(request.getName());
+        singleschedule.setStartDatetime(request.getStartDatetime());
+        singleschedule.setEndDatetime(request.getEndDatetime());
         singleschedule.setPet(getPetById(petId));
         singlescheduleRepository.save(singleschedule);
 
