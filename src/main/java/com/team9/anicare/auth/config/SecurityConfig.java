@@ -28,40 +28,40 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder();}
 
-            @Bean
-            public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-                http
-                        .csrf().disable()
-                        .cors().and() // CORS 설정 추가
-                        .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/api/auth/kakao/**").permitAll()
-                                .requestMatchers("/api/**").permitAll()
-                                .requestMatchers("/swagger-ui/**").permitAll()
-                                .requestMatchers("/v3/api-docs/**").permitAll()
-                                .anyRequest().authenticated()
-                        )
-                        .exceptionHandling(exception -> exception
-                                .authenticationEntryPoint(new CustomAuthenticationEntryPoint()) // 추가
-                                .accessDeniedHandler(new CAccessDeniedHandler())
-                        )
-                        .addFilterBefore(
-                                new JwtAuthenticationFilter(jwtTokenProvider, userRepository),
-                                UsernamePasswordAuthenticationFilter.class
-                        );
-                return http.build();
-            }
-
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf().disable()
+                .cors().and() // CORS 설정 추가
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/kakao/**").permitAll() // 카카오 로그인 경로에 대해 모든 접근 허용
+                        .requestMatchers("/api/**").permitAll() // 다른 API도 허용
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .anyRequest().authenticated() // 다른 모든 요청은 인증 필요
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint()) // 인증 처리
+                        .accessDeniedHandler(new CAccessDeniedHandler())
+                )
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(jwtTokenProvider, userRepository),
+                        UsernamePasswordAuthenticationFilter.class
+                );
+        return http.build();
+    }
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // 모든 경로에 대해
-                        .allowedOrigins("http://localhost:8080", "http://localhost:3000", "http://127.0.0.1:3000") // 허용할 도메인 설정
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 허용할 HTTP 메서드 설정
-                        .allowedHeaders("*") // 모든 헤더 허용
-                        .allowCredentials(true); // 인증 정보 허용
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:3000") // 허용할 프론트엔드 주소
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true); // credentials 허용
             }
         };
     }
-    }
+
+}
