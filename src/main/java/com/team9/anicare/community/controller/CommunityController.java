@@ -1,5 +1,6 @@
 package com.team9.anicare.community.controller;
 
+import com.team9.anicare.auth.security.CustomUserDetails;
 import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
 import com.team9.anicare.community.dto.CommunityRequestDTO;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,9 +39,9 @@ public class CommunityController {
 
     @Operation(summary = "내가 작성한 글 조회")
     @GetMapping("/myPost")
-    public ResponseEntity<List<CommunityResponseDTO>> showMyPosts(Long userId) {
+    public ResponseEntity<List<CommunityResponseDTO>> showMyPosts(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        List<CommunityResponseDTO> posts = communityService.showMyPosts(userId);
+        List<CommunityResponseDTO> posts = communityService.showMyPosts(userDetails.getUserId());
 
         return ResponseEntity.ok(posts);
     }
@@ -48,10 +50,10 @@ public class CommunityController {
     @GetMapping("/{postingId}")
     public ResponseEntity<DetailResponseDTO> showPostDetail(
             PageRequestDTO pageRequestDTO,
-            Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long postingId) {
 
-        DetailResponseDTO detailResponseDTO = communityService.showPostDetail(pageRequestDTO, userId, postingId);
+        DetailResponseDTO detailResponseDTO = communityService.showPostDetail(pageRequestDTO, userDetails.getUserId(), postingId);
 
         return ResponseEntity.ok(detailResponseDTO);
     }
@@ -59,11 +61,11 @@ public class CommunityController {
     @Operation(summary = "글 작성")
     @PostMapping("/post")
     public ResponseEntity<CommunityResponseDTO> createPost(
-            Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestPart(value = "dto") CommunityRequestDTO communityRequestDTO,
             @RequestPart(value = "file", required = false) MultipartFile file) {
 
-        CommunityResponseDTO communityResponseDTO = communityService.createPost(userId, communityRequestDTO, file);
+        CommunityResponseDTO communityResponseDTO = communityService.createPost(userDetails.getUserId(), communityRequestDTO, file);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(communityResponseDTO);
     }
