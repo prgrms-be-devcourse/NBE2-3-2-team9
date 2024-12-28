@@ -33,8 +33,22 @@ public class AnimalHospitalController {
         List<AnimalHospital> nearbyHospitals = animalHospitalService.findHospitalsNearLocation(latitude, longitude);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("nearbyHospitals", nearbyHospitals); // 중첩 제거
+        response.put("nearbyHospitals", nearbyHospitals);
 
         return ResponseEntity.ok(response);
+    }
+
+    //"동물병원"을 검색할경우 동물병원 리스트가 나옴
+    @GetMapping("/api/animal-hospitals/namesearch")
+    public ResponseEntity<?> searchHospitals(@RequestParam(required = false) String keyword) {
+
+        //검색어가 비어있거나 키워드가 "동물병원" 이 아닌경우
+        if(!"동물병원".equals(keyword) || keyword.isEmpty()) {
+            return ResponseEntity.ok(List.of()); //빈 리스트를 반환
+        }
+
+        //키워드가 동물병원인경우 동물병원을 호출
+        List<AnimalHospital> searchResults = animalHospitalService.searchHospitals();
+        return ResponseEntity.ok(searchResults);
     }
 }

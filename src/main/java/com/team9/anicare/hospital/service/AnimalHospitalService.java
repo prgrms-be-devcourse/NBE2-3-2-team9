@@ -69,6 +69,13 @@ public class AnimalHospitalService {
         return true; // 유효한 병원
     }
 
+    // "동물병원"으로 키워드 고정해서 검색
+    public List<AnimalHospital> searchHospitals() {
+        return animalHospitalRepository.findByBplcNmContaining("동물병원");
+
+    }
+
+
     public List<AnimalHospital> findHospitalsNearLocation(double latitude, double longitude) {
         // 모든 병원을 조회하고 필터링
         return animalHospitalRepository.findAll().stream()
