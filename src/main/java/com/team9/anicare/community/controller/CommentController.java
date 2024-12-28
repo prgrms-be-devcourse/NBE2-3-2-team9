@@ -1,5 +1,6 @@
 package com.team9.anicare.community.controller;
 
+import com.team9.anicare.auth.security.CustomUserDetails;
 import com.team9.anicare.community.dto.CommentRequestDTO;
 import com.team9.anicare.community.dto.CommentResponseDTO;
 import com.team9.anicare.community.dto.LikeResponseDTO;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,12 +24,12 @@ public class CommentController {
     @Operation(summary = "댓글 작성")
     @PostMapping("/comments/{postingId}")
     public ResponseEntity<CommentResponseDTO> createComment(
-            Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long postingId,
             @RequestParam(required = false) Long parentId,
             @RequestBody CommentRequestDTO commentRequestDTO) {
 
-        CommentResponseDTO commentResponseDTO = commentService.createComment(userId, postingId, parentId, commentRequestDTO);
+        CommentResponseDTO commentResponseDTO = commentService.createComment(userDetails.getUserId(), postingId, parentId, commentRequestDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(commentResponseDTO);
     }
@@ -54,18 +56,22 @@ public class CommentController {
 
     @Operation(summary = "좋아요 생성")
     @PostMapping("/like/{postingId}")
-    public ResponseEntity<LikeResponseDTO> createLike(Long userId, @PathVariable Long postingId) {
+    public ResponseEntity<LikeResponseDTO> createLike(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long postingId) {
 
-        LikeResponseDTO likeResponseDTO = commentService.createLike(userId, postingId);
+        LikeResponseDTO likeResponseDTO = commentService.createLike(userDetails.getUserId(), postingId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(likeResponseDTO);
     }
 
     @Operation(summary = "답글 조회")
     @GetMapping("/comments/{parentId}/replies")
-    public ResponseEntity<List<CommentResponseDTO>> getReplies(Long userId, @PathVariable Long parentId) {
+    public ResponseEntity<List<CommentResponseDTO>> getReplies(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long parentId) {
 
-        List<CommentResponseDTO> replies = commentService.getReplies(userId, parentId);
+        List<CommentResponseDTO> replies = commentService.getReplies(userDetails.getUserId(), parentId);
 
         return ResponseEntity.ok(replies);
     }
