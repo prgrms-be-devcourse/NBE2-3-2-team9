@@ -1,16 +1,21 @@
 package com.team9.anicare.pet.model;
 
 import com.team9.anicare.common.entities.CommonEntity;
+import com.team9.anicare.schedule.model.PeriodicSchedule;
+import com.team9.anicare.schedule.model.SingleSchedule;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "pet")
 @Getter
 @Setter
+@ToString
 public class Pet extends CommonEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,4 +39,10 @@ public class Pet extends CommonEntity {
 
     @Column(name = "gender")
     private String  gender;
+
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE)
+    private List<SingleSchedule> singleSchedules;
+
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE)
+    private List<PeriodicSchedule> periodicSchedule;
 }

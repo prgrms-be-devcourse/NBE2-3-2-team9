@@ -26,7 +26,6 @@ public class PetDTO {
         private Long speciesId;
         private String name;
         private String age;
-        private String picture;
         private String gender;
     }
 
@@ -37,7 +36,6 @@ public class PetDTO {
         private Long speciesId;
         private String name;
         private String age;
-        private String picture;
         private String gender;
     }
 }

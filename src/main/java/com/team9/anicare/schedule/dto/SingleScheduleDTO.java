@@ -1,8 +1,10 @@
 package com.team9.anicare.schedule.dto;
 
 
+import com.team9.anicare.schedule.model.PeriodicSchedule;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -14,8 +16,11 @@ public class SingleScheduleDTO {
     private Long petId;
     private Long userId;
     private String name;
-    private Date startDatetime;
-    private Date endDatetime;
+    private Long periodicScheduleId;
+    private LocalDateTime startDatetime;
+    private LocalDateTime endDatetime;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @Getter
     @Setter
@@ -23,8 +28,8 @@ public class SingleScheduleDTO {
     public static class addSingleScheduleDTO {
         private Long petId;
         private String name;
-        private Date startDatetime;
-        private Date endDatetime;
+        private LocalDateTime startDatetime;
+        private LocalDateTime endDatetime;
     }
 
     @Getter
@@ -33,7 +38,7 @@ public class SingleScheduleDTO {
         private Long id;
         private Long petId;
         private String name;
-        private Date startDatetime;
-        private Date endDatetime;
+        private LocalDateTime startDatetime;
+        private LocalDateTime endDatetime;
     }
 }
