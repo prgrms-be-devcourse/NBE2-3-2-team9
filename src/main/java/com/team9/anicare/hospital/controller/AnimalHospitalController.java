@@ -1,12 +1,13 @@
 package com.team9.anicare.hospital.controller;
 
+import com.team9.anicare.common.exception.ResultCode;
+import com.team9.anicare.common.response.Result;
+import com.team9.anicare.hospital.dto.AnimalHospitalDetailsDto;
 import com.team9.anicare.hospital.model.AnimalHospital;
 import com.team9.anicare.hospital.service.AnimalHospitalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -50,5 +51,44 @@ public class AnimalHospitalController {
         //키워드가 동물병원인경우 동물병원을 호출
         List<AnimalHospital> searchResults = animalHospitalService.searchHospitals();
         return ResponseEntity.ok(searchResults);
+    }
+
+    @PostMapping("/api/animal-hospitals/{mgtNo}/like")
+    public ResponseEntity<Result<String>> likeHospital(
+            @PathVariable String mgtNo,
+            @RequestParam String userId) {
+        try {
+            Result<String> result = animalHospitalService.likeHospital(mgtNo, userId);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new Result<>(ResultCode.INVALID_REQUEST, e.getMessage()));
+        }
+    }
+
+    // 동물병원 좋아요 취소
+    @DeleteMapping("/api/animal-hospitals/{mgtNo}/like")
+    public ResponseEntity<Result<String>> unlikeHospital(
+            @PathVariable String mgtNo,
+            @RequestParam String userId) {
+        try {
+            Result<String> result = animalHospitalService.unlikeHospital(mgtNo, userId);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new Result<>(ResultCode.INVALID_REQUEST, e.getMessage()));
+        }
+    }
+
+    // 좋아요 수 확인 API
+    @GetMapping("/api/animal-hospitals/{mgtNo}/like-count")
+    public ResponseEntity<Result<Long>> getLikeCount(@PathVariable String mgtNo) {
+        long likeCount = animalHospitalService.getLikeCount(mgtNo);
+        return ResponseEntity.ok(new Result<>(ResultCode.SUCCESS, likeCount));
+    }
+
+    //동물병원 상세검색
+    @GetMapping("/api/animal-hospitals/{mgtNo}/details")
+    public ResponseEntity<Result<AnimalHospitalDetailsDto>> getHospitalDetails(@PathVariable String mgtNo) {
+        AnimalHospitalDetailsDto hospitalDetails = animalHospitalService.getHospitalDetailsDto(mgtNo);
+        return ResponseEntity.ok(new Result<>(ResultCode.SUCCESS, hospitalDetails));
     }
 }
