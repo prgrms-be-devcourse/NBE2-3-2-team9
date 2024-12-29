@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +40,7 @@ public class CommunityController {
 
     @Operation(summary = "내가 작성한 글 조회")
     @GetMapping("/myPost")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<CommunityResponseDTO>> showMyPosts(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
         List<CommunityResponseDTO> posts = communityService.showMyPosts(userDetails.getUserId());
@@ -60,6 +62,7 @@ public class CommunityController {
 
     @Operation(summary = "글 작성")
     @PostMapping("/post")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CommunityResponseDTO> createPost(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestPart(value = "dto") CommunityRequestDTO communityRequestDTO,
@@ -72,6 +75,7 @@ public class CommunityController {
 
     @Operation(summary = "글 수정")
     @PutMapping("/post/{postingId}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CommunityResponseDTO> updatePost(
             @PathVariable Long postingId,
             @RequestPart(value = "dto") CommunityRequestDTO communityRequestDTO,
@@ -84,6 +88,7 @@ public class CommunityController {
 
     @Operation(summary = "글 삭제")
     @DeleteMapping("/post/{postingId}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deletePost(@PathVariable Long postingId) {
 
         communityService.deletePost(postingId);
