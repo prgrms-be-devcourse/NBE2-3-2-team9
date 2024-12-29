@@ -19,7 +19,7 @@ public class Comment extends CommonEntity {
     @JoinColumn(name = "community_id")
     private Community community;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 

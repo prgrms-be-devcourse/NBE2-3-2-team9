@@ -73,19 +73,19 @@ public class CommunityService {
                 .toList();
     }
 
-    public DetailResponseDTO showPostDetail(PageRequestDTO pageRequestDTO, Long userId, Long postingId) {
+    public DetailResponseDTO showPostDetail(PageRequestDTO pageRequestDTO, Long postingId) {
         PageRequest pageRequest = pageRequestDTO.toPageRequest();
 
         // 게시글 조회
         Community community = communityRepository.findById(postingId)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
-
-        // 현재 유저의 게시글 수정 권한 확인
-        boolean canEditPost = community.getUser().getId().equals(userId);
+//
+//        // 현재 유저의 게시글 수정 권한 확인
+//        boolean canEditPost = community.getUser().getId().equals(userId);
 
         // 조회된 게시글 -> DTO 변환
         CommunityResponseDTO communityResponseDTO = communityMapper.toDto(community);
-        communityResponseDTO.setCanEdit(canEditPost);
+//        communityResponseDTO.setCanEdit(canEditPost);
 
         Page<Comment> commentPage = commentRepository.findByCommunityIdAndParentIsNull(postingId, pageRequest);
 
@@ -94,7 +94,13 @@ public class CommunityService {
                 .map(comment -> {
                     CommentResponseDTO dto = modelMapper.map(comment, CommentResponseDTO.class);
                     // 현재 유저의 댓글 수정 권한 확인
-                    dto.setCanEdit(comment.getUser().getId().equals(userId));
+//                    dto.setCanEdit(comment.getUser().getId().equals(userId));
+                    // user 정보 매핑
+                    if (comment.getUser() != null) {
+                        dto.setName(comment.getUser().getName());
+                        dto.setProfileImg(comment.getUser().getProfileImg());
+                    }
+
                     return dto;
                 })
                 .toList();
