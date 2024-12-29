@@ -9,6 +9,7 @@ import com.team9.anicare.community.dto.CommentResponseDTO;
 import com.team9.anicare.community.dto.DetailResponseDTO;
 import com.team9.anicare.community.dto.CommunityRequestDTO;
 import com.team9.anicare.community.dto.CommunityResponseDTO;
+import com.team9.anicare.community.mapper.CommunityMapper;
 import com.team9.anicare.community.model.Comment;
 import com.team9.anicare.community.model.Community;
 import com.team9.anicare.community.repository.CommentRepository;
@@ -32,6 +33,7 @@ public class CommunityService {
 
     private final CommunityRepository communityRepository;
     private final ModelMapper modelMapper;
+    private final CommunityMapper communityMapper;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final S3FileService s3FileService;
@@ -56,7 +58,7 @@ public class CommunityService {
 
         // 조회된 게시글 -> DTO로 변환
         List<CommunityResponseDTO> posts = communityPage.getContent().stream()
-                .map(community -> modelMapper.map(community, CommunityResponseDTO.class))
+                .map(communityMapper::toDto)
                 .toList();
 
         PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), communityPage.getTotalElements());
@@ -82,7 +84,7 @@ public class CommunityService {
         boolean canEditPost = community.getUser().getId().equals(userId);
 
         // 조회된 게시글 -> DTO 변환
-        CommunityResponseDTO communityResponseDTO = modelMapper.map(community, CommunityResponseDTO.class);
+        CommunityResponseDTO communityResponseDTO = communityMapper.toDto(community);
         communityResponseDTO.setCanEdit(canEditPost);
 
         Page<Comment> commentPage = commentRepository.findByCommunityIdAndParentIsNull(postingId, pageRequest);
@@ -121,7 +123,7 @@ public class CommunityService {
         }
         communityRepository.save(community);
 
-        return modelMapper.map(community, CommunityResponseDTO.class);
+        return communityMapper.toDto(community);
     }
 
     public CommunityResponseDTO updatePost(Long postingId, CommunityRequestDTO communityRequestDTO, MultipartFile file) {
@@ -130,9 +132,14 @@ public class CommunityService {
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
         // 게시글 수정
-        community.setTitle(communityRequestDTO.getTitle());
-        community.setContent(communityRequestDTO.getContent());
-        community.setAnimalSpecies(communityRequestDTO.getAnimalSpecies());
+        if (communityRequestDTO.getTitle() != null)
+            community.setTitle(communityRequestDTO.getTitle());
+
+        if (communityRequestDTO.getContent() != null)
+            community.setContent(communityRequestDTO.getContent());
+
+        if (communityRequestDTO.getAnimalSpecies() != null)
+            community.setAnimalSpecies(communityRequestDTO.getAnimalSpecies());
 
         try {
             // 새로운 파일이 들어왔다면
@@ -147,7 +154,7 @@ public class CommunityService {
         }
         communityRepository.save(community);
 
-        return modelMapper.map(community, CommunityResponseDTO.class);
+        return communityMapper.toDto(community);
     }
 
     public void deletePost(Long postingId) {
@@ -155,11 +162,12 @@ public class CommunityService {
         Community community = communityRepository.findById(postingId)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
+        // S3에서 파일 삭제
+        if(community.getPicture() != null)
+            s3FileService.deleteFile(community.getPicture());
+
         // 게시글 삭제
         communityRepository.deleteById(postingId);
-
-        // S3에서 파일 삭제
-        s3FileService.deleteFile(community.getPicture());
     }
 
 }
