@@ -5,10 +5,7 @@ import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageMetaDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
 import com.team9.anicare.common.exception.CustomException;
-import com.team9.anicare.community.dto.CommentResponseDTO;
-import com.team9.anicare.community.dto.DetailResponseDTO;
-import com.team9.anicare.community.dto.CommunityRequestDTO;
-import com.team9.anicare.community.dto.CommunityResponseDTO;
+import com.team9.anicare.community.dto.*;
 import com.team9.anicare.community.mapper.CommunityMapper;
 import com.team9.anicare.community.model.Comment;
 import com.team9.anicare.community.model.Community;
@@ -64,6 +61,10 @@ public class CommunityService {
         PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), communityPage.getTotalElements());
 
         return new PageDTO<>(posts, meta);
+    }
+
+    public AnimalSpeciesDTO getDistinctAnimalSpecies() {
+        return new AnimalSpeciesDTO(communityRepository.findDistinctAnimalSpecies());
     }
 
     public List<CommunityResponseDTO> showMyPosts(Long userId) {

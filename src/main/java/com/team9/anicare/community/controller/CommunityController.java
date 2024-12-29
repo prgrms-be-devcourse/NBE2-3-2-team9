@@ -3,6 +3,7 @@ package com.team9.anicare.community.controller;
 import com.team9.anicare.auth.security.CustomUserDetails;
 import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
+import com.team9.anicare.community.dto.AnimalSpeciesDTO;
 import com.team9.anicare.community.dto.CommunityRequestDTO;
 import com.team9.anicare.community.dto.CommunityResponseDTO;
 import com.team9.anicare.community.dto.DetailResponseDTO;
@@ -36,6 +37,13 @@ public class CommunityController {
         PageDTO<CommunityResponseDTO> pageDTO = communityService.showPosts(pageRequestDTO, keyword, category);
 
         return ResponseEntity.ok(pageDTO);
+    }
+
+    @Operation(summary="종 종류 조회")
+    @GetMapping("/species")
+    public ResponseEntity<AnimalSpeciesDTO> getAnimalSpecies() {
+        AnimalSpeciesDTO animalSpecies = communityService.getDistinctAnimalSpecies();
+        return ResponseEntity.ok(animalSpecies);
     }
 
     @Operation(summary = "내가 작성한 글 조회")

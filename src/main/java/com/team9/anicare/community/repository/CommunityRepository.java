@@ -29,4 +29,7 @@ public interface CommunityRepository extends JpaRepository<Community, Long> {
             String keyword, String category, Pageable pageable);
 
     List<Community> findByUserId(Long userId);
+
+    @Query("SELECT DISTINCT c.animalSpecies FROM Community c")
+    List<String> findDistinctAnimalSpecies();
 }
