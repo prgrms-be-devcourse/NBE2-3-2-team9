@@ -1,5 +1,6 @@
 package com.team9.anicare.hospital.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -42,4 +43,7 @@ public class AnimalHospital {
     private String latitude;
 
     private String longitude;
+
+    @Column(nullable = false)
+    private int likeCount; // 좋아요 기본값 0
 }
