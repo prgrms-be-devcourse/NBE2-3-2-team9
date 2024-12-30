@@ -1,5 +1,6 @@
 package com.team9.anicare.chat.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 /**
@@ -12,6 +13,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ChatRoomDTO {
     private String roomId;          // 채팅방 ID
     private String roomName;        // 채팅방 이름
