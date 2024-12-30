@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anicare Chat Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .chat-box, .room-list {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .chat-input input, .chat-input button {
+            padding: 10px;
+        }
+        .chat-input input {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .chat-input button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 10px;
+            max-width: 60%;
+            word-wrap: break-word;
+        }
+
+        .sent {
+            background-color: #e0f7fa;
+            align-self: flex-end; /* 오른쪽 정렬 */
+            text-align: right;
+        }
+
+        .received {
+            background-color: #f1f1f1;
+            align-self: flex-start; /* 왼쪽 정렬 */
+            text-align: left;
+        }
+
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            overflow-y: auto;
+            height: 300px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Anicare Chat Test</h1>
+
+    <section id="room-section">
+        <h2>Chat Rooms</h2>
+        <div class="chat-input">
+            <input id="username" type="text" placeholder="Enter your username" />
+        </div>
+        <div class="chat-input">
+            <input id="keyword" type="text" placeholder="Search chat rooms..." />
+            <button onclick="searchRooms()">Search</button>
+            <button onclick="fetchChatRooms()">Refresh</button>
+        </div>
+        <div class="room-list" id="room-list"></div>
+        <div class="chat-input">
+            <input id="new-room-name" type="text" placeholder="New room name..." />
+            <input id="new-room-desc" type="text" placeholder="Room description..." />
+            <button onclick="createRoom()">Create Room</button>
+        </div>
+    </section>
+
+    <section id="chat-section" style="display: none;">
+        <h2>Chat Room: <span id="current-room-name"></span></h2>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="chat-input">
+            <input id="new-message" type="text" placeholder="Type your message..." />
+            <button onclick="sendMessage()">Send</button>
+            <button onclick="exitRoom()">Exit Room</button>
+        </div>
+        <button onclick="backToRooms()">Back to Room List</button>
+    </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script>
+    const apiUrl = "http://localhost:8080/api/chat";
+    let stompClient = null;
+    let currentRoomId = null;
+    let isSubscribed = false;
+
+    function connect() {
+        const username = document.getElementById("username").value.trim(); // 사용자 이름을 동적으로 받아옴
+        const roomId = currentRoomId;
+
+        if (!roomId || !username) {
+            alert("Room ID and Username are required!");
+            return;
+        }
+
+        const socket = new SockJS("http://localhost:8080/chat-socket");
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, (frame) => {
+            console.log("Connected: " + frame);
+
+            if (!isSubscribed) {
+                stompClient.subscribe(`/topic/chat/${roomId}`, (message) => {
+                    console.log("Received message:", message.body);
+                    const parsedMessage = JSON.parse(message.body);
+                    if (parsedMessage.sender === username) {
+                        showMessage(`You: ${parsedMessage.content}`, "sent");
+                    } else {
+                        showMessage(`${parsedMessage.sender}: ${parsedMessage.content}`, "received");
+                    }
+                });
+                isSubscribed = true; // 중복 구독 방지
+            }
+        }, (error) => {
+            console.error("Connection error: ", error);
+            alert("Failed to connect to WebSocket Server!");
+        });
+    }
+
+
+
+    function updateChatBox(message) {
+        const chatBox = document.getElementById("chat-box");
+
+        // 메시지를 표시
+        const messageDiv = document.createElement("div");
+        const messageType = message.sender === "TestUser" ? "sent" : "received"; // 본인/상대방 메시지 구분
+        messageDiv.className = `message ${messageType}`;
+        messageDiv.innerHTML = `
+        <strong>${message.sender}:</strong> ${message.content}
+        <small style="margin-left: 10px; color: gray;">${message.timestamp}</small>
+    `;
+
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight; // 스크롤 자동 이동
+    }
+
+    // Show a message in the chat box
+    function showMessage(message, type) {
+        const messagesDiv = document.getElementById("chat-box");
+
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message", type);
+
+        messageElement.textContent = message;
+
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
+    }
+
+
+    // Fetch chat rooms
+    async function fetchChatRooms() {
+        try {
+            const response = await fetch(`${apiUrl}/rooms`);
+            const rooms = await response.json();
+            const roomList = document.getElementById("room-list");
+            roomList.innerHTML = rooms.map(room => `
+                <div>
+                    <strong>${room.roomName}</strong> - ${room.description}
+                    <button onclick="enterRoom('${room.roomId}', '${room.roomName}')">Enter</button>
+                </div>
+            `).join("");
+        } catch (error) {
+            console.error("Error fetching chat rooms:", error);
+        }
+    }
+
+
+    // Search chat rooms
+    async function searchRooms() {
+        const keyword = document.getElementById("keyword").value.trim();
+
+        if (!keyword) {
+            // 검색어가 없으면 그냥 모든 채팅방을 불러옵니다.
+            fetchChatRooms();
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiUrl}/search?keyword=${encodeURIComponent(keyword)}`);
+            const rooms = await response.json();
+            console.log("Rooms Response:", rooms);
+
+            const roomList = document.getElementById("room-list");
+
+            if (Array.isArray(rooms)) {
+                roomList.innerHTML = rooms.map(room => `
+                <div>
+                    <strong>${room.roomName}</strong> - ${room.description}
+                    <button onclick="enterRoom('${room.roomId}', '${room.roomName}')">Enter</button>
+                </div>
+            `).join("");
+            } else if (rooms.data && Array.isArray(rooms.data)) {
+                roomList.innerHTML = rooms.data.map(room => `
+                <div>
+                    <strong>${room.roomName}</strong> - ${room.description}
+                    <button onclick="enterRoom('${room.roomId}', '${room.roomName}')">Enter</button>
+                </div>
+            `).join("");
+            } else {
+                throw new Error("Unexpected response format.");
+            }
+        } catch (error) {
+            console.error("Error searching chat rooms:", error);
+            alert("Error searching chat rooms: " + error.message);
+        }
+    }
+
+    // Create a new room
+    async function createRoom() {
+        const roomName = document.getElementById("new-room-name").value.trim();
+        const description = document.getElementById("new-room-desc").value.trim();
+        const participantName = "TestUser";
+
+        if (!roomName) {
+            alert("Room name is required!");
+            return;
+        }
+
+        try {
+            const url = `${apiUrl}/rooms?roomName=${encodeURIComponent(roomName)}&description=${encodeURIComponent(description)}&participantName=${encodeURIComponent(participantName)}`;
+            const response = await fetch(url, {
+                method: "POST",
+            });
+
+            if (response.ok) {
+                alert("Room created successfully!");
+                fetchChatRooms();
+            } else {
+                const errorData = await response.json();
+                alert(`Error creating room: ${JSON.stringify(errorData)}`);
+            }
+        } catch (error) {
+            alert("Error creating room: " + error.message);
+        }
+    }
+
+    // Enter a chat room
+    async function enterRoom(roomId, roomName) {
+        currentRoomId = roomId; // 선택한 방 ID 저장
+        document.getElementById("current-room-name").textContent = roomName;
+        document.getElementById("room-section").style.display = "none"; // 방 리스트 숨김
+        document.getElementById("chat-section").style.display = "block"; // 채팅 화면 표시
+
+        connect(); // WebSocket 연결 시작
+        fetchChatLogs(); // 기존 채팅 기록 로드
+    }
+
+    // Fetch chat logs
+    async function fetchChatLogs() {
+            try {
+                const response = await fetch(`${apiUrl}/rooms/${currentRoomId}/logs`);
+                const data = await response.json();
+
+                const messages = Array.isArray(data) ? data : data.messages || [];
+                messages.forEach(msg => updateChatBox({
+                    sender: msg.sender,
+                    content: msg.content,
+                    timestamp: msg.timestamp
+                }));
+            } catch (error) {
+                console.error("Error fetching chat logs:", error);
+            }
+
+    }
+
+    // Send a message
+    function sendMessage() {
+        const content = document.getElementById("new-message").value.trim();
+        const username = document.getElementById("username").value.trim(); // 사용자 이름을 동적으로 가져옴
+
+        if (!content || !currentRoomId || !username) return;
+
+        if (!stompClient || !stompClient.connected) {
+            alert("WebSocket is not connected.");
+            console.error("stompClient is not connected.");
+            return;
+        }
+
+        const message = {
+            sender:  username,
+            roomId: currentRoomId,
+            content,
+            timestamp: new Date().toLocaleString(), // 현재 시간 추가
+            type: "TALK"
+        };
+
+        stompClient.send(`/app/chat/${currentRoomId}`, {}, JSON.stringify(message));
+        console.log("Message sent:", message);
+
+        document.getElementById("new-message").value = "";
+    }
+
+
+    function exitRoom() {
+        currentRoomId = null;
+        if (stompClient) {
+            stompClient.disconnect();
+            stompClient = null;
+        }
+        document.getElementById("room-section").style.display = "block";
+        document.getElementById("chat-section").style.display = "none";
+    }
+
+    // Back to room list
+    function backToRooms() {
+        currentRoomId = null;
+        document.getElementById("room-section").style.display = "block";
+        document.getElementById("chat-section").style.display = "none";
+        fetchChatRooms();
+    }
+
+    // Auto-refresh chat logs every 5 seconds
+    setInterval(() => {
+        if (currentRoomId) {
+            fetchChatLogs();
+        }
+    }, 5000);
+
+    // Initial load
+    fetchChatRooms();
+</script>
+</body>
+</html>
