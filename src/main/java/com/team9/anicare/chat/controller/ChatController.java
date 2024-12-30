@@ -7,6 +7,7 @@ import com.team9.anicare.chat.service.ChatRoomService;
 import com.team9.anicare.chat.service.RedisMessagePublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/chat")
 public class ChatController {
 
     private final RedisMessagePublisher redisMessagePublisher;
@@ -27,7 +29,7 @@ public class ChatController {
      * WebSocket 메시지 처리
      * @param message 클라이언트로부터 전달된 메시지
      */
-    @MessageMapping("/chat/message")
+    @MessageMapping("/message")
     public void handleMessage(ChatMessageDTO message) throws Exception {
         // Redis Pub/Sub 채널 이름
         String channel = "chatRoom:" + message.getRoomId();
@@ -58,15 +60,9 @@ public class ChatController {
         );
     }
 
-    // 키워드를 사용한 채팅방 검색
-    @GetMapping("/chat/search")
-    public List<ChatRoomDTO> searchChatRooms(@RequestParam String keyword) {
-        return chatRoomService.searchRooms(keyword);
-    }
-
     // 채팅 로그 조회
     @GetMapping("/rooms/{roomId}/logs")
-    public List<String> getChatLogs(@PathVariable String roomId) {
+    public List<ChatMessageDTO> getChatLogs(@PathVariable String roomId) {
         return chatLogService.getChatLogs(roomId);
     }
 
@@ -78,5 +74,17 @@ public class ChatController {
         } else {
             chatRoomService.handleUserExit(roomId);
         }
+    }
+
+    /**
+     * 클라이언트로부터 메시지를 받아 브로드캐스트
+     * @param roomId 채팅방 ID
+     * @param message 클라이언트가 보낸 메시지
+     */
+    @MessageMapping("/chat/{roomId}")
+    public void sendMessage(@DestinationVariable String roomId, ChatMessageDTO message) {
+
+        // 메시지를 구독한 클라이언트들에게 브로드캐스트
+        messagingTemplate.convertAndSend("/topic/chat/" + roomId, message);
     }
 }
