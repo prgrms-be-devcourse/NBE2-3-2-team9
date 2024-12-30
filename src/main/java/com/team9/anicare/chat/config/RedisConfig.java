@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team9.anicare.chat.dto.ChatMessageDTO;
+import com.team9.anicare.chat.dto.ChatRoomDTO;
 import com.team9.anicare.chat.service.ChatLogService;
 import com.team9.anicare.chat.service.RedisMessageSubscriber;
 import lombok.RequiredArgsConstructor;
@@ -88,9 +89,32 @@ public class RedisConfig {
         RedisTemplate<String, ChatMessageDTO> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageDTO.class));
+        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageDTO.class));
         return template;
     }
+
+    @Bean(name = "chatLogRedisTemplate")
+    public RedisTemplate<String, ChatMessageDTO> chatLogRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, ChatMessageDTO> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageDTO.class));
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageDTO.class));
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, ChatRoomDTO> chatRoomRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, ChatRoomDTO> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomDTO.class));
+        return template;
+    }
+
 
     @Bean(name = "defaultRedisTemplate")
     public RedisTemplate<String, Object> defaultRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
@@ -107,6 +131,7 @@ public class RedisConfig {
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
+
         template.setValueSerializer(jackson2JsonRedisSerializer);
         template.setHashValueSerializer(jackson2JsonRedisSerializer);
 

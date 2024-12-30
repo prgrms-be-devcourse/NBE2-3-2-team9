@@ -2,11 +2,15 @@ package com.team9.anicare.chat.service;
 
 import com.team9.anicare.chat.dto.ChatMessageDTO;
 import com.team9.anicare.chat.dto.ChatRoomDTO;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -17,12 +21,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatLogService {
 
-    private final RedisTemplate<String, ChatMessageDTO> redisTemplate; // Redis와의 상호작용을 위한 템플릿
+    private final RedisTemplate<String, Object> redisTemplate;
+
     private static final long CHAT_LOG_TTL_SECONDS = 30 * 24 * 60 * 60; // 30일
+
+    @PostConstruct
+    public void setupRedisTemplate() {
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageDTO.class));
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageDTO.class));
+    }
 
     /**
      * Redis에 채팅 메시지 저장
@@ -33,16 +47,15 @@ public class ChatLogService {
         String key = "chat_logs:" + roomId;
         String hashKey = chatMessage.getSender() + ":" + System.currentTimeMillis();
 
-        // 메시지의 timestamp 설정
-        if (chatMessage.getTimestamp() == null) {
-            chatMessage.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        try {
+            chatMessage.setTimestamp(java.time.LocalDateTime.now().toString());
+            redisTemplate.opsForHash().put(key, hashKey, chatMessage); // 저장
+            setTTL(key); // TTL 설정
+            log.debug("Message saved to Redis: key={}, hashKey={}, value={}", key, hashKey, chatMessage);
+        } catch (Exception e) {
+            log.error("Failed to save chat message to Redis: {}", e.getMessage());
         }
 
-        // Hash에 저장
-        redisTemplate.opsForHash().put(key, hashKey, chatMessage);
-
-        // TTL 설정
-        setTTL(key);
     }
 
     /**
