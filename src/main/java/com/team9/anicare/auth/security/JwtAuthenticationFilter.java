@@ -23,6 +23,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        String requestURI = request.getRequestURI();
+
+        // WebSocket 경로는 필터링하지 않음
+        if (requestURI.startsWith("/ws") || requestURI.startsWith("/chat-socket")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = getTokenFromHeader(request);
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
