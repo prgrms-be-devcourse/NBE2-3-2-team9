@@ -49,23 +49,23 @@ public class PeriodicScheduleService {
         return periodicScheduleDTOs;
     }
 
-    public PeriodicScheduleDTO addPeriodicSchedule(PeriodicScheduleDTO.addPeriodicScheduleDTO request, Long userId) {
+    public PeriodicScheduleDTO addPeriodicSchedule(PeriodicScheduleDTO.AddPeriodicScheduleDTO request, Long userId) {
         Long petId = request.getPetId();
 
         if (!petRepository.existsById(petId)) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         }
         if (request.getStartDate().isAfter(request.getEndDate())) {
-            throw new CustomException(ResultCode.INVALID_REQUEST);
+            throw new CustomException(ResultCode.INVALID_DATETIME_VALUE);
         }
         if (request.getStartTime().isAfter(request.getEndTime())) {
-            throw new CustomException(ResultCode.INVALID_REQUEST);
+            throw new CustomException(ResultCode.INVALID_DATETIME_VALUE);
         }
         if (request.getRepeatPattern() == RepeatPattern.DAILY && request.getRepeatDays() != null) {
             throw new CustomException(ResultCode.INVALID_REQUEST);
         }
         if (request.getRepeatPattern() == RepeatPattern.WEEKLY && request.getRepeatDays() == null) {
-            throw new CustomException(ResultCode.INVALID_REQUEST);
+            throw new CustomException(ResultCode.MISSING_PARAMETER);
         }
         if (request.getRepeatInterval() <= 0) {
             throw new CustomException(ResultCode.INVALID_REQUEST);
@@ -88,7 +88,7 @@ public class PeriodicScheduleService {
     }
 
     @Transactional
-    public PeriodicScheduleDTO updatePeriodicSchedule(PeriodicScheduleDTO.updatePeriodicScheduleDTO request, Long userId) {
+    public PeriodicScheduleDTO updatePeriodicSchedule(PeriodicScheduleDTO.UpdatePeriodicScheduleDTO request, Long userId) {
         Long Id = request.getId();
         Long petId = request.getPetId();
 
@@ -96,16 +96,16 @@ public class PeriodicScheduleService {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         }
         if (request.getStartDate().isAfter(request.getEndDate())) {
-            throw new CustomException(ResultCode.INVALID_REQUEST);
+            throw new CustomException(ResultCode.INVALID_DATETIME_VALUE);
         }
         if (request.getStartTime().isAfter(request.getEndTime())) {
-            throw new CustomException(ResultCode.INVALID_REQUEST);
+            throw new CustomException(ResultCode.INVALID_DATETIME_VALUE);
         }
         if (request.getRepeatPattern() == RepeatPattern.DAILY && request.getRepeatDays() != null) {
             throw new CustomException(ResultCode.INVALID_REQUEST);
         }
         if (request.getRepeatPattern() == RepeatPattern.WEEKLY && request.getRepeatDays() == null) {
-            throw new CustomException(ResultCode.INVALID_REQUEST);
+            throw new CustomException(ResultCode.MISSING_PARAMETER);
         }
         if (request.getRepeatInterval() <= 0) {
             throw new CustomException(ResultCode.INVALID_REQUEST);

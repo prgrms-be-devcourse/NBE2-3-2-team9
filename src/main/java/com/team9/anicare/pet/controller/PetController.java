@@ -1,7 +1,6 @@
 package com.team9.anicare.pet.controller;
 
 import com.team9.anicare.auth.security.CustomUserDetails;
-import com.team9.anicare.common.response.Result;
 import com.team9.anicare.pet.dto.PetDTO;
 import com.team9.anicare.pet.service.PetService;
 import org.springframework.beans.factory.annotation.Autowired;
