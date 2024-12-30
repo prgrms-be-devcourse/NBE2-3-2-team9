@@ -28,7 +28,16 @@ public class ChatRoomService {
      * @param participantName 사용자 이름
      * @return 생성된 채팅방 DTO
      */    public ChatRoomDTO createRoom(String roomName, String description, String participantName) {
-        ChatRoomDTO chatRoom = ChatRoomDTO.create(roomName, description, participantName);
+        ChatRoomDTO chatRoom = ChatRoomDTO.builder()
+                .roomId(ChatRoomDTO.generateUniqueRoomId())
+                .roomName(roomName)
+                .description(description)
+                .participantName(participantName)
+                .lastMessage("채팅방이 생성되었습니다.")
+                .lastMessageTime(java.time.LocalDateTime.now().toString())
+                .isOccupied(false)
+                .build();
+
         chatRooms.put(chatRoom.getRoomId(), chatRoom);
         return chatRoom;
     }

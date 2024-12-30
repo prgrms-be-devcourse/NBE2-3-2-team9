@@ -1,5 +1,6 @@
 package com.team9.anicare.chat.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@Builder
 public class ChatRoomDTO {
     private String roomId;          // 채팅방 ID
     private String roomName;        // 채팅방 이름
@@ -19,33 +21,12 @@ public class ChatRoomDTO {
     private boolean isOccupied;     // 현재 채팅방에 의사가 참여 중인지 여부
 
     /**
-     * 새로운 ChatRoomDTO 객체를 생성하는 정적 메서드
-     * - 고유한 채팅방 ID를 생성하고 초기 상태를 설정합니다.
-     *
-     * @param roomName       채팅방 이름
-     * @param description    채팅방 설명
-     * @param participantName 참여자 이름
-     * @return 생성된 ChatRoomDTO 객체
-     */
-    public static ChatRoomDTO create(String roomName, String description, String participantName) {
-        ChatRoomDTO chatRoom = new ChatRoomDTO();
-        chatRoom.setRoomId(generateUniqueRoomId());
-        chatRoom.setRoomName(roomName);
-        chatRoom.setDescription(description);
-        chatRoom.setParticipantName(participantName);
-        chatRoom.setLastMessage("채팅방이 생성되었습니다.");
-        chatRoom.setLastMessageTime(java.time.LocalDateTime.now().toString());
-        chatRoom.setOccupied(false);
-        return chatRoom;
-    }
-
-    /**
      * 고유한 채팅방 ID를 생성하는 메서드
      * - UUID를 사용하여 고유한 문자열을 생성합니다.
      *
      * @return 고유한 채팅방 ID
      */
-    private static String generateUniqueRoomId() {
+    public static String generateUniqueRoomId() {
         return java.util.UUID.randomUUID().toString();
     }
 }

@@ -19,6 +19,7 @@ public class ChatMessageDTO {
     private String content;     // 메시지 내용
     private String roomId;      // 채팅방 ID
     private MessageType type;   // 메시지 타입
+    private String timestamp;   // 메시지 전송 시간
 
     /**
      * MessageType 열거형은 메시지의 유형을 정의합니다.
@@ -47,11 +48,10 @@ public class ChatMessageDTO {
         this.roomId = roomId;
         this.type = type;
 
-        // 메시지 타입에 따라 고정 메시지 설정
-        if (type == MessageType.ENTER) {
-            this.content = sender + "님과의 상담이 시작되었습니다.";
-        } else if (type == MessageType.EXIT) {
-            this.content = sender + "님과의 상담이 종료되었습니다.";
+        switch (type) {
+            case ENTER -> this.content = sender + "님과의 상담이 시작되었습니다.";
+            case EXIT -> this.content = sender + "님과의 상담이 종료되었습니다.";
+            default -> this.content = "";
         }
     }
 }
