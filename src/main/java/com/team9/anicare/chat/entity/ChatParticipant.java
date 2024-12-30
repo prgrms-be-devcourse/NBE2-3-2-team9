@@ -14,13 +14,13 @@ import org.springframework.data.redis.core.index.Indexed;
 public class ChatParticipant {
 
     @Id
-    private String id; // Redis에서는 ID를 보통 String으로 설정
+    private String id; // Redis에서 사용되는 고유 ID
 
-    @Indexed // 인덱스를 추가해 검색 성능 향상
+    @Indexed
     private String roomId; // 채팅방 ID
 
     @Indexed
-    private String userId; // User의 ID만 저장 (참조 관계 대신 ID 값)
+    private String userId; // 사용자 ID (참조 관계 대신 ID 값)
 
     private boolean isDoctor; // 의사 여부 (true: 의사, false: 사용자)
 
