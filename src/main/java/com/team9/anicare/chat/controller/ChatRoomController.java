@@ -26,9 +26,8 @@ public class ChatRoomController {
             @RequestParam String roomName,
             @RequestParam String description,
             @RequestParam String participantName) {
-        ChatRoomDTO createdRoom = chatRoomService.createRoom(roomName, description, participantName);
-        System.out.println("Created Room ID in Controller: " + createdRoom.getRoomId()); // 디버깅용
-        return createdRoom;    }
+        return chatRoomService.createRoom(roomName, description, participantName);
+    }
 
     /**
      * 채팅방 목록 조회
@@ -47,5 +46,16 @@ public class ChatRoomController {
     @GetMapping("/rooms/{roomId}")
     public ChatRoomDTO getRoom(@PathVariable String roomId) {
         return chatRoomService.getRoom(roomId);
+    }
+
+
+    /**
+     * 키워드를 사용한 채팅방 검색
+     * @param keyword 검색 키워드
+     * @return 키워드가 포함된 채팅방 리스트
+     */
+    @GetMapping("/search")
+    public List<ChatRoomDTO> searchRooms(@RequestParam String keyword) {
+        return chatRoomService.searchRooms(keyword);
     }
 }
