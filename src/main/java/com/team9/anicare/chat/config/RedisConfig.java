@@ -1,5 +1,7 @@
 package com.team9.anicare.chat.config;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team9.anicare.chat.dto.ChatMessageDTO;
 import com.team9.anicare.chat.service.ChatLogService;
@@ -81,12 +83,34 @@ public class RedisConfig {
      * @param connectionFactory Redis 연결 팩토리
      * @return RedisTemplate 빈
      */
-    @Bean
-    public RedisTemplate<String, ChatMessageDTO> redisTemplate(RedisConnectionFactory connectionFactory) {
+    @Bean(name = "chatMessageRedisTemplate")
+    public RedisTemplate<String, ChatMessageDTO> chatMessageRedisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, ChatMessageDTO> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageDTO.class));
+        return template;
+    }
+
+    @Bean(name = "defaultRedisTemplate")
+    public RedisTemplate<String, Object> defaultRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+
+        // Key Serializer
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+
+        // Value Serializer
+        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
+        template.setValueSerializer(jackson2JsonRedisSerializer);
+        template.setHashValueSerializer(jackson2JsonRedisSerializer);
+
+        template.afterPropertiesSet();
         return template;
     }
 

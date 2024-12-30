@@ -1,8 +1,6 @@
 package com.team9.anicare.chat.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * ChatRoomDTO 클래스는 채팅방의 데이터를 캡슐화하는 DTO입니다.
@@ -11,6 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChatRoomDTO {
     private String roomId;          // 채팅방 ID
     private String roomName;        // 채팅방 이름
