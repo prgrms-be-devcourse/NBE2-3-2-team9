@@ -1,5 +1,6 @@
 package com.team9.anicare.chat.controller;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.team9.anicare.chat.dto.ChatRoomDTO;
 import com.team9.anicare.chat.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
