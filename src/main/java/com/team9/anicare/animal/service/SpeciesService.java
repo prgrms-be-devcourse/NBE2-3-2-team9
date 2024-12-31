@@ -1,12 +1,12 @@
-package com.team9.anicare.species.service;
+package com.team9.anicare.animal.service;
 
 import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.common.exception.ResultCode;
-import com.team9.anicare.species.dto.CreateAnimalDTO;
-import com.team9.anicare.species.model.Breed;
-import com.team9.anicare.species.model.Species;
-import com.team9.anicare.species.repository.BreedRepository;
-import com.team9.anicare.species.repository.SpeciesRepository;
+import com.team9.anicare.animal.dto.CreateAnimalDTO;
+import com.team9.anicare.animal.model.Breed;
+import com.team9.anicare.animal.model.Species;
+import com.team9.anicare.animal.repository.BreedRepository;
+import com.team9.anicare.animal.repository.SpeciesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

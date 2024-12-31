@@ -1,7 +1,7 @@
-package com.team9.anicare.species.controller;
+package com.team9.anicare.animal.controller;
 
-import com.team9.anicare.species.dto.CreateAnimalDTO;
-import com.team9.anicare.species.service.SpeciesService;
+import com.team9.anicare.animal.dto.CreateAnimalDTO;
+import com.team9.anicare.animal.service.SpeciesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

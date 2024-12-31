@@ -1,4 +1,4 @@
-package com.team9.anicare.species.dto;
+package com.team9.anicare.animal.dto;
 
 import lombok.Getter;
 

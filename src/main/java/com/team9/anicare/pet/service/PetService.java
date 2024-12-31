@@ -6,11 +6,10 @@ import com.team9.anicare.file.service.S3FileService;
 import com.team9.anicare.pet.dto.PetDTO;
 import com.team9.anicare.pet.model.Pet;
 import com.team9.anicare.pet.repository.PetRepository;
-import com.team9.anicare.species.repository.SpeciesRepository;
+import com.team9.anicare.animal.repository.SpeciesRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
