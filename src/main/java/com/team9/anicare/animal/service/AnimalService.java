@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class SpeciesService {
+public class AnimalService {
 
     private final SpeciesRepository speciesRepository;
     private final BreedRepository breedRepository;
