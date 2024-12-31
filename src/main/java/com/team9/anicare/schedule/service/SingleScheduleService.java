@@ -46,13 +46,13 @@ public class SingleScheduleService {
         return singleScheduleDTOs;
     }
 
-    public SingleScheduleDTO addSingleSchedule(SingleScheduleDTO.addSingleScheduleDTO request, Long userId) {
+    public SingleScheduleDTO addSingleSchedule(SingleScheduleDTO.AddSingleScheduleDTO request, Long userId) {
         Long petId = request.getPetId();
 
         if (!petRepository.existsById(petId)) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         } else if (request.getStartDatetime().isAfter(request.getEndDatetime())) {
-            throw new CustomException(ResultCode.INVALID_REQUEST);
+            throw new CustomException(ResultCode.INVALID_DATETIME_VALUE);
         }
 
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
@@ -70,14 +70,14 @@ public class SingleScheduleService {
         return singleScheduleDTO;
     }
 
-    public SingleScheduleDTO updateSingleSchedule(SingleScheduleDTO.updateSingleScheduleDTO request, Long userId) {
+    public SingleScheduleDTO updateSingleSchedule(SingleScheduleDTO.UpdateSingleScheduleDTO request, Long userId) {
         Long Id = request.getId();
         Long petId = request.getPetId();
 
         if (petRepository.findById(petId).isEmpty()) {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         } else if (request.getStartDatetime().isAfter(request.getEndDatetime())) {
-            throw new CustomException(ResultCode.INVALID_REQUEST);
+            throw new CustomException(ResultCode.INVALID_DATETIME_VALUE);
         }
 
         SingleSchedule singleschedule = singlescheduleRepository.findById(Id)

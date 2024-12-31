@@ -33,7 +33,7 @@ public class PeriodicScheduleDTO {
 
     @Getter
     @Setter
-    public static class addPeriodicScheduleDTO {
+    public static class AddPeriodicScheduleDTO {
         private Long petId;
         private String name;
         private LocalDate startDate;
@@ -47,7 +47,7 @@ public class PeriodicScheduleDTO {
 
     @Getter
     @Setter
-    public static class updatePeriodicScheduleDTO {
+    public static class UpdatePeriodicScheduleDTO {
         private Long id;
         private Long petId;
         private String name;

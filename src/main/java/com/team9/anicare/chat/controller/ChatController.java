@@ -32,7 +32,7 @@ public class ChatController {
     @MessageMapping("/message")
     public void handleMessage(ChatMessageDTO message) throws Exception {
         // Redis Pub/Sub 채널 이름
-        String channel = "chatRoom:" + message.getRoomId();
+        String channel = "chatroom:" + message.getRoomId();
 
         // 메시지 Redis로 발행
         redisMessagePublisher.publish(channel, objectMapper.writeValueAsString(message));
@@ -51,6 +51,12 @@ public class ChatController {
                     message
             );
         }
+
+        // Redis에 메시지 저장
+        chatLogService.saveChatMessage(
+                message.getRoomId(),
+                message
+        );
 
         // 마지막 메시지 및 시간 업데이트
         chatRoomService.updateLastMessage(
@@ -83,6 +89,8 @@ public class ChatController {
      */
     @MessageMapping("/chat/{roomId}")
     public void sendMessage(@DestinationVariable String roomId, ChatMessageDTO message) {
+
+        chatLogService.saveChatMessage(roomId, message);
 
         // 메시지를 구독한 클라이언트들에게 브로드캐스트
         messagingTemplate.convertAndSend("/topic/chat/" + roomId, message);

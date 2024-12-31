@@ -25,7 +25,7 @@ public class SingleScheduleDTO {
     @Getter
     @Setter
     @ToString
-    public static class addSingleScheduleDTO {
+    public static class AddSingleScheduleDTO {
         private Long petId;
         private String name;
         private LocalDateTime startDatetime;
@@ -34,7 +34,7 @@ public class SingleScheduleDTO {
 
     @Getter
     @Setter
-    public static class updateSingleScheduleDTO {
+    public static class UpdateSingleScheduleDTO {
         private Long id;
         private Long petId;
         private String name;

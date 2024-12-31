@@ -1,7 +1,10 @@
 package com.team9.anicare.chat.config;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team9.anicare.chat.dto.ChatMessageDTO;
+import com.team9.anicare.chat.dto.ChatRoomDTO;
 import com.team9.anicare.chat.service.ChatLogService;
 import com.team9.anicare.chat.service.RedisMessageSubscriber;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -45,6 +49,7 @@ public class RedisConfig {
 
     private final ObjectMapper objectMapper;
     private final SimpMessagingTemplate messagingTemplate;
+
 
     /**
      * RedisMessageListenerContainer 설정
@@ -112,12 +117,46 @@ public class RedisConfig {
      * @param connectionFactory Redis 연결 팩토리
      * @return RedisTemplate 빈
      */
-    @Bean
-    public RedisTemplate<String, ChatMessageDTO> redisTemplate(RedisConnectionFactory connectionFactory) {
+    @Bean(name = "chatMessageRedisTemplate")
+    public RedisTemplate<String, ChatMessageDTO> chatMessageRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, ChatMessageDTO> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageDTO.class));
+        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageDTO.class));
+        return template;
+    }
+
+    @Bean(name = "chatLogRedisTemplate")
+    public RedisTemplate<String, ChatMessageDTO> chatLogRedisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, ChatMessageDTO> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageDTO.class));
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageDTO.class));
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, ChatRoomDTO> chatRoomRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, ChatRoomDTO> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomDTO.class));
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomDTO.class));
+        return template;
+    }
+
+
+    @Bean(name = "defaultRedisTemplate")
+    public RedisTemplate<String, Object> defaultRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         return template;
     }
 
