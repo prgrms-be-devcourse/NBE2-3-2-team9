@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -78,7 +79,7 @@ public class AuthController {
     }
 
     @GetMapping("/kakao/callback")
-    public ResponseEntity<TokenResponseDTO> kakaoCallback(@RequestParam String code, HttpServletResponse response) {
+    public ResponseEntity<Map<String, Object>> kakaoCallback(@RequestParam String code, HttpServletResponse response) {
         // 1. Kakao AccessToken 가져오기
         String kakaoAccessToken = kakaoService.getAccessToken(code);
 
@@ -96,7 +97,11 @@ public class AuthController {
 
         // 4. AccessToken 반환
         TokenResponseDTO tokenResponseDTO = new TokenResponseDTO(userInfo.getAccessToken());
-
-        return ResponseEntity.ok(tokenResponseDTO); // ResponseEntity로 반환
+        // 5. userId와 함께 응답 반환
+        Map<String, Object> responseMap = Map.of(
+                "accessToken", tokenResponseDTO.getAccessToken(),
+                "userId", userInfo.getId()
+        );
+        return ResponseEntity.ok(responseMap); // ResponseEntity로 반환
     }
 }
