@@ -5,9 +5,13 @@ import com.team9.anicare.chat.dto.ChatMessageDTO;
 import com.team9.anicare.chat.service.ChatLogService;
 import com.team9.anicare.chat.service.RedisMessageSubscriber;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -24,6 +28,20 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 @Configuration
 @RequiredArgsConstructor
 public class RedisConfig {
+    @Value("${spring.data.redis.host}")
+    private String redisHost;
+
+    @Value("${spring.data.redis.port}")
+    private int redisPort;
+
+    @Value("${spring.data.redis.password}")
+    private String redisPassword;
+
+    @Value("${redis.channel.topic}")
+    private String redisChannelTopic;
+
+
+
 
     private final ObjectMapper objectMapper;
     private final SimpMessagingTemplate messagingTemplate;
@@ -62,6 +80,19 @@ public class RedisConfig {
         RedisMessageSubscriber redisMessageSubscriber = new RedisMessageSubscriber(objectMapper, messagingTemplate, chatLogService);
         return new MessageListenerAdapter(redisMessageSubscriber, "handleMessage");
     }
+
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        // RedisStandaloneConfiguration 설정
+        RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration();
+        redisConfiguration.setHostName(redisHost);
+        redisConfiguration.setPort(redisPort);
+        redisConfiguration.setPassword(redisPassword);
+        System.out.println("22321312312" + redisHost);
+        // LettuceConnectionFactory를 사용하여 Redis와 연결
+        return new LettuceConnectionFactory(redisConfiguration);
+    }
+
 
     /**
      * Redis Pub/Sub 채널 주제 정의
