@@ -1,7 +1,6 @@
 package com.team9.anicare.information.model;
 
-import com.team9.anicare.species.model.Breed;
-import com.team9.anicare.species.model.Species;
+import com.team9.anicare.animal.model.Breed;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
