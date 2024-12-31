@@ -1,5 +1,8 @@
 package com.team9.anicare.pet.service;
 
+import com.team9.anicare.animal.model.Breed;
+import com.team9.anicare.animal.model.Species;
+import com.team9.anicare.animal.repository.BreedRepository;
 import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.file.service.S3FileService;
@@ -7,6 +10,8 @@ import com.team9.anicare.pet.dto.PetDTO;
 import com.team9.anicare.pet.model.Pet;
 import com.team9.anicare.pet.repository.PetRepository;
 import com.team9.anicare.animal.repository.SpeciesRepository;
+import com.team9.anicare.user.model.User;
+import com.team9.anicare.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -23,6 +28,8 @@ public class PetService {
     private final PetRepository petRepository;
     private final ModelMapper modelMapper;
     private final SpeciesRepository speciesRepository;
+    private final UserRepository userRepository;
+    private final BreedRepository breedRepository;
     private final S3FileService s3FileService;
 
     public List<PetDTO> findPets(Long userId) {
@@ -50,10 +57,12 @@ public class PetService {
             throw new CustomException(ResultCode.NOT_EXISTS_SPECIES);
         }
 
-
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         Pet pet = modelMapper.map(request, Pet.class);
+        pet.setBreed(getBreedById(request.getBreedId()));
+        pet.setSpecies(getSpeciesById(request.getSpeciesId()));
+        pet.setUser(getUserById(userId));
 
         try {
             if (file != null && !file.isEmpty()) {
@@ -62,10 +71,14 @@ public class PetService {
         } catch (IOException e) {
             throw new CustomException(ResultCode.FILE_UPLOAD_ERROR);
         }
-        pet.setUserId(userId);
+        pet.setUser(getUserById(userId));
 
         petRepository.save(pet);
         PetDTO petDTO = modelMapper.map(pet,PetDTO.class);
+        petDTO.setUserId(userId);
+        petDTO.setSpeciesId(request.getSpeciesId());
+        petDTO.setBreedId(request.getBreedId());
+
         return petDTO;
     }
 
@@ -85,8 +98,9 @@ public class PetService {
 
         Pet pet = petRepository.findById(request.getId())
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_PET));
-        pet.setUserId(userId);
-        pet.setSpeciesId(request.getSpeciesId());
+        pet.setUser(getUserById(userId));
+        pet.setBreed(getBreedById(request.getBreedId()));
+        pet.setSpecies(getSpeciesById(request.getSpeciesId()));
         pet.setName(request.getName());
         pet.setAge(request.getAge());
         pet.setGender(request.getGender());
@@ -112,5 +126,17 @@ public class PetService {
         } else {
             throw new CustomException(ResultCode.NOT_EXISTS_PET);
         }
+    }
+
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(RuntimeException::new);
+    }
+
+    private Species getSpeciesById(Long speciesId) {
+        return speciesRepository.findById(speciesId).orElseThrow(RuntimeException::new);
+    }
+
+    private Breed getBreedById(Long breedId) {
+        return breedRepository.findById(breedId).orElseThrow(RuntimeException::new);
     }
 }

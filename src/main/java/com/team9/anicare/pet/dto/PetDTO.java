@@ -2,6 +2,7 @@ package com.team9.anicare.pet.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ public class PetDTO {
     private Long id;
     private Long userId;
     private Long speciesId;
+    private Long breedId;
     private String name;
     private String age;
     private String picture;
@@ -22,7 +24,9 @@ public class PetDTO {
 
     @Getter
     @Setter
+    @ToString
     public static class AddPetDTO {
+        private Long breedId;
         private Long speciesId;
         private String name;
         private String age;
@@ -33,6 +37,7 @@ public class PetDTO {
     @Setter
     public static class UpdatePetDTO {
         private Long id;
+        private Long breedId;
         private Long speciesId;
         private String name;
         private String age;
