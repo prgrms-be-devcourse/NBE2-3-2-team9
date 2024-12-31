@@ -1,4 +1,4 @@
-package com.team9.anicare.species.model;
+package com.team9.anicare.animal.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -6,16 +6,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "species")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Species {
+public class Breed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @Column(name = "name")
+    @ManyToOne
+    @JoinColumn(name = "species_id")
+    private Species species;
+
     private String name;
 }
