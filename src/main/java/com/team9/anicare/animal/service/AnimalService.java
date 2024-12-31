@@ -1,21 +1,28 @@
-package com.team9.anicare.species.service;
+package com.team9.anicare.animal.service;
 
+import com.team9.anicare.animal.dto.FindBreedDTO;
+import com.team9.anicare.animal.dto.FindSpeciesDTO;
 import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.common.exception.ResultCode;
-import com.team9.anicare.species.dto.CreateAnimalDTO;
-import com.team9.anicare.species.model.Breed;
-import com.team9.anicare.species.model.Species;
-import com.team9.anicare.species.repository.BreedRepository;
-import com.team9.anicare.species.repository.SpeciesRepository;
+import com.team9.anicare.animal.dto.CreateAnimalDTO;
+import com.team9.anicare.animal.model.Breed;
+import com.team9.anicare.animal.model.Species;
+import com.team9.anicare.animal.repository.BreedRepository;
+import com.team9.anicare.animal.repository.SpeciesRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class SpeciesService {
+public class AnimalService {
 
     private final SpeciesRepository speciesRepository;
     private final BreedRepository breedRepository;
+    private final ModelMapper modelMapper;
 
     public void createAnimal(CreateAnimalDTO createAnimalDTO) {
 
@@ -57,4 +64,33 @@ public class SpeciesService {
         }
     }
 
+    public List<FindSpeciesDTO> findSpecies() {
+        List<Species> lists = speciesRepository.findAll();
+
+        if (lists.isEmpty()) {
+            throw new CustomException(ResultCode.NOT_EXISTS_SPECIES);
+        }
+
+        List<FindSpeciesDTO> findSpeciesDTOs = lists.stream()
+                .map(species -> modelMapper.map(species, FindSpeciesDTO.class))
+                .collect(Collectors.toList());
+
+        return findSpeciesDTOs;
+    }
+
+    public List<FindBreedDTO> findBreedsBySpecies(Long speciesId) {
+        Species species = speciesRepository.findById(speciesId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_SPECIES));
+
+        List<Breed> lists = breedRepository.findBreedsBySpecies(species);
+        if (lists.isEmpty()) {
+            throw new CustomException(ResultCode.NOT_EXISTS_BREED);
+        }
+
+        List<FindBreedDTO> findBreedDTOs = lists.stream()
+                .map(breed -> modelMapper.map(breed, FindBreedDTO.class))
+                .collect(Collectors.toList());
+
+        return findBreedDTOs;
+    }
 }

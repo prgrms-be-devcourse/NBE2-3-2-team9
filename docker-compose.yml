@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"  # Spring Boot 애플리케이션 포트
+    env_file:
+      - .env  # .env 파일에서 환경 변수 로드
+    environment:
+      - SPRING_DATA_REDIS_HOST=host.docker.internal  # Redis에 연결할 호스트
+      - SPRING_DATA_REDIS_PORT=6378  # Redis 포트
+    depends_on:
+      - mariadb
+      - redis
+    networks:
+      - app-network
+
+  redis:
+    container_name: redis
+    image: "redis:alpine"
+    ports:
+      - "6378:6379"  # Redis 포트
+    volumes:
+      - ./redis.conf:/etc/redis/redis.conf
+    networks:
+      - app-network
+
+  mariadb:
+    image: mariadb:latest
+    ports:
+      - "3306:3306"  # MariaDB 포트
+    environment:
+      - MYSQL_ROOT_PASSWORD=!123456
+      - MYSQL_DATABASE=sample
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=!123456
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mariadb-data:

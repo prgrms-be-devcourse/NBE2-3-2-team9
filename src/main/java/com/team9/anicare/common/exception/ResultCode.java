@@ -43,6 +43,7 @@ public enum ResultCode {
     NOT_EXISTS_BREED(404, "해당하는 품종이 없습니다"),
     DUPLICATE_SPECIES(409, "이미 존재하는 종입니다"),
     DUPLICATE_SPECIES_AND_BREED(409, "이미 존재하는 종과 품종입니다"),
+    NOT_EXISTS_BREED(404, "종에 해당되는 품종이 등록되어 있지 않습니다"),
 
     // 동물 정보 관련
     NOT_EXISTS_INFORMATION(404, "해당하는 정보가 없습니다"),

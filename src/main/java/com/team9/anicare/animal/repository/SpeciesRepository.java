@@ -1,6 +1,6 @@
-package com.team9.anicare.species.repository;
+package com.team9.anicare.animal.repository;
 
-import com.team9.anicare.species.model.Species;
+import com.team9.anicare.animal.model.Species;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
