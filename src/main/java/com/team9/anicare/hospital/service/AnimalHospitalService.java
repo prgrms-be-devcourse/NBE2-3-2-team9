@@ -186,4 +186,15 @@ public class AnimalHospitalService {
         }
         return rdnWhlAddr.replaceAll(".*(\\d{5}).*", "$1");
     }
+
+    // 동 검색: 일반 주소 반환
+    public List<AnimalHospital> searchByRdnWhlAddr(String address) {
+        return animalHospitalRepository.findByRdnWhlAddrContaining(address);
+    }
+
+    // 구 검색: 도로명 주소 반환
+    public List<AnimalHospital> searchBySiteWhlAddr(String address) {
+        return animalHospitalRepository.findBySiteWhlAddrContaining(address);
+    }
+
 }
