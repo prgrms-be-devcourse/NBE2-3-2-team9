@@ -3,6 +3,7 @@ package com.team9.anicare.user.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team9.anicare.common.entities.CommonEntity;
 import com.team9.anicare.community.model.Community;
+import com.team9.anicare.pet.model.Pet;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,6 +45,11 @@ public class User extends CommonEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Community> communities;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Pet> pets;
+
+
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;

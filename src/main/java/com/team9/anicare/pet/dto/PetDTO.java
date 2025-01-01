@@ -19,6 +19,8 @@ public class PetDTO {
     private String age;
     private String picture;
     private String gender;
+    private String speciesName; // species의 name 필드 추가
+    private String breedName; // breed의 name 필드 추가
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
