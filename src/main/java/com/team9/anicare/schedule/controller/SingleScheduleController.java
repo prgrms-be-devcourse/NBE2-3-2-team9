@@ -6,6 +6,7 @@ import com.team9.anicare.schedule.service.SingleScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +19,14 @@ public class SingleScheduleController {
     private SingleScheduleService singleScheduleService;
 
     @GetMapping("/singleSchedules")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<SingleScheduleDTO>> findSingleSchedules(@AuthenticationPrincipal CustomUserDetails userDetails) {
         List<SingleScheduleDTO> singleScheduleDTOs = singleScheduleService.findSingleSchedules(userDetails.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body(singleScheduleDTOs);
     }
 
     @PostMapping("/singleSchedule")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SingleScheduleDTO> addSingleSchedule(@RequestBody SingleScheduleDTO.AddSingleScheduleDTO request,
                                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
         SingleScheduleDTO singleScheduleDTO = singleScheduleService.addSingleSchedule(request, userDetails.getUserId());
@@ -31,6 +34,7 @@ public class SingleScheduleController {
     }
 
     @PutMapping("/singleSchedule/{scheduleId}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SingleScheduleDTO> updateSingleSchedule(@RequestBody SingleScheduleDTO.UpdateSingleScheduleDTO request,
                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
         SingleScheduleDTO singleScheduleDTO = singleScheduleService.updateSingleSchedule(request, userDetails.getUserId());
