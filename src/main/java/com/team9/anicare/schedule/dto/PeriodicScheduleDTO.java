@@ -20,6 +20,7 @@ public class PeriodicScheduleDTO {
     private Long id;
     private Long userId;
     private Long petId;
+    private String petName;
     private String name;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -35,6 +36,7 @@ public class PeriodicScheduleDTO {
     @Setter
     public static class AddPeriodicScheduleDTO {
         private Long petId;
+        private String petName;
         private String name;
         private LocalDate startDate;
         private LocalDate endDate;
@@ -50,6 +52,7 @@ public class PeriodicScheduleDTO {
     public static class UpdatePeriodicScheduleDTO {
         private Long id;
         private Long petId;
+        private String petName;
         private String name;
         private LocalDate startDate;
         private LocalDate endDate;

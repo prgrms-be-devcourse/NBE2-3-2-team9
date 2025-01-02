@@ -84,6 +84,7 @@ public class PeriodicScheduleService {
         PeriodicScheduleDTO periodicScheduleDTO = modelMapper.map(periodicSchedule, PeriodicScheduleDTO.class);
         periodicScheduleDTO.setUserId(userId);
         periodicScheduleDTO.setPetId(petId);
+        periodicScheduleDTO.setPetName(request.getPetName());
         return periodicScheduleDTO;
     }
 
@@ -131,6 +132,7 @@ public class PeriodicScheduleService {
         PeriodicScheduleDTO periodicScheduleDTO = modelMapper.map(periodicSchedule, PeriodicScheduleDTO.class);
         periodicScheduleDTO.setUserId(userId);
         periodicScheduleDTO.setPetId(petId);
+        periodicScheduleDTO.setPetName(request.getPetName());
         return periodicScheduleDTO;
     }
 

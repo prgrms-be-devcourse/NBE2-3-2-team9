@@ -65,7 +65,7 @@ public class SingleScheduleService {
         SingleScheduleDTO singleScheduleDTO = modelMapper.map(singleschedule, SingleScheduleDTO.class);
         singleScheduleDTO.setUserId(userId);
         singleScheduleDTO.setPetId(petId);
-
+        singleScheduleDTO.setPetName(request.getPetName());
 
         return singleScheduleDTO;
     }
@@ -92,6 +92,7 @@ public class SingleScheduleService {
         SingleScheduleDTO singleScheduleDTO = modelMapper.map(singleschedule, SingleScheduleDTO.class);
         singleScheduleDTO.setUserId(userId);
         singleScheduleDTO.setPetId(petId);
+        singleScheduleDTO.setPetName(request.getPetName());
 
         return singleScheduleDTO;
     }
