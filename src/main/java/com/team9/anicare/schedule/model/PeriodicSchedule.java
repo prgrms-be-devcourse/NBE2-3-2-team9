@@ -52,7 +52,7 @@ public class PeriodicSchedule extends CommonEntity {
     @Column(name = "repeat_pattern", nullable = false)
     private RepeatPattern repeatPattern;
 
-    @Column(name = "repeat_interval")
+    @Column(name = "repeat_interval", nullable = false)
     private int repeatInterval;
 
     @Column(name = "repeat_days")
