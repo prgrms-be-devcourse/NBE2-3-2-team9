@@ -14,6 +14,7 @@ import java.util.Date;
 public class SingleScheduleDTO {
     private Long id;
     private Long petId;
+    private String petName;
     private Long userId;
     private String name;
     private Long periodicScheduleId;
@@ -30,6 +31,7 @@ public class SingleScheduleDTO {
         private String name;
         private LocalDateTime startDatetime;
         private LocalDateTime endDatetime;
+        private String petName;
     }
 
     @Getter
@@ -40,5 +42,6 @@ public class SingleScheduleDTO {
         private String name;
         private LocalDateTime startDatetime;
         private LocalDateTime endDatetime;
+        private String petName;
     }
 }
