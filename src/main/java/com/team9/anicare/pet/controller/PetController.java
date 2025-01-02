@@ -1,9 +1,9 @@
 package com.team9.anicare.pet.controller;
 
 import com.team9.anicare.auth.security.CustomUserDetails;
-import com.team9.anicare.common.response.Result;
 import com.team9.anicare.pet.dto.PetDTO;
 import com.team9.anicare.pet.service.PetService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +20,7 @@ public class PetController {
     @Autowired
     private PetService petService;
 
+    @Operation(summary = "반려동물 조회", description = "반려동물 조회 API 입니다. 필수 요청 항목 : 로그인" )
     @GetMapping("/pets")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<PetDTO>> findPets(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -28,6 +29,7 @@ public class PetController {
         return ResponseEntity.status(HttpStatus.OK).body(petDTOs);
     }
 
+    @Operation(summary = "반려동물 등록", description = "반려동물 등록 API 입니다. 필수 요청 항목 : 로그인, breedId, speciesId, name, gender(암컷 or 수컷) / 그 외 : age, file(반려동물 사진)" )
     @PostMapping("/pet")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<PetDTO> addPets(
@@ -38,6 +40,7 @@ public class PetController {
         return ResponseEntity.status(HttpStatus.OK).body(petDTO);
     }
 
+    @Operation(summary = "반려동물 수정", description = "반려동물 수정 API 입니다. 필수 요청 항목 : 로그인, ID(Pet), breedId, speciesId, name, gender(암컷 or 수컷) / 그 외 : age, file(image)" )
     @PutMapping("/pet/{petId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<PetDTO> updatePets(
@@ -48,6 +51,7 @@ public class PetController {
         return ResponseEntity.status(HttpStatus.OK).body(petDTO);
     }
 
+    @Operation(summary = "반려동물 삭제", description = "반려동물 삭제 API 입니다. 필수 요청 항목 : ID(Pet)" )
     @DeleteMapping("/pet/{petId}")
     public void deletePets(@RequestParam Long petId) {
         petService.deletePet(petId);
