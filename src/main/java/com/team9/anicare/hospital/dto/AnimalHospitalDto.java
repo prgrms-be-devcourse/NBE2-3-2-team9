@@ -2,12 +2,12 @@ package com.team9.anicare.hospital.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.team9.anicare.hospital.model.AnimalHospital;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@Builder
 @NoArgsConstructor
 public class AnimalHospitalDto {
 
@@ -53,7 +53,7 @@ public class AnimalHospitalDto {
     @JsonProperty("longitude")
     private double longitude;
 
-    public AnimalHospital toEntity() {
+    public  AnimalHospital toEntity() {
         return AnimalHospital.builder()
                 .opnsfTeamCode(this.opnsfTeamCode)
                 .mgtNo(this.mgtNo)

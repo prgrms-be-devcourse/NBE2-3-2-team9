@@ -46,6 +46,37 @@ public class AnimalHospitalService {
 
 
 
+    public List<AnimalHospitalDto> findHospitalsByAddress(String address) {
+        List<AnimalHospital> hospitals;
+
+        if (address.contains("동")) {
+            hospitals = animalHospitalRepository.findByRdnWhlAddrContaining(address);
+        } else if (address.contains("구")) {
+            hospitals = animalHospitalRepository.findBySiteWhlAddrContaining(address);
+        } else {
+            return List.of(); // 빈 리스트 반환
+        }
+        return hospitals.stream()
+                .map(hospital -> AnimalHospitalDto.builder()
+                        .opnsfTeamCode(hospital.getOpnsfTeamCode())
+                        .mgtNo(hospital.getMgtNo())
+                        .apvPermYmd(hospital.getApvPermYmd())
+                        .trdStateGbn(hospital.getTrdStateGbn())
+                        .trdStateNm(hospital.getTrdStateNm())
+                        .siteTel(hospital.getSiteTel())
+                        .siteWhlAddr(hospital.getSiteWhlAddr())
+                        .rdnWhlAddr(hospital.getRdnWhlAddr())
+                        .bplcNm(hospital.getBplcNm())
+                        .uptaeNm(hospital.getUptaeNm())
+                        .xCode(hospital.getXCode())
+                        .yCode(hospital.getYCode())
+                        .latitude(hospital.getLatitude())
+                        .longitude(hospital.getLongitude())
+                        .build())
+                .collect(Collectors.toList());
+
+    }
+
     public void fetchAndSaveCoordinates() {
         // 모든 병원 데이터를 가져옵니다.
         List<AnimalHospital> hospitals = animalHospitalRepository.findAll();

@@ -3,6 +3,7 @@ package com.team9.anicare.hospital.controller;
 import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.common.response.Result;
 import com.team9.anicare.hospital.dto.AnimalHospitalDetailsDto;
+import com.team9.anicare.hospital.dto.AnimalHospitalDto;
 import com.team9.anicare.hospital.model.AnimalHospital;
 import com.team9.anicare.hospital.service.AnimalHospitalService;
 import lombok.RequiredArgsConstructor;
@@ -70,34 +71,12 @@ public class AnimalHospitalController {
             return ResponseEntity.ok(List.of());
         }
 
-        List<Map<String, String>> searchResults;
-
-        if (address.contains("동")) {
-            searchResults = animalHospitalService.searchByRdnWhlAddr(address).stream()
-                    .map(hospital -> {
-                        Map<String, String> result = new HashMap<>();
-                        result.put("address", hospital.getSiteWhlAddr()); // 일반 주소 반환
-                        result.put("name", hospital.getBplcNm()); // 병원이름 반환
-                        result.put("phone", hospital.getSiteTel()); // 병원 전화번호 반환
-                        return result;
-                    })
-                    .collect(Collectors.toList());
-        } else if (address.contains("구")) {
-            searchResults = animalHospitalService.searchBySiteWhlAddr(address).stream()
-                    .map(hospital -> {
-                        Map<String, String> result = new HashMap<>();
-                        result.put("address", hospital.getRdnWhlAddr()); // 도로명 주소 반환
-                        result.put("name", hospital.getBplcNm()); // 병원이름 반환
-                        result.put("phone", hospital.getSiteTel()); // 병원 전화번호 반환
-                        return result;
-                    })
-                    .collect(Collectors.toList());
-        } else {
-            return ResponseEntity.ok(List.of());
-        }
+        List<AnimalHospitalDto> searchResults = animalHospitalService.findHospitalsByAddress(address);
 
         return ResponseEntity.ok(searchResults);
     }
+
+
 
     @PostMapping("/api/animal-hospitals/{mgtNo}/like")
     public ResponseEntity<Result<String>> likeHospital(
