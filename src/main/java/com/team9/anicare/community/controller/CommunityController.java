@@ -59,11 +59,10 @@ public class CommunityController {
     @Operation(summary = "글 상세 보기")
     @GetMapping("/{postingId}")
     public ResponseEntity<DetailResponseDTO> showPostDetail(
-            PageRequestDTO pageRequestDTO,
 //            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long postingId) {
 
-        DetailResponseDTO detailResponseDTO = communityService.showPostDetail(pageRequestDTO, postingId);
+        DetailResponseDTO detailResponseDTO = communityService.showPostDetail(postingId);
 
         return ResponseEntity.ok(detailResponseDTO);
     }

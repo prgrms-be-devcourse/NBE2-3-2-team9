@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    Page<Comment> findByCommunityIdAndParentIsNull(Long communityId, Pageable pageable);
+    List<Comment> findByCommunityIdAndParentIsNull(Long communityId);
 
     List<Comment> findByParentId(Long parentId);
 

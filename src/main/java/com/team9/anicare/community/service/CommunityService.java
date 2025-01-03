@@ -74,8 +74,7 @@ public class CommunityService {
                 .toList();
     }
 
-    public DetailResponseDTO showPostDetail(PageRequestDTO pageRequestDTO, Long postingId) {
-        PageRequest pageRequest = pageRequestDTO.toPageRequest();
+    public DetailResponseDTO showPostDetail(Long postingId) {
 
         // 게시글 조회
         Community community = communityRepository.findById(postingId)
@@ -88,10 +87,8 @@ public class CommunityService {
         CommunityResponseDTO communityResponseDTO = communityMapper.toDto(community);
 //        communityResponseDTO.setCanEdit(canEditPost);
 
-        Page<Comment> commentPage = commentRepository.findByCommunityIdAndParentIsNull(postingId, pageRequest);
-
         // 조회된 댓글 -> DTO 변환
-        List<CommentResponseDTO> comments = commentPage.getContent().stream()
+        List<CommentResponseDTO> comments = commentRepository.findByCommunityIdAndParentIsNull(postingId).stream()
                 .map(comment -> {
                     CommentResponseDTO dto = modelMapper.map(comment, CommentResponseDTO.class);
                     // 현재 유저의 댓글 수정 권한 확인
@@ -106,9 +103,7 @@ public class CommunityService {
                 })
                 .toList();
 
-        PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), commentPage.getTotalElements());
-
-        return new DetailResponseDTO(communityResponseDTO, new PageDTO<>(comments, meta));
+        return new DetailResponseDTO(communityResponseDTO, comments);
     }
 
     public CommunityResponseDTO createPost(Long userId, CommunityRequestDTO communityRequestDTO, MultipartFile file) {
