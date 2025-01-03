@@ -58,8 +58,10 @@ public class InformationService {
         PageRequest pageRequest = pageRequestDTO.toPageRequest();
 
         Page<Information> informationPage;
-        if(speciesName == null || speciesName.isEmpty()) {
+        if((speciesName == null || speciesName.isEmpty()) && (breedName == null || breedName.isEmpty())) {
             informationPage = informationRepository.findAllInformation(pageRequest);
+        } else if(speciesName == null || speciesName.isEmpty()) {
+            throw new CustomException(ResultCode.NOT_EXISTS_SPECIES);
         } else if(breedName == null || breedName.isEmpty()) {
             informationPage = informationRepository.findBySpeciesName(speciesName, pageRequest);
         } else {
