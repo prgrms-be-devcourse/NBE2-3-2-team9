@@ -48,10 +48,10 @@ public class AnimalHospitalDto {
     private String yCode;
 
     @JsonProperty("latitude")
-    private String latitude;
+    private double latitude;
 
     @JsonProperty("longitude")
-    private String longitude;
+    private double longitude;
 
     public AnimalHospital toEntity() {
         return AnimalHospital.builder()
