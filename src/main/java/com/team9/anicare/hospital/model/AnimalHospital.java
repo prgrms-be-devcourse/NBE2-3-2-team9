@@ -40,9 +40,9 @@ public class AnimalHospital {
 
     private String yCode;
 
-    private String latitude;
+    private double latitude;
 
-    private String longitude;
+    private double longitude;
 
     @Column(nullable = false)
     private int likeCount; // 좋아요 기본값 0
