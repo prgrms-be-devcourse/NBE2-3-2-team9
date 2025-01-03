@@ -26,6 +26,14 @@ public class AnimalHospitalController {
         return "데이터 수집 및 저장 완료";
     }
 
+    @PostMapping("/api/update-coordinates")
+    public String updateCoordinates() {
+        animalHospitalService.fetchAndSaveCoordinates();
+        return "좌표수정";
+    }
+
+
+
     // 특정 위치에서 2km 이내의 동물병원 찾기
     @GetMapping("/api/animal-hospitals/nearby")
     public ResponseEntity<Map<String, Object>> findNearbyHospitals(

@@ -72,6 +72,7 @@ public class InformationService {
                     dto.setSpeciesName(information.getBreed().getSpecies().getName());
                     return dto;
                 }).toList();
+        System.out.println("posts:" + posts);
 
         PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), informationPage.getTotalElements());
 
