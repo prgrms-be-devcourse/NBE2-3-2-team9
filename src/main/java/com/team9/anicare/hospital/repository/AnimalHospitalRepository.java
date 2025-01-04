@@ -16,4 +16,10 @@ public interface AnimalHospitalRepository extends JpaRepository<AnimalHospital, 
 
     // 일반 주소 검색 (site_whl_addr)
     List<AnimalHospital> findBySiteWhlAddrContaining(String siteWhlAddr);
+
+    //단어 검색
+    List<AnimalHospital> findByRdnWhlAddrContainingOrSiteWhlAddrContaining(String rdnWhlAddrKeyword, String siteWhlAddrKeyword);
+
+    List<AnimalHospital> findByRdnWhlAddrContainingAndSiteWhlAddrContaining(String rdnWhlAddr, String siteWhlAddr);
+
 }

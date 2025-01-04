@@ -63,17 +63,24 @@ public class AnimalHospitalController {
         return ResponseEntity.ok(searchResults);
     }
 
-    // **동을 검색하면 일반 주소(site_whl_addr), 병원이름, 병원전화번호 반환
-    // **구를 검색하면 도로명 주소(rdn_whl_addr), 병원이름, 병원전화번호 반환
+    //  주소 검색 로직
     @GetMapping("/api/animal-hospitals/dongorgu")
-    public ResponseEntity<?> searchDongOrGuHospitals(@RequestParam(required = false) String address) {
-        if (address == null || address.isEmpty()) {
-            return ResponseEntity.ok(List.of());
+    public List<AnimalHospitalDto> searchHospitalsByDongOrGu(
+            @RequestParam(required = false) String gu,
+            @RequestParam(required = false) String dong,
+            @RequestParam(required = false) String keyword) {
+        // `gu`와 `dong`이 있을 경우 구와 동으로 검색
+        if (gu != null || dong != null) {
+            return animalHospitalService.searchHospitalsByGuAndDong(gu, dong);
         }
 
-        List<AnimalHospitalDto> searchResults = animalHospitalService.findHospitalsByAddress(address);
+        // 키워드 검색
+        if (keyword != null && !keyword.isBlank()) {
+            return animalHospitalService.searchHospitalsByKeyword(keyword);
+        }
 
-        return ResponseEntity.ok(searchResults);
+        // 모든 조건이 없을 경우 빈 리스트 반환
+        return List.of();
     }
 
 
