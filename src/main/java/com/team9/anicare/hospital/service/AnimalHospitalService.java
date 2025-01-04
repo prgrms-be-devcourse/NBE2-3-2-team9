@@ -46,16 +46,19 @@ public class AnimalHospitalService {
 
 
 
-    public List<AnimalHospitalDto> findHospitalsByAddress(String address) {
+    @Transactional(readOnly = true)
+    public List<AnimalHospitalDto> searchHospitalsByGuAndDong(String gu, String dong) {
+        // `gu`와 `dong`을 조건에 따라 검색
         List<AnimalHospital> hospitals;
-
-        if (address.contains("동")) {
-            hospitals = animalHospitalRepository.findByRdnWhlAddrContaining(address);
-        } else if (address.contains("구")) {
-            hospitals = animalHospitalRepository.findBySiteWhlAddrContaining(address);
+        if (gu != null && dong != null) {
+            hospitals = animalHospitalRepository.findByRdnWhlAddrContainingAndSiteWhlAddrContaining(gu, dong);
+        } else if (gu != null) {
+            hospitals = animalHospitalRepository.findByRdnWhlAddrContaining(gu);
         } else {
-            return List.of(); // 빈 리스트 반환
+            hospitals = animalHospitalRepository.findBySiteWhlAddrContaining(dong);
         }
+
+        // DTO로 변환 후 반환
         return hospitals.stream()
                 .map(hospital -> AnimalHospitalDto.builder()
                         .opnsfTeamCode(hospital.getOpnsfTeamCode())
@@ -74,7 +77,30 @@ public class AnimalHospitalService {
                         .longitude(hospital.getLongitude())
                         .build())
                 .collect(Collectors.toList());
+    }
 
+    @Transactional(readOnly = true)
+    public List<AnimalHospitalDto> searchHospitalsByKeyword(String keyword) {
+        List<AnimalHospital> hospitals = animalHospitalRepository.findByRdnWhlAddrContainingOrSiteWhlAddrContaining(keyword, keyword);
+
+        return hospitals.stream()
+                .map(hospital -> AnimalHospitalDto.builder()
+                        .opnsfTeamCode(hospital.getOpnsfTeamCode())
+                        .mgtNo(hospital.getMgtNo())
+                        .apvPermYmd(hospital.getApvPermYmd())
+                        .trdStateGbn(hospital.getTrdStateGbn())
+                        .trdStateNm(hospital.getTrdStateNm())
+                        .siteTel(hospital.getSiteTel())
+                        .siteWhlAddr(hospital.getSiteWhlAddr())
+                        .rdnWhlAddr(hospital.getRdnWhlAddr())
+                        .bplcNm(hospital.getBplcNm())
+                        .uptaeNm(hospital.getUptaeNm())
+                        .xCode(hospital.getXCode())
+                        .yCode(hospital.getYCode())
+                        .latitude(hospital.getLatitude())
+                        .longitude(hospital.getLongitude())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     public void fetchAndSaveCoordinates() {
