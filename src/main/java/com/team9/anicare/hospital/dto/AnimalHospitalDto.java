@@ -11,46 +11,44 @@ import lombok.*;
 @NoArgsConstructor
 public class AnimalHospitalDto {
 
-    @JsonProperty("OPNSFTEAMCODE")
+
     private String opnsfTeamCode;
 
-    @JsonProperty("MGTNO")
+
     private String mgtNo;
 
-    @JsonProperty("APVPERMYMD")
+
     private String apvPermYmd;
 
-    @JsonProperty("TRDSTATEGBN")
+
     private String trdStateGbn;
 
-    @JsonProperty("TRDSTATENM")
+
     private String trdStateNm;
 
-    @JsonProperty("SITETEL")
+
     private String siteTel;
 
-    @JsonProperty("SITEWHLADDR")
+
     private String siteWhlAddr;
 
-    @JsonProperty("RDNWHLADDR")
+
     private String rdnWhlAddr;
 
-    @JsonProperty("BPLCNM")
+
     private String bplcNm;
 
-    @JsonProperty("UPTAENM")
+
     private String uptaeNm;
 
-    @JsonProperty("X")
+
     private String xCode;
 
-    @JsonProperty("Y")
+
     private String yCode;
 
-    @JsonProperty("latitude")
     private double latitude;
 
-    @JsonProperty("longitude")
     private double longitude;
 
     public  AnimalHospital toEntity() {
