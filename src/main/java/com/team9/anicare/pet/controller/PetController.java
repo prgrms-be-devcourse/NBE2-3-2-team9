@@ -4,8 +4,10 @@ import com.team9.anicare.auth.security.CustomUserDetails;
 import com.team9.anicare.pet.dto.PetDTO;
 import com.team9.anicare.pet.service.PetService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @RequestMapping("/api")
 @RestController
@@ -30,8 +34,9 @@ public class PetController {
     }
 
     @Operation(summary = "반려동물 등록", description = "반려동물 등록 API 입니다. 필수 요청 항목 : 로그인, breedId, speciesId, name, gender(암컷 or 수컷) / 그 외 : age, file(반려동물 사진)" )
-    @PostMapping("/pet")
+    @PostMapping(value = "/pet", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('USER')")
+    @SecurityRequirement(name = "access-token")
     public ResponseEntity<PetDTO> addPets(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestPart(value = "dto") PetDTO.AddPetDTO request,
@@ -41,7 +46,7 @@ public class PetController {
     }
 
     @Operation(summary = "반려동물 수정", description = "반려동물 수정 API 입니다. 필수 요청 항목 : 로그인, ID(Pet), breedId, speciesId, name, gender(암컷 or 수컷) / 그 외 : age, file(image)" )
-    @PutMapping("/pet/{petId}")
+    @PutMapping(value = "/pet/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<PetDTO> updatePets(
             @AuthenticationPrincipal CustomUserDetails userDetails,
