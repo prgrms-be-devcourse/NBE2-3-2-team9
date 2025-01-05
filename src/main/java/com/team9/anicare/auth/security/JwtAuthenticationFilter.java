@@ -13,7 +13,11 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+
+import static org.aspectj.weaver.tools.cache.SimpleCacheFactory.path;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -21,10 +25,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
 
+    private static final List<String> SWAGGER_WHITELIST = List.of(
+            "/swagger-ui.html",
+            "/swagger-ui/",
+            "/v3/api-docs/",
+            "/api-docs/",
+            "/api-ui.html"
+    );
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String requestURI = request.getRequestURI();
+
+        if (SWAGGER_WHITELIST.stream().anyMatch(requestURI::startsWith)) {
+            filterChain.doFilter(request, response); // 필터 건너뜀
+            return;
+        }
+
 
         // WebSocket 경로는 필터링하지 않음
         if (requestURI.startsWith("/ws") || requestURI.startsWith("/chat-socket")) {
@@ -62,5 +80,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String[] excludePath = {"/swagger-ui/index.html",
+                "/swagger-ui/swagger-ui-standalone-preset.js",
+                "/swagger-ui/swagger-initializer.js",
+                "/swagger-ui/swagger-ui-bundle.js",
+                "/swagger-ui/swagger-ui.css",
+                "/swagger-ui/index.css",
+                "/swagger-ui/favicon-32x32.png",
+                "/swagger-ui/favicon-16x16.png",
+                "/api-docs/json/swagger-config",
+                "/api-docs/json"};
+        String path = request.getRequestURI();
+        return Arrays.stream(excludePath).anyMatch(path::startsWith);
     }
 }
