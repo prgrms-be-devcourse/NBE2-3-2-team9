@@ -3,6 +3,8 @@ package com.team9.anicare.common.config;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,22 +15,22 @@ public class SwaggerConfig {
      *
      * @return OpenAPI OpenAPI 설정 객체
      */
-    @Bean
-    public OpenAPI openAPI() {
-        return new OpenAPI()
-                .components(new Components())
-                .info(apiInfo());
+    private Info info() {
+        return new Info()
+                .title("Anicare ")
+                .version("1.0")
+                .description("API 명세서");
     }
 
-    /**
-     * API 문서의 기본 정보를 설정합니다.
-     *
-     * @return Info OpenAPI의 기본 정보 객체
-     */
-    private Info apiInfo() {
-        return new Info()
-                .title("Anicare")
-                .description("Anicare 프로젝트의 API 문서입니다.")
-                .version("1.0");
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .components(new Components()
+                        .addSecuritySchemes("access-token", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")))
+                .addSecurityItem(new SecurityRequirement().addList("access-token"))
+                .info(info());
     }
 }
