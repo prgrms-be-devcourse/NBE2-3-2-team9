@@ -1,10 +1,7 @@
 package com.team9.anicare.user.controller;
 
 import com.team9.anicare.auth.security.CustomUserDetails;
-import com.team9.anicare.user.dto.CreateAdminDTO;
-import com.team9.anicare.user.dto.UpdateAdminDTO;
-import com.team9.anicare.user.dto.UserDetailResponseDTO;
-import com.team9.anicare.user.dto.UserResponseDTO;
+import com.team9.anicare.user.dto.*;
 import com.team9.anicare.user.model.User;
 import com.team9.anicare.user.service.UserService;
 import jakarta.validation.Valid;
@@ -51,6 +48,14 @@ public class UserController {
                               @Valid @RequestBody UpdateAdminDTO updateAdminDTO) {
         return userService.adminUpdate(userDetails.getUserId(), updateAdminDTO );
     }
+
+    @PutMapping("/user")
+    @PreAuthorize("hasRole('USER')")
+    public String userUpdate(@AuthenticationPrincipal CustomUserDetails userDetails,
+                              @Valid @RequestBody UpdateUserDTO updateUserDTO) {
+        return userService.userUpdate(userDetails.getUserId(), updateUserDTO );
+    }
+
 
     // 사용자 삭제
     @DeleteMapping

@@ -20,6 +20,7 @@ public class UserDetailResponseDTO  {
     private String name;
     private String email;
     private String profileImg;
+    private int years_of_experience;
     private List<CommunityDTO> communities;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
