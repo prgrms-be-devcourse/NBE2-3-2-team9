@@ -51,3 +51,4 @@ public class SingleScheduleController {
         singleScheduleService.deleteSingleSchedule(singleScheduleId);
     }
 }
+
