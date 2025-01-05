@@ -8,6 +8,7 @@ import com.team9.anicare.domain.auth.service.KakaoService;
 import com.team9.anicare.domain.user.dto.LoginAdminDTO;
 import com.team9.anicare.domain.user.dto.UserResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.Map;
 
+@Tag(name = "auth", description = "인증 API")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -44,15 +46,14 @@ public class AuthController {
         this.kakaoService = kakaoService;
     }
 
+    @Operation(summary = "관리자 로그인")
     @PostMapping("/login")
     public ResponseEntity<TokenResponseDTO> login(@Valid @RequestBody LoginAdminDTO loginAdminDTO, HttpServletResponse response) {
         TokenResponseDTO tokenResponseDTO = authService.login(loginAdminDTO, response);
         return ResponseEntity.status(HttpStatus.OK).body(tokenResponseDTO);
     }
 
-
-
-
+    @Operation(summary = "관리자 로그아웃")
     @GetMapping("/logout")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public String logout(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletResponse response) {
@@ -64,6 +65,8 @@ public class AuthController {
     public ResponseEntity<TokenResponseDTO> reCreateToken(HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.OK).body(authService.reCreateToken(request));
     }
+
+    @Operation(summary = "카카오 로그인")
     @GetMapping("/kakao")
     public void redirectToKakao(HttpServletResponse response) throws IOException {
         String kakaoLoginUrl = "https://kauth.kakao.com/oauth/authorize"
@@ -75,6 +78,7 @@ public class AuthController {
         response.sendRedirect(kakaoLoginUrl);
     }
 
+    @Operation(summary = "카카오 로그인 콜백")
     @GetMapping("/kakao/callback")
     public ResponseEntity<Map<String, Object>> kakaoCallback(@RequestParam String code, HttpServletResponse response) {
         // 1. Kakao AccessToken 가져오기

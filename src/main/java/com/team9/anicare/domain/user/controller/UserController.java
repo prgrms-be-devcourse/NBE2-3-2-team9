@@ -7,6 +7,8 @@ import com.team9.anicare.domain.user.dto.UpdateUserDTO;
 import com.team9.anicare.domain.user.dto.UserDetailResponseDTO;
 import com.team9.anicare.domain.user.model.User;
 import com.team9.anicare.domain.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "user", description = "회원/관리자 API")
 @RestController
 @RequestMapping("/api")
 public class UserController {
@@ -23,6 +26,7 @@ public class UserController {
 
 
     // 관리자 생성
+    @Operation(summary = "관리자 회원가입")
     @PostMapping("/admin")
     public ResponseEntity<CreateAdminDTO> signup(@Valid @RequestBody CreateAdminDTO createAdminDTO) {
         // 서비스에서 관리자 생성
@@ -35,6 +39,7 @@ public class UserController {
     }
 
     // 관리자 프로필 조회
+    @Operation(summary = "관리자 정보 조회")
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> adminProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -45,6 +50,7 @@ public class UserController {
     }
 
     // 관리자 정보 업데이트
+    @Operation(summary = "관리자 정보 수정")
     @PutMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public String adminUpdate(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -52,6 +58,7 @@ public class UserController {
         return userService.adminUpdate(userDetails.getUserId(), updateAdminDTO );
     }
 
+    @Operation(summary = "일반 회원 정보 수정")
     @PutMapping("/user")
     @PreAuthorize("hasRole('USER')")
     public String userUpdate(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -61,12 +68,14 @@ public class UserController {
 
 
     // 사용자 삭제
+    @Operation(summary = "회원 탈퇴")
     @DeleteMapping
     @PreAuthorize("isAuthenticated()")
     public String delete(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return userService.deleteUser(userDetails.getUserId());
     }
 
+    @Operation(summary = "일반 회원 정보 조회")
     @GetMapping("/user")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserDetailResponseDTO> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {

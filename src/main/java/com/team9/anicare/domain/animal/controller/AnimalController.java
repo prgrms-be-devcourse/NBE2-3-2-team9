@@ -5,6 +5,7 @@ import com.team9.anicare.domain.animal.dto.FindBreedDTO;
 import com.team9.anicare.domain.animal.dto.FindSpeciesDTO;
 import com.team9.anicare.domain.animal.service.AnimalService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@Tag(name = "animal", description = "동물 종 API")
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class AnimalController {
