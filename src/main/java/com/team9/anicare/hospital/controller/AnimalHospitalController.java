@@ -7,6 +7,11 @@ import com.team9.anicare.hospital.dto.AnimalHospitalDto;
 import com.team9.anicare.hospital.model.AnimalHospital;
 import com.team9.anicare.hospital.service.AnimalHospitalService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
 @RestController
 @RequiredArgsConstructor
+@RequestMapping
 public class AnimalHospitalController {
 
     private final AnimalHospitalService animalHospitalService;

@@ -34,10 +34,16 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors().and() // CORS 설정 추가
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api-ui.html", // 새로운 Swagger UI 경로
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/v3/**",
+                                "/api-docs/**"
+                        ).permitAll()
                         .requestMatchers("/api/auth/kakao/**").permitAll() // 카카오 로그인 경로에 대해 모든 접근 허용
                         .requestMatchers("/api/**").permitAll() // 다른 API도 허용
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/chat-socket/**", "/topic/**", "/app/**", "/ws/**", "/api/chat/**").permitAll() // WebSocket 경로 허용
                         .anyRequest().authenticated() // 다른 모든 요청은 인증 필요
                 )
