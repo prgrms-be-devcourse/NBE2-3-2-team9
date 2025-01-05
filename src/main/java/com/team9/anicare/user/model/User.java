@@ -43,7 +43,7 @@ public class User extends CommonEntity {
     @JsonIgnore
     private String refreshtoken;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Community> communities;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

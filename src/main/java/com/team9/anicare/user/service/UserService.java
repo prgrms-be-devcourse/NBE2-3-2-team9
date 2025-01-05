@@ -6,14 +6,12 @@ import com.team9.anicare.community.dto.CommunityDTO;
 import com.team9.anicare.community.dto.CommunityRequestDTO;
 import com.team9.anicare.community.dto.CommunityResponseDTO;
 import com.team9.anicare.community.model.Community;
-import com.team9.anicare.user.dto.CreateAdminDTO;
-import com.team9.anicare.user.dto.UpdateAdminDTO;
-import com.team9.anicare.user.dto.UserDetailResponseDTO;
-import com.team9.anicare.user.dto.UserResponseDTO;
+import com.team9.anicare.user.dto.*;
 import com.team9.anicare.user.mapper.UserMapper;
 import com.team9.anicare.user.model.Role;
 import com.team9.anicare.user.model.User;
 import com.team9.anicare.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -83,6 +81,33 @@ public class UserService {
             return "업데이트 성공";
 
     }
+
+
+
+    public String userUpdate(Long id, UpdateUserDTO updateUserDTO) {
+        // 기존 User 조회
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Builder를 사용해 기존 데이터와 업데이트 데이터 병합
+        User updatedUser = User.builder()
+                .id(user.getId()) // ID 유지
+                .name(updateUserDTO.getName() != null ? updateUserDTO.getName() : user.getName()) // 이름 업데이트 또는 기존 값 유지
+                .years_of_experience(updateUserDTO.getYears_of_experience() != 0 ? updateUserDTO.getYears_of_experience() : user.getYears_of_experience()) // 경험 업데이트 또는 기존 값 유지
+                .pets(user.getPets()) // 기존 pets 유지
+                .refreshtoken(user.getRefreshtoken())
+                .profileImg(user.getProfileImg())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .communities(user.getCommunities()) // 기존 communities 유지
+                .build();
+
+        // 업데이트된 User 저장
+        userRepository.save(updatedUser);
+
+        return "User updated successfully";
+    }
+
 
     public String deleteUser(Long id) {
             Optional<User> optionalUser = userRepository.findById(id);
