@@ -6,7 +6,6 @@ import com.team9.anicare.domain.user.dto.CreateAdminDTO;
 import com.team9.anicare.domain.user.dto.UpdateAdminDTO;
 import com.team9.anicare.domain.user.dto.UpdateUserDTO;
 import com.team9.anicare.domain.user.dto.UserDetailResponseDTO;
-import com.team9.anicare.user.dto.*;
 import com.team9.anicare.domain.user.mapper.UserMapper;
 import com.team9.anicare.domain.user.model.Role;
 import com.team9.anicare.domain.user.model.User;

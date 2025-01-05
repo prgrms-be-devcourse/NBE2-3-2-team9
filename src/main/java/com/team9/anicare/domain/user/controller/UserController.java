@@ -5,7 +5,6 @@ import com.team9.anicare.domain.user.dto.CreateAdminDTO;
 import com.team9.anicare.domain.user.dto.UpdateAdminDTO;
 import com.team9.anicare.domain.user.dto.UpdateUserDTO;
 import com.team9.anicare.domain.user.dto.UserDetailResponseDTO;
-import com.team9.anicare.user.dto.*;
 import com.team9.anicare.domain.user.model.User;
 import com.team9.anicare.domain.user.service.UserService;
 import jakarta.validation.Valid;
