@@ -4,6 +4,7 @@ import com.team9.anicare.domain.auth.security.CustomUserDetails;
 import com.team9.anicare.domain.schedule.dto.PeriodicScheduleDTO;
 import com.team9.anicare.domain.schedule.service.PeriodicScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "period schedule", description = "정기 일정 API")
 @RequestMapping("/api")
 @RestController
 public class PeriodicScheduleController {

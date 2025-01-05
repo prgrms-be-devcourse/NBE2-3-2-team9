@@ -5,6 +5,8 @@ import com.team9.anicare.domain.chat.service.ChatLogService;
 import com.team9.anicare.domain.chat.service.ChatRoomService;
 import com.team9.anicare.domain.chat.service.RedisMessagePublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "chat", description = "채팅 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/chat")
@@ -66,12 +69,14 @@ public class ChatController {
     }
 
     // 채팅 로그 조회
+    @Operation(summary = "채팅방 로그 조회")
     @GetMapping("/rooms/{roomId}/logs")
     public List<ChatMessageDTO> getChatLogs(@PathVariable String roomId) {
         return chatLogService.getChatLogs(roomId);
     }
 
     // 사용자 퇴장 처리
+    @Operation(summary = "채팅방 나가기")
     @PostMapping("/rooms/{roomId}/exit")
     public void exitChatRoom(@PathVariable String roomId, @RequestParam boolean isDoctor) {
         if (isDoctor) {

@@ -7,6 +7,7 @@ import com.team9.anicare.domain.hospital.dto.AnimalHospitalDto;
 import com.team9.anicare.domain.hospital.model.AnimalHospital;
 import com.team9.anicare.domain.hospital.service.AnimalHospitalService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 
-
+@Tag(name = "animal hospital", description = "동물병원 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping
