@@ -9,9 +9,9 @@ import org.springframework.data.domain.Sort;
 @Getter
 public class PageRequestDTO {
     private int page = 1; // 기본 페이지 번호
-    private int size = 5; // 한 페이지 당 크기
+    private int size = 3; // 한 페이지 당 크기
     private String sortBy = "id";
-    private Sort.Direction direction = Sort.Direction.ASC;
+    private Sort.Direction direction = Sort.Direction.DESC;
 
     public PageRequest toPageRequest() {
         return PageRequest.of(

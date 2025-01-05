@@ -1,11 +1,17 @@
 package com.team9.anicare.schedule.service;
 
+import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.common.response.Result;
+import com.team9.anicare.pet.model.Pet;
 import com.team9.anicare.pet.repository.PetRepository;
 import com.team9.anicare.schedule.dto.SingleScheduleDTO;
+import com.team9.anicare.schedule.model.PeriodicSchedule;
 import com.team9.anicare.schedule.model.SingleSchedule;
+import com.team9.anicare.schedule.repository.PeriodicScheduleRepository;
 import com.team9.anicare.schedule.repository.SingleScheduleRepository;
+import com.team9.anicare.user.model.User;
+import com.team9.anicare.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -22,98 +28,98 @@ public class SingleScheduleService {
     private final SingleScheduleRepository singlescheduleRepository;
     private final PetRepository petRepository;
     private final ModelMapper modelMapper;
+    private final UserRepository userRepository;
+    private final SingleScheduleRepository singleScheduleRepository;
+    private final PeriodicScheduleRepository periodicScheduleRepository;
 
-    public Result findSingleSchedules(Long userId) {
-        try {
-            List<SingleSchedule> lists = singlescheduleRepository.findSingleSchedulesByUserId(userId);
+    public List<SingleScheduleDTO> findSingleSchedules(Long userId) {
+        List<SingleSchedule> lists = singlescheduleRepository.findSingleSchedulesByUser(getUserById(userId));
 
-            if (lists.isEmpty()) {
-                return new Result(ResultCode.NOT_EXISTS_SCHEDULE);
-            }
-
-            List<SingleScheduleDTO> singleScheduleDTOs = lists.stream()
-                    .map(singleschedule -> modelMapper.map(singleschedule, SingleScheduleDTO.class))
-                    .collect(Collectors.toList());
-
-            return new Result(ResultCode.SUCCESS, singleScheduleDTOs);
-        } catch (DataAccessException e) {
-            System.out.println(e.getMessage());
-            return new Result(ResultCode.DB_ERROR);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return new Result(ResultCode.ETC_ERROR);
+        if (lists.isEmpty()) {
+            throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
         }
+
+        List<SingleScheduleDTO> singleScheduleDTOs = lists.stream()
+                .map(singleschedule -> modelMapper.map(singleschedule, SingleScheduleDTO.class))
+                .collect(Collectors.toList());
+
+        return singleScheduleDTOs;
     }
 
-    public Result addSingleSchedule(SingleScheduleDTO.addSingleScheduleDTO request, Long userId) {
-        try {
-            Long PetId = request.getPetId();
+    public SingleScheduleDTO addSingleSchedule(SingleScheduleDTO.AddSingleScheduleDTO request, Long userId) {
+        Long petId = request.getPetId();
 
-            if (!petRepository.existsById(PetId)) {
-                return new Result(ResultCode.NOT_EXISTS_PET);
-            } else if (request.getStartDatetime().getTime() > request.getEndDatetime().getTime()) {
-                return new Result(ResultCode.INVALID_REQUEST);
-            }
-
-            modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-            SingleSchedule singleschedule = modelMapper.map(request, SingleSchedule.class);
-            singleschedule.setUserId(userId);
-            singlescheduleRepository.save(singleschedule);
-
-            return new Result(ResultCode.SUCCESS);
-        } catch (DataAccessException e) {
-            System.out.println(e.getMessage());
-            return new Result(ResultCode.DB_ERROR);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return new Result(ResultCode.ETC_ERROR);
+        if (!petRepository.existsById(petId)) {
+            throw new CustomException(ResultCode.NOT_EXISTS_PET);
+        } else if (request.getStartDatetime().isAfter(request.getEndDatetime())) {
+            throw new CustomException(ResultCode.INVALID_DATETIME_VALUE);
         }
+
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+        SingleSchedule singleschedule = modelMapper.map(request, SingleSchedule.class);
+        singleschedule.setUser(getUserById(userId));
+        singleschedule.setPet(getPetById(petId));
+        singlescheduleRepository.save(singleschedule);
+
+        SingleScheduleDTO singleScheduleDTO = modelMapper.map(singleschedule, SingleScheduleDTO.class);
+        singleScheduleDTO.setUserId(userId);
+        singleScheduleDTO.setPetId(petId);
+        singleScheduleDTO.setPetName(request.getPetName());
+
+        return singleScheduleDTO;
     }
 
-    public Result updateSingleSchedule(SingleScheduleDTO.updateSingleScheduleDTO request, Long userId) {
-        try {
-            Long Id = request.getId();
-            Long PetId = request.getPetId();
+    public SingleScheduleDTO updateSingleSchedule(SingleScheduleDTO.UpdateSingleScheduleDTO request, Long userId) {
+        Long Id = request.getId();
+        Long petId = request.getPetId();
 
-            if (!singlescheduleRepository.existsById(Id)) {
-                return new Result(ResultCode.NOT_EXISTS_SCHEDULE);
-            } else if (petRepository.findById(PetId).isEmpty()) {
-                return new Result(ResultCode.NOT_EXISTS_PET);
-            } else if (request.getStartDatetime().getTime() > request.getEndDatetime().getTime()) {
-                return new Result(ResultCode.INVALID_REQUEST);
-            }
-
-            SingleSchedule singleschedule = modelMapper.map(request, SingleSchedule.class);
-            singleschedule.setUserId(userId);
-            singlescheduleRepository.save(singleschedule);
-
-            return new Result(ResultCode.SUCCESS);
-        } catch (DataAccessException e) {
-            System.out.println(e.getMessage());
-            return new Result(ResultCode.DB_ERROR);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return new Result(ResultCode.ETC_ERROR);
+        if (petRepository.findById(petId).isEmpty()) {
+            throw new CustomException(ResultCode.NOT_EXISTS_PET);
+        } else if (request.getStartDatetime().isAfter(request.getEndDatetime())) {
+            throw new CustomException(ResultCode.INVALID_DATETIME_VALUE);
         }
+
+        SingleSchedule singleschedule = singlescheduleRepository.findById(Id)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_SCHEDULE));
+        singleschedule.setName(request.getName());
+        singleschedule.setStartDatetime(request.getStartDatetime());
+        singleschedule.setEndDatetime(request.getEndDatetime());
+        singleschedule.setPet(getPetById(petId));
+        singlescheduleRepository.save(singleschedule);
+
+
+        SingleScheduleDTO singleScheduleDTO = modelMapper.map(singleschedule, SingleScheduleDTO.class);
+        singleScheduleDTO.setUserId(userId);
+        singleScheduleDTO.setPetId(petId);
+        singleScheduleDTO.setPetName(request.getPetName());
+
+        return singleScheduleDTO;
     }
 
-    public Result deleteSingleSchedule(Long singleScheduleId) {
-        try {
-            if (singlescheduleRepository.existsById(singleScheduleId)) {
-                singlescheduleRepository.deleteById(singleScheduleId);
+    public void deleteSingleSchedule(Long singleScheduleId) {
+        if (singlescheduleRepository.existsById(singleScheduleId)) {
+            PeriodicSchedule periodicSchedule = singleScheduleRepository.findPeriodicScheduleById(singleScheduleId);
+            if (periodicSchedule != null) {
+               if (singleScheduleRepository.countByPeriodicScheduleId(periodicSchedule) == 1) {
+                   singleScheduleRepository.deleteById(singleScheduleId);
+                   periodicScheduleRepository.deleteById(periodicSchedule.getId());
+               }  else {
+                   singleScheduleRepository.deleteById(singleScheduleId);
+               }
             } else {
-                return new Result(ResultCode.NOT_EXISTS_SCHEDULE);
+                singleScheduleRepository.deleteById(singleScheduleId);
             }
-
-            return new Result(ResultCode.SUCCESS);
-        } catch (DataAccessException e) {
-            System.out.println(e.getMessage());
-            return new Result(ResultCode.DB_ERROR);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return new Result(ResultCode.ETC_ERROR);
+        } else {
+            throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
         }
+    }
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(RuntimeException::new);
+    }
+
+    private Pet getPetById(Long petId) {
+        return petRepository.findById(petId).orElseThrow(RuntimeException::new);
     }
 }
 

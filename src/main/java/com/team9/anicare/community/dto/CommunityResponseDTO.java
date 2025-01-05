@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -13,6 +14,8 @@ import java.util.List;
 public class CommunityResponseDTO {
     private Long id;
     private Long userId;
+    private String name;
+    private String profileImg;
     private String title;
     private String content;
     private String picture;
@@ -20,6 +23,6 @@ public class CommunityResponseDTO {
     private int commentCount;
     private int likeCount;
     private boolean canEdit;
-    private List<Comment> comments;
-
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

@@ -5,10 +5,8 @@ import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageMetaDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
 import com.team9.anicare.common.exception.CustomException;
-import com.team9.anicare.community.dto.CommentResponseDTO;
-import com.team9.anicare.community.dto.DetailResponseDTO;
-import com.team9.anicare.community.dto.CommunityRequestDTO;
-import com.team9.anicare.community.dto.CommunityResponseDTO;
+import com.team9.anicare.community.dto.*;
+import com.team9.anicare.community.mapper.CommunityMapper;
 import com.team9.anicare.community.model.Comment;
 import com.team9.anicare.community.model.Community;
 import com.team9.anicare.community.repository.CommentRepository;
@@ -32,6 +30,7 @@ public class CommunityService {
 
     private final CommunityRepository communityRepository;
     private final ModelMapper modelMapper;
+    private final CommunityMapper communityMapper;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final S3FileService s3FileService;
@@ -56,12 +55,16 @@ public class CommunityService {
 
         // 조회된 게시글 -> DTO로 변환
         List<CommunityResponseDTO> posts = communityPage.getContent().stream()
-                .map(community -> modelMapper.map(community, CommunityResponseDTO.class))
+                .map(communityMapper::toDto)
                 .toList();
 
         PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), communityPage.getTotalElements());
 
         return new PageDTO<>(posts, meta);
+    }
+
+    public AnimalSpeciesDTO getDistinctAnimalSpecies() {
+        return new AnimalSpeciesDTO(communityRepository.findDistinctAnimalSpecies());
     }
 
     public List<CommunityResponseDTO> showMyPosts(Long userId) {
@@ -71,35 +74,36 @@ public class CommunityService {
                 .toList();
     }
 
-    public DetailResponseDTO showPostDetail(PageRequestDTO pageRequestDTO, Long userId, Long postingId) {
-        PageRequest pageRequest = pageRequestDTO.toPageRequest();
+    public DetailResponseDTO showPostDetail(Long postingId) {
 
         // 게시글 조회
         Community community = communityRepository.findById(postingId)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
-
-        // 현재 유저의 게시글 수정 권한 확인
-        boolean canEditPost = community.getUser().getId().equals(userId);
+//
+//        // 현재 유저의 게시글 수정 권한 확인
+//        boolean canEditPost = community.getUser().getId().equals(userId);
 
         // 조회된 게시글 -> DTO 변환
-        CommunityResponseDTO communityResponseDTO = modelMapper.map(community, CommunityResponseDTO.class);
-        communityResponseDTO.setCanEdit(canEditPost);
-
-        Page<Comment> commentPage = commentRepository.findByCommunityIdAndParentIsNull(postingId, pageRequest);
+        CommunityResponseDTO communityResponseDTO = communityMapper.toDto(community);
+//        communityResponseDTO.setCanEdit(canEditPost);
 
         // 조회된 댓글 -> DTO 변환
-        List<CommentResponseDTO> comments = commentPage.getContent().stream()
+        List<CommentResponseDTO> comments = commentRepository.findByCommunityIdAndParentIsNull(postingId).stream()
                 .map(comment -> {
                     CommentResponseDTO dto = modelMapper.map(comment, CommentResponseDTO.class);
                     // 현재 유저의 댓글 수정 권한 확인
-                    dto.setCanEdit(comment.getUser().getId().equals(userId));
+//                    dto.setCanEdit(comment.getUser().getId().equals(userId));
+                    // user 정보 매핑
+                    if (comment.getUser() != null) {
+                        dto.setName(comment.getUser().getName());
+                        dto.setProfileImg(comment.getUser().getProfileImg());
+                    }
+
                     return dto;
                 })
                 .toList();
 
-        PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), commentPage.getTotalElements());
-
-        return new DetailResponseDTO(communityResponseDTO, new PageDTO<>(comments, meta));
+        return new DetailResponseDTO(communityResponseDTO, comments);
     }
 
     public CommunityResponseDTO createPost(Long userId, CommunityRequestDTO communityRequestDTO, MultipartFile file) {
@@ -121,7 +125,7 @@ public class CommunityService {
         }
         communityRepository.save(community);
 
-        return modelMapper.map(community, CommunityResponseDTO.class);
+        return communityMapper.toDto(community);
     }
 
     public CommunityResponseDTO updatePost(Long postingId, CommunityRequestDTO communityRequestDTO, MultipartFile file) {
@@ -130,9 +134,14 @@ public class CommunityService {
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
         // 게시글 수정
-        community.setTitle(communityRequestDTO.getTitle());
-        community.setContent(communityRequestDTO.getContent());
-        community.setAnimalSpecies(communityRequestDTO.getAnimalSpecies());
+        if (communityRequestDTO.getTitle() != null)
+            community.setTitle(communityRequestDTO.getTitle());
+
+        if (communityRequestDTO.getContent() != null)
+            community.setContent(communityRequestDTO.getContent());
+
+        if (communityRequestDTO.getAnimalSpecies() != null)
+            community.setAnimalSpecies(communityRequestDTO.getAnimalSpecies());
 
         try {
             // 새로운 파일이 들어왔다면
@@ -147,7 +156,7 @@ public class CommunityService {
         }
         communityRepository.save(community);
 
-        return modelMapper.map(community, CommunityResponseDTO.class);
+        return communityMapper.toDto(community);
     }
 
     public void deletePost(Long postingId) {
@@ -155,11 +164,12 @@ public class CommunityService {
         Community community = communityRepository.findById(postingId)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
+        // S3에서 파일 삭제
+        if(community.getPicture() != null)
+            s3FileService.deleteFile(community.getPicture());
+
         // 게시글 삭제
         communityRepository.deleteById(postingId);
-
-        // S3에서 파일 삭제
-        s3FileService.deleteFile(community.getPicture());
     }
 
 }

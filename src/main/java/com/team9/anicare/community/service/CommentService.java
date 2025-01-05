@@ -2,10 +2,10 @@ package com.team9.anicare.community.service;
 
 import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.common.exception.CustomException;
-import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.community.dto.CommentRequestDTO;
 import com.team9.anicare.community.dto.CommentResponseDTO;
 import com.team9.anicare.community.dto.LikeResponseDTO;
+import com.team9.anicare.community.mapper.CommunityMapper;
 import com.team9.anicare.community.model.Comment;
 import com.team9.anicare.community.model.Community;
 import com.team9.anicare.community.model.CommunityLike;
@@ -28,6 +28,7 @@ public class CommentService {
     private final CommunityRepository communityRepository;
     private final CommunityLikeRepository communityLikeRepository;
     private final UserRepository userRepository;
+    private final CommunityMapper communityMapper;
     private final ModelMapper modelMapper;
 
     public CommentResponseDTO createComment(Long userId, Long postingId, Long parentId, CommentRequestDTO commentRequestDTO) {
@@ -56,7 +57,7 @@ public class CommentService {
         community.setCommentCount(community.getCommentCount() + 1);
         communityRepository.save(community);
 
-        return modelMapper.map(comment, CommentResponseDTO.class);
+        return communityMapper.toDto(comment);
     }
 
     public CommentResponseDTO updateComment(Long commentId, CommentRequestDTO commentRequestDTO) {
@@ -68,7 +69,7 @@ public class CommentService {
         comment.setContent(commentRequestDTO.getContent());
         commentRepository.save(comment);
 
-        return modelMapper.map(comment, CommentResponseDTO.class);
+        return communityMapper.toDto(comment);
     }
 
     public void deleteComment(Long commentId) {
@@ -92,11 +93,9 @@ public class CommentService {
         Community community = communityRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
 
-
         // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_USER));
-
 
         // 이미 좋아요를 누른 상태인지 확인
         if (communityLikeRepository.existsByCommunityAndUser(community, user)) {
@@ -119,7 +118,7 @@ public class CommentService {
     public List<CommentResponseDTO> getReplies(Long userId, Long parentId) {
         return commentRepository.findByParentId(parentId).stream()
                 .map(comment -> {
-                    CommentResponseDTO dto = modelMapper.map(comment, CommentResponseDTO.class);
+                    CommentResponseDTO dto = communityMapper.toDto(comment);
                     dto.setCanEdit(comment.getUser().getId().equals(userId)); // 수정 권한 설정
                     return dto;
                 })
