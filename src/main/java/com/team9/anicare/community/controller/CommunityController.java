@@ -9,8 +9,10 @@ import com.team9.anicare.community.dto.CommunityResponseDTO;
 import com.team9.anicare.community.dto.DetailResponseDTO;
 import com.team9.anicare.community.service.CommunityService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Tag(name = "community", description = "커뮤니티 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/community")
@@ -26,7 +29,8 @@ public class CommunityController {
 
     private final CommunityService communityService;
 
-    @Operation(summary = "게시글 목록 출력 & 검색")
+    @Operation(summary = "게시글 목록 조회 & 검색",
+            description = "전체 게시글 조회 및 검색하는 API 입니다. 검색은 키워드와 카테고리로 필터링이 가능합니다.")
     @GetMapping
     public ResponseEntity<PageDTO<CommunityResponseDTO>> showPosts(
             PageRequestDTO pageRequestDTO,
@@ -39,7 +43,8 @@ public class CommunityController {
         return ResponseEntity.ok(pageDTO);
     }
 
-    @Operation(summary="종 종류 조회")
+    @Operation(summary="종 종류 조회",
+            description = "카테고리로 설정할 종의 종류를 조회하는 API 입니다.")
     @GetMapping("/species")
     public ResponseEntity<AnimalSpeciesDTO> getAnimalSpecies() {
         AnimalSpeciesDTO animalSpecies = communityService.getDistinctAnimalSpecies();
@@ -56,7 +61,8 @@ public class CommunityController {
         return ResponseEntity.ok(posts);
     }
 
-    @Operation(summary = "글 상세 보기")
+    @Operation(summary = "글 상세 보기",
+            description = "특정 게시글의 상세 정보를 조회하는 API 입니다. 요청 항목 : 게시글 ID")
     @GetMapping("/{postingId}")
     public ResponseEntity<DetailResponseDTO> showPostDetail(
 //            @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -67,8 +73,9 @@ public class CommunityController {
         return ResponseEntity.ok(detailResponseDTO);
     }
 
-    @Operation(summary = "글 작성")
-    @PostMapping("/post")
+    @Operation(summary = "글 작성",
+            description = "사용자가 새로운 게시글을 작성하는 API 입니다. 요청 항목 : 로그인 필수, 작성할 글 내용(title, content, animalSpecies, file)")
+    @PostMapping(value = "/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CommunityResponseDTO> createPost(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -80,8 +87,9 @@ public class CommunityController {
         return ResponseEntity.status(HttpStatus.CREATED).body(communityResponseDTO);
     }
 
-    @Operation(summary = "글 수정")
-    @PutMapping("/post/{postingId}")
+    @Operation(summary = "글 수정",
+            description = "사용자가 게시글을 수정하는 API 입니다. 요청 항목 : 로그인 필수, 게시글 ID, 수정할 글 내용(title, content, animalSpecies, file)")
+    @PutMapping(value = "/post/{postingId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CommunityResponseDTO> updatePost(
             @PathVariable Long postingId,
@@ -93,7 +101,8 @@ public class CommunityController {
         return ResponseEntity.ok(communityResponseDTO);
     }
 
-    @Operation(summary = "글 삭제")
+    @Operation(summary = "글 삭제",
+            description = "사용자가 게시글을 삭제하는 API 입니다. 요청 항목 : 로그인 필수, 게시글 ID")
     @DeleteMapping("/post/{postingId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deletePost(@PathVariable Long postingId) {
