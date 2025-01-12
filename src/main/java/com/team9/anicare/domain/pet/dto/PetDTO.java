@@ -1,5 +1,6 @@
 package com.team9.anicare.domain.pet.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -9,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
-@Setter
+@Builder
 public class PetDTO {
     private Long id;
     private Long userId;
@@ -25,7 +26,7 @@ public class PetDTO {
     private LocalDateTime updatedAt;
 
     @Getter
-    @Setter
+    @Builder
     @ToString
     public static class AddPetDTO {
         private Long breedId;
@@ -36,7 +37,7 @@ public class PetDTO {
     }
 
     @Getter
-    @Setter
+    @Builder
     public static class UpdatePetDTO {
         private Long id;
         private Long breedId;

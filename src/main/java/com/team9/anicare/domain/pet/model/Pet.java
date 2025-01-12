@@ -3,22 +3,26 @@ package com.team9.anicare.domain.pet.model;
 import com.team9.anicare.domain.animal.model.Breed;
 import com.team9.anicare.domain.animal.model.Species;
 import com.team9.anicare.common.entities.CommonEntity;
+import com.team9.anicare.domain.animal.repository.BreedRepository;
+import com.team9.anicare.domain.animal.repository.SpeciesRepository;
+import com.team9.anicare.domain.pet.dto.PetDTO;
+import com.team9.anicare.domain.pet.repository.PetRepository;
 import com.team9.anicare.domain.schedule.model.PeriodicSchedule;
 import com.team9.anicare.domain.schedule.model.SingleSchedule;
 import com.team9.anicare.domain.user.model.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Table(name = "pet")
 @Getter
-@Setter
-@ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Pet extends CommonEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -53,4 +57,14 @@ public class Pet extends CommonEntity {
 
     @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE)
     private List<PeriodicSchedule> periodicSchedule;
+
+    public Pet updatePet(PetDTO.UpdatePetDTO request, SpeciesRepository spRepo, BreedRepository brRepo, String Picture) {
+        this.species = spRepo.findById(request.getSpeciesId()).orElseThrow(RuntimeException::new);
+        this.breed = brRepo.findById(request.getBreedId()).orElseThrow(RuntimeException::new);
+        this.name = request.getName();
+        this.age = request.getAge();
+        this.gender = request.getGender();
+        this.picture = Picture;
+        return this;
+    }
 }
