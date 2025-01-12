@@ -57,27 +57,39 @@ public class PetService {
             throw new CustomException(ResultCode.NOT_EXISTS_SPECIES);
         }
 
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-        Pet pet = modelMapper.map(request, Pet.class);
-        pet.setBreed(getBreedById(request.getBreedId()));
-        pet.setSpecies(getSpeciesById(request.getSpeciesId()));
-        pet.setUser(getUserById(userId));
-
+        String Picture = null;
         try {
             if (file != null && !file.isEmpty()) {
-                pet.setPicture(s3FileService.updateFile(file, pet.getPicture(), "pet"));
+                Picture = s3FileService.updateFile(file, null, "pet");
             }
         } catch (IOException e) {
             throw new CustomException(ResultCode.FILE_UPLOAD_ERROR);
         }
-        pet.setUser(getUserById(userId));
+
+        Pet pet = Pet.builder()
+                .breed(getBreedById(request.getBreedId()))
+                .species(getSpeciesById(request.getSpeciesId()))
+                .picture(Picture)
+                .user(getUserById(userId))
+                .age(request.getAge())
+                .name(request.getName())
+                .gender(request.getGender())
+                .build();
 
         petRepository.save(pet);
-        PetDTO petDTO = modelMapper.map(pet,PetDTO.class);
-        petDTO.setUserId(userId);
-        petDTO.setSpeciesId(request.getSpeciesId());
-        petDTO.setBreedId(request.getBreedId());
+
+        PetDTO petDTO = PetDTO.builder()
+                .id(pet.getId())
+                .breedId(pet.getBreed().getId())
+                .speciesId(pet.getSpecies().getId())
+                .picture(pet.getPicture())
+                .userId(pet.getUser().getId())
+                .age(pet.getAge())
+                .name(pet.getName())
+                .gender(pet.getGender())
+                .createdAt(pet.getCreatedAt())
+                .updatedAt(pet.getUpdatedAt())
+                .build();
 
         return petDTO;
     }
@@ -98,25 +110,34 @@ public class PetService {
 
         Pet pet = petRepository.findById(request.getId())
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_PET));
-        pet.setUser(getUserById(userId));
-        pet.setBreed(getBreedById(request.getBreedId()));
-        pet.setSpecies(getSpeciesById(request.getSpeciesId()));
-        pet.setName(request.getName());
-        pet.setAge(request.getAge());
-        pet.setGender(request.getGender());
-
+        String Picture = null;
         try {
             if (file != null && !file.isEmpty()) {
-                pet.setPicture(s3FileService.updateFile(file, pet.getPicture(), "pet"));
+                Picture = (s3FileService.updateFile(file, pet.getPicture(), "pet"));
             } else if (pet.getPicture() != null) {
-                pet.setPicture(pet.getPicture());
+                Picture = (pet.getPicture());
             }
         } catch (IOException e) {
             throw new CustomException(ResultCode.FILE_UPLOAD_ERROR);
         }
 
+        pet.updatePet(request,speciesRepository,breedRepository,Picture);
+
         petRepository.save(pet);
-        PetDTO petDTO = modelMapper.map(pet,PetDTO.class);
+
+        PetDTO petDTO = PetDTO.builder()
+                .id(pet.getId())
+                .breedId(pet.getBreed().getId())
+                .speciesId(pet.getSpecies().getId())
+                .picture(pet.getPicture())
+                .userId(pet.getUser().getId())
+                .age(pet.getAge())
+                .name(pet.getName())
+                .gender(pet.getGender())
+                .createdAt(pet.getCreatedAt())
+                .updatedAt(pet.getUpdatedAt())
+                .build();
+
         return petDTO;
     }
 
