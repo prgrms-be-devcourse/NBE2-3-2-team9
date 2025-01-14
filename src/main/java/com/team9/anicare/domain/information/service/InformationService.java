@@ -8,12 +8,12 @@ import com.team9.anicare.common.exception.ResultCode;
 import com.team9.anicare.common.file.service.S3FileService;
 import com.team9.anicare.domain.information.dto.InformationRequestDTO;
 import com.team9.anicare.domain.information.dto.InformationResponseDTO;
+import com.team9.anicare.domain.information.mapper.InformationMapper;
 import com.team9.anicare.domain.information.model.Information;
 import com.team9.anicare.domain.information.repository.InformationRepository;
 import com.team9.anicare.domain.animal.model.Breed;
 import com.team9.anicare.domain.animal.repository.BreedRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,8 @@ public class InformationService {
 
     private final InformationRepository informationRepository;
     private final BreedRepository breedRepository;
-    private final ModelMapper modelMapper;
+
+    private final InformationMapper informationMapper;
     private final S3FileService s3FileService;
 
     public void saveInformation(InformationRequestDTO informationDTO, MultipartFile file) {
@@ -40,16 +41,24 @@ public class InformationService {
             throw new CustomException(ResultCode.DUPLICATE_INFORMATION);
         }
 
-        Information information = modelMapper.map(informationDTO, Information.class);
-        information.setBreed(breed);
-
+        String pictureUrl = null;
         try {
             if (file != null && !file.isEmpty()) {
-                information.setPicture(s3FileService.uploadFile(file, "information"));
+                pictureUrl = s3FileService.uploadFile(file, "community");
             }
         } catch (IOException e) {
             throw new CustomException(ResultCode.FILE_UPLOAD_ERROR);
         }
+
+        Information information = Information.builder()
+                .breed(breed)
+                .age(informationDTO.getAge())
+                .picture(pictureUrl)
+                .height(informationDTO.getHeight())
+                .weight(informationDTO.getWeight())
+                .guide(informationDTO.getGuide())
+                .description(informationDTO.getDescription())
+                .build();
 
         informationRepository.save(information);
     }
@@ -69,12 +78,7 @@ public class InformationService {
         }
 
         List<InformationResponseDTO> posts = informationPage.getContent().stream()
-                .map(information -> {
-                    InformationResponseDTO dto = modelMapper.map(information, InformationResponseDTO.class);
-                    dto.setSpeciesName(information.getBreed().getSpecies().getName());
-                    return dto;
-                }).toList();
-        System.out.println("posts:" + posts);
+                .map(informationMapper::toDto).toList();
 
         PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), informationPage.getTotalElements());
 
@@ -86,15 +90,11 @@ public class InformationService {
         Information information = informationRepository.findById(informationId)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_INFORMATION));
 
-        information.setHit(information.getHit() + 1);
+        information.updateHit(information.getHit() + 1);
         informationRepository.save(information);
 
-        InformationResponseDTO informationDTO = modelMapper.map(information, InformationResponseDTO.class);
-        informationDTO.setSpeciesName(information.getBreed().getSpecies().getName());
-
-        return informationDTO;
+        return informationMapper.toDto(information);
     }
-
 
 }
 
