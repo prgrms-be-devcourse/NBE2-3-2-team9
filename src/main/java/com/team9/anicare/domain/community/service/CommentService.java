@@ -15,7 +15,6 @@ import com.team9.anicare.domain.community.repository.CommunityRepository;
 import com.team9.anicare.domain.user.model.User;
 import com.team9.anicare.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,7 +28,6 @@ public class CommentService {
     private final CommunityLikeRepository communityLikeRepository;
     private final UserRepository userRepository;
     private final CommunityMapper communityMapper;
-    private final ModelMapper modelMapper;
 
     public CommentResponseDTO createComment(Long userId, Long postingId, Long parentId, CommentRequestDTO commentRequestDTO) {
         // 게시글 조회
@@ -47,14 +45,17 @@ public class CommentService {
         }
 
         // 댓글 생성
-        Comment comment = modelMapper.map(commentRequestDTO, Comment.class);
-        comment.setCommunity(community);
-        comment.setUser(user);
-        comment.setParent(parentComment);
+        Comment comment = Comment.builder()
+                .community(community)
+                .user(user)
+                .content(commentRequestDTO.getContent())
+                .parent(parentComment)
+                .build();
+
         commentRepository.save(comment);
 
         // 해당 게시글 댓글 수 증가
-        community.setCommentCount(community.getCommentCount() + 1);
+        community.updateCommentCount(community.getCommentCount() + 1);
         communityRepository.save(community);
 
         return communityMapper.toDto(comment);
@@ -66,7 +67,7 @@ public class CommentService {
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_COMMENT));
 
         // 댓글 수정
-        comment.setContent(commentRequestDTO.getContent());
+        comment.updateContent(commentRequestDTO.getContent());
         commentRepository.save(comment);
 
         return communityMapper.toDto(comment);
@@ -83,7 +84,7 @@ public class CommentService {
         commentRepository.deleteById(commentId);
 
         // 해당 게시글 댓글 수 감소
-        community.setCommentCount(community.getCommentCount() - 1);
+        community.updateCommentCount(community.getCommentCount() - 1);
         communityRepository.save(community);
 
     }
@@ -103,13 +104,15 @@ public class CommentService {
         }
 
         // 좋아요 생성
-        CommunityLike communityLike = new CommunityLike();
-        communityLike.setCommunity(community);
-        communityLike.setUser(user);
+        CommunityLike communityLike = CommunityLike.builder()
+                .community(community)
+                .user(user)
+                .build();
+
         communityLikeRepository.save(communityLike);
 
         // 좋아요 개수 증가
-        community.setLikeCount(community.getLikeCount() + 1);
+        community.updateLikeCount(community.getLikeCount() + 1);
         communityRepository.save(community);
 
         return new LikeResponseDTO(communityLike.getId(), community.getId(), userId);
