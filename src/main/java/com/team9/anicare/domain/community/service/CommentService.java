@@ -86,7 +86,6 @@ public class CommentService {
         // 해당 게시글 댓글 수 감소
         community.updateCommentCount(community.getCommentCount() - 1);
         communityRepository.save(community);
-
     }
 
     public LikeResponseDTO createLike(Long userId, Long postId) {
@@ -99,7 +98,7 @@ public class CommentService {
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_USER));
 
         // 이미 좋아요를 누른 상태인지 확인
-        if (communityLikeRepository.existsByCommunityAndUser(community, user)) {
+        if (communityLikeRepository.existsByCommunityIdAndUserId(community.getId(), user.getId())) {
             throw new CustomException(ResultCode.DUPLICATE_LIKE);
         }
 
@@ -116,6 +115,27 @@ public class CommentService {
         communityRepository.save(community);
 
         return new LikeResponseDTO(communityLike.getId(), community.getId(), userId);
+    }
+
+    public void deleteLike(Long userId, Long postId) {
+        // 게시글 조회
+        Community community = communityRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_POST));
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_USER));
+
+        // 좋아요가 존재하는지 확인
+        CommunityLike communityLike = communityLikeRepository.findByCommunityIdAndUserId(community.getId(), user.getId())
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_LIKE));
+
+        // 좋아요 삭제
+        communityLikeRepository.delete(communityLike);
+
+        // 좋아요 개수 감소
+        community.updateLikeCount(community.getLikeCount() - 1);
+        communityRepository.save(community);
     }
 
     public List<CommentResponseDTO> getReplies(Long userId, Long parentId) {

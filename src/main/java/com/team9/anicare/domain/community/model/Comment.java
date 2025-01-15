@@ -17,7 +17,7 @@ public class Comment extends CommonEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "community_id")
     private Community community;
 
@@ -27,7 +27,7 @@ public class Comment extends CommonEntity {
 
     private String content;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "parent_id")
     private Comment parent;
 

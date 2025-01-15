@@ -76,6 +76,19 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(likeResponseDTO);
     }
 
+    @Operation(summary = "좋아요 삭제",
+            description = "특정 게시글에 좋아요를 삭제하는 API 입니다. 요청 항목 : 로그인 필수, 게시글 ID")
+    @DeleteMapping("/like/{postingId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> deleteLike(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long postingId) {
+
+        commentService.deleteLike(userDetails.getUserId(), postingId);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "답글 조회",
             description = "특정 댓글에 대한 답글을 조회하는 API 입니다. 요청 항목 : 로그인 필수, 댓글 ID")
     @GetMapping("/comments/{parentId}/replies")
