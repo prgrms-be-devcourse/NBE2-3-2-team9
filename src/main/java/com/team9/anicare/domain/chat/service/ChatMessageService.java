@@ -41,6 +41,7 @@ public class ChatMessageService {
      * @return 전송된 메시지 응답 DTO
      */
     public ChatMessageResponseDTO sendMessage(Long senderId, ChatMessageRequestDTO requestDTO) {
+        validateMessageContent(requestDTO.getContent());
         return processAndSendMessage(senderId, requestDTO);
     }
 
@@ -79,6 +80,20 @@ public class ChatMessageService {
         saveMessageAndUpdateRoom(chatMessage, chatRoom);
 
         return convertToResponseDTO(chatMessage);
+    }
+
+
+    /**
+     * 메시지 내용 유효성 검사
+     * - 메시지가 비어있거나 1000자를 초과하면 예외 발생
+     */
+    private void validateMessageContent(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("메시지 내용은 비어 있을 수 없습니다.");
+        }
+        if (content.length() > 1000) {
+            throw new IllegalArgumentException("메시지 내용은 1000자를 초과할 수 없습니다.");
+        }
     }
 
 
