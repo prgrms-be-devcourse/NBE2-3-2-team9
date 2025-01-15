@@ -1,8 +1,8 @@
 package com.team9.anicare.domain.chat.handler;
 
+import com.team9.anicare.domain.chat.service.UserSessionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -14,63 +14,42 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @RequiredArgsConstructor
 public class WebSocketChatHandler extends TextWebSocketHandler {
 
-    private static final String USER_STATUS_KEY = "user_status"; // Redis 키 상수화
-    private final RedisTemplate<String, String> redisTemplate;
+    private final UserSessionService userSessionService;
 
     /**
-     * WebSocket 연결 종료 처리
-     *
-     * @param session WebSocket 세션
-     * @param status  연결 종료 상태
+     * WebSocket 연결 성립 시 처리
      */
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        try {
-            String userId = session.getId();
-            updateUserStatus(userId, "disconnected");
-            log.info("User {} disconnected. Status: {}", userId, status);
-        } catch (Exception e) {
-            log.error("Error during connection closure: {}", e.getMessage(), e);
-        }
+    public void afterConnectionEstablished(WebSocketSession session) {
+        String userId = session.getId();
+        userSessionService.setUserConnected(userId);
+        log.info("User {} connected.", userId);
     }
 
+    /**
+     * WebSocket 연결 종료 시 처리
+     */
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        try {
-            String userId = session.getId();
-            updateUserStatus(userId, "connected");
-            log.info("User {} connected.", userId);
-        } catch (Exception e) {
-            log.error("Error during connection establishment: {}", e.getMessage(), e);
-        }
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+        String userId = session.getId();
+        userSessionService.setUserDisconnected(userId);
+        log.info("User {} disconnected. Status: {}", userId, status);
     }
 
     /**
-     * Redis에서 사용자 상태 조회
-     *
-     * @param userId 사용자 ID
-     * @return 사용자 상태
+     * 메시지 수신 처리
      */
-    public String getUserStatus(String userId) {
-        try {
-            return (String) redisTemplate.opsForHash().get(USER_STATUS_KEY, userId);
-        } catch (Exception e) {
-            log.error("Failed to fetch user status for ID {}: {}", userId, e.getMessage(), e);
-            return "unknown";
-        }
-    }
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+        String userId = session.getId();
+        String payload = message.getPayload();
+        log.info("Received message from {}: {}", userId, payload);
 
-    /**
-     * 사용자 상태를 Redis에 업데이트
-     *
-     * @param userId 사용자 ID
-     * @param status 사용자 상태 (connected/disconnected)
-     */
-    private void updateUserStatus(String userId, String status) {
+        // Echo Message (테스트용)
         try {
-            redisTemplate.opsForHash().put(USER_STATUS_KEY, userId, status);
+            session.sendMessage(new TextMessage("Echo: " + payload));
         } catch (Exception e) {
-            log.error("Failed to update user status for ID {}: {}", userId, e.getMessage(), e);
+            log.error("Error sending message to {}: {}", userId, e.getMessage());
         }
     }
 }
