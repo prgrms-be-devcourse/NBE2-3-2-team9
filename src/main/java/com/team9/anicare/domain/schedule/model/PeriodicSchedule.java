@@ -3,11 +3,11 @@ package com.team9.anicare.domain.schedule.model;
 
 import com.team9.anicare.common.entities.CommonEntity;
 import com.team9.anicare.domain.pet.model.Pet;
+import com.team9.anicare.domain.pet.repository.PetRepository;
+import com.team9.anicare.domain.schedule.dto.PeriodicScheduleDTO;
 import com.team9.anicare.domain.user.model.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -15,9 +15,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "periodic_schedule")
-@Setter
 @Getter
-@ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PeriodicSchedule extends CommonEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,6 +60,23 @@ public class PeriodicSchedule extends CommonEntity {
 
     @OneToMany(mappedBy = "periodicSchedule", cascade = CascadeType.REMOVE)
     private List<SingleSchedule> singleSchedules;
+
+    public PeriodicSchedule updatePeriodicSchedule(PeriodicScheduleDTO.UpdatePeriodicScheduleDTO request, PetRepository peRepo) {
+        this.pet = peRepo.findById(request.getPetId()).orElseThrow(RuntimeException::new);
+        this.name = request.getName();
+        this.startDate = request.getStartDate();
+        this.endDate = request.getEndDate();
+        this.startTime = request.getStartTime();
+        this.endTime = request.getEndTime();
+        this.repeatPattern = request.getRepeatPattern();
+        this.repeatInterval = request.getRepeatInterval();
+        this.repeatDays = request.getRepeatDays();
+
+        return this;
+    }
+
+
+
 }
 
 
