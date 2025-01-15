@@ -44,4 +44,8 @@ public class ChatServiceUtil {
         }
     }
 
+    public ChatParticipant findParticipantByUserAndRoom(User user, ChatRoom chatRoom) {
+        return chatParticipantRepository.findByUserAndChatRoom(user, chatRoom)
+                .orElseThrow(() -> new EntityNotFoundException("참여자를 찾을 수 없습니다."));
+    }
 }
