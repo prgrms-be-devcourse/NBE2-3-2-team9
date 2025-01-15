@@ -1,8 +1,6 @@
 package com.team9.anicare.domain.chat.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team9.anicare.domain.chat.dto.ChatMessageDTO;
-import com.team9.anicare.domain.chat.dto.ChatRoomDTO;
 import com.team9.anicare.domain.chat.service.ChatLogService;
 import com.team9.anicare.domain.chat.service.RedisMessageSubscriber;
 import lombok.RequiredArgsConstructor;
