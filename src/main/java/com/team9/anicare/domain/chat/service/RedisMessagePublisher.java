@@ -34,7 +34,10 @@ public class RedisMessagePublisher {
     private final UserRepository userRepository;
 
     private static final int MAX_RETRIES = 3;  // 최대 재시도 횟수
-    private static final long RETRY_DELAY_MS = 1000;  // 재시도 간격 (밀리초)
+    private static final long INITIAL_RETRY_DELAY_MS = 1000;  // 초기 1초 대기
+    private static final Long SYSTEM_USER_ID = 0L;
+    private static final String SYSTEM_USER_NAME = "SYSTEM";
+
 
     /**
      * Redis 채널로 메시지를 발행하고 DB에 저장
@@ -45,6 +48,7 @@ public class RedisMessagePublisher {
      */
     public void publish(String channel, Long senderId, ChatMessageRequestDTO requestDTO) {
         int attempt = 0;
+        long delay = INITIAL_RETRY_DELAY_MS;
 
         while (attempt < MAX_RETRIES) {
             try {
@@ -65,11 +69,13 @@ public class RedisMessagePublisher {
                 log.error("Redis 메시지 발행 실패 (시도 {}): {}", attempt, e.getMessage());
 
                 if (attempt >= MAX_RETRIES) {
-                    throw new RuntimeException("Redis 메시지 발행 실패: " + e.getMessage(), e);
+                    log.warn("Redis 발행 실패. DB에만 저장됨.");
+                    return;
                 }
 
                 try {
-                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY_MS);  // 재시도 전 대기
+                    TimeUnit.MILLISECONDS.sleep(delay);
+                    delay *= 2;  // 대기 시간 두 배 증가 (백오프)
                 } catch (InterruptedException interruptedException) {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException("재시도 대기 중 인터럽트 발생", interruptedException);
@@ -83,11 +89,9 @@ public class RedisMessagePublisher {
      * 메시지를 DB에 저장
      */
     private ChatMessage saveChatMessage(Long senderId, ChatMessageRequestDTO requestDTO) {
-        User sender = userRepository.findById(senderId)
-                .orElseThrow(() -> new EntityNotFoundException("발신자를 찾을 수 없습니다."));
+        User sender = (senderId != null) ? findUserById(senderId) : getSystemUser();
 
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(requestDTO.getRoomId())
-                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+        ChatRoom chatRoom = findChatRoomById(requestDTO.getRoomId());
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .sender(sender)
@@ -100,11 +104,19 @@ public class RedisMessagePublisher {
         chatMessageRepository.save(chatMessage);
 
         // 마지막 메시지 업데이트
+        updateLastMessage(chatRoom, chatMessage);
+
+        return chatMessage;
+    }
+
+
+    /**
+     * 채팅방의 마지막 메시지 업데이트
+     */
+    private void updateLastMessage(ChatRoom chatRoom, ChatMessage chatMessage) {
         chatRoom.setLastMessage(chatMessage.getContent());
         chatRoom.setLastMessageTime(chatMessage.getSentAt());
         chatRoomRepository.save(chatRoom);
-
-        return chatMessage;
     }
 
 
@@ -119,5 +131,31 @@ public class RedisMessagePublisher {
                 .type(chatMessage.getType())
                 .sentAt(chatMessage.getSentAt())
                 .build();
+    }
+
+
+    /**
+     * 사용자 조회
+     */
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
+    }
+
+
+    /**
+     * 채팅방 조회
+     */
+    private ChatRoom findChatRoomById(String roomId) {
+        return chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다. RoomID: " + roomId));
+    }
+
+
+    /**
+     * 시스템 유저 생성
+     */
+    private User getSystemUser() {
+        return User.builder().id(SYSTEM_USER_ID).name(SYSTEM_USER_NAME).build();
     }
 }
