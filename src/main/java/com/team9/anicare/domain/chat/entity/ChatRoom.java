@@ -76,6 +76,7 @@ public class ChatRoom {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.roomId = generateUniqueRoomId();  // 채팅방 생성 시 자동으로 ID 부여
     }
 
 
@@ -86,5 +87,12 @@ public class ChatRoom {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 고유한 채팅방 ID(UUID)를 생성하는 메서드
+     */
+    public static String generateUniqueRoomId() {
+        return java.util.UUID.randomUUID().toString();
     }
 }
