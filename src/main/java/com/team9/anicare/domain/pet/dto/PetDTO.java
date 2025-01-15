@@ -1,9 +1,6 @@
 package com.team9.anicare.domain.pet.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,6 +8,9 @@ import java.util.Date;
 
 @Getter
 @Builder
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PetDTO {
     private Long id;
     private Long userId;
@@ -27,7 +27,6 @@ public class PetDTO {
 
     @Getter
     @Builder
-    @ToString
     public static class AddPetDTO {
         private Long breedId;
         private Long speciesId;

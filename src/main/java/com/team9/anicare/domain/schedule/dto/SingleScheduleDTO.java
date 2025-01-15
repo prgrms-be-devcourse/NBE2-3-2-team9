@@ -6,9 +6,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
+@Builder
 public class SingleScheduleDTO {
     private Long id;
     private Long petId;
@@ -22,8 +23,7 @@ public class SingleScheduleDTO {
     private LocalDateTime updatedAt;
 
     @Getter
-    @Setter
-    @ToString
+    @Builder
     public static class AddSingleScheduleDTO {
         private Long petId;
         private String name;
@@ -33,7 +33,7 @@ public class SingleScheduleDTO {
     }
 
     @Getter
-    @Setter
+    @Builder
     public static class UpdateSingleScheduleDTO {
         private Long id;
         private Long petId;
