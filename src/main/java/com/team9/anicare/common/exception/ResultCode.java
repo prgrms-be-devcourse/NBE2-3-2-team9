@@ -56,6 +56,7 @@ public enum ResultCode {
     NOT_EXISTS_POST(404, "게시글이 존재하지 않습니다."),
     NOT_EXISTS_COMMENT(404, "댓글이 존재하지 않습니다"),
     DUPLICATE_LIKE(409, "이미 좋아요를 누른 상태입니다"),
+    NOT_EXISTS_LIKE(404, "좋아요를 누르지 않은 상태입니다"),
 
     // 파일 관련
     EMPTY_FILE_NAME(400, "파일 이름이 비었습니다"),

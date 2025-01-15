@@ -9,6 +9,7 @@ import com.team9.anicare.domain.community.dto.*;
 import com.team9.anicare.domain.community.mapper.CommunityMapper;
 import com.team9.anicare.domain.community.model.Community;
 import com.team9.anicare.domain.community.repository.CommentRepository;
+import com.team9.anicare.domain.community.repository.CommunityLikeRepository;
 import com.team9.anicare.domain.community.repository.CommunityRepository;
 import com.team9.anicare.common.file.service.S3FileService;
 import com.team9.anicare.domain.user.model.User;
@@ -16,6 +17,8 @@ import com.team9.anicare.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,9 +30,11 @@ import java.util.List;
 public class CommunityService {
 
     private final CommunityRepository communityRepository;
-    private final CommunityMapper communityMapper;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final CommunityLikeRepository communityLikeRepository;
+
+    private final CommunityMapper communityMapper;
     private final S3FileService s3FileService;
 
     public PageDTO<CommunityResponseDTO> showPosts(PageRequestDTO pageRequestDTO, String keyword, String category) {
@@ -79,6 +84,16 @@ public class CommunityService {
 
         // 조회된 게시글 -> DTO 변환
         CommunityResponseDTO communityResponseDTO = communityMapper.toDto(community);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = (authentication != null && authentication.isAuthenticated()) ? authentication.getName() : null;
+
+        boolean liked = false;
+        if(userId != null && !userId.equals("anonymousUser")) {
+            liked = communityLikeRepository.existsByCommunityIdAndUserId(community.getId(), Long.parseLong(userId));
+        }
+
+        communityResponseDTO.setLiked(liked);
 
         // 조회된 댓글 -> DTO 변환
         List<CommentResponseDTO> comments = commentRepository.findByCommunityIdAndParentIsNull(postingId).stream()

@@ -20,6 +20,7 @@ public class CommunityResponseDTO {
     private String animalSpecies;
     private int commentCount;
     private int likeCount;
+    private boolean liked;
     private boolean canEdit;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
