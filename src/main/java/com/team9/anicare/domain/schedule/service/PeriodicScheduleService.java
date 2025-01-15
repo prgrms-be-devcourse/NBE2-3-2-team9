@@ -71,11 +71,18 @@ public class PeriodicScheduleService {
             throw new CustomException(ResultCode.INVALID_REQUEST);
         }
 
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-        PeriodicSchedule periodicSchedule = modelMapper.map(request, PeriodicSchedule.class);
-        periodicSchedule.setUser(getUserById(userId));
-        periodicSchedule.setPet(getPetById(petId));
+        PeriodicSchedule periodicSchedule = PeriodicSchedule.builder()
+                .user(getUserById(userId))
+                .pet(getPetById(petId))
+                .name(request.getName())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .startTime(request.getStartTime())
+                .endTime(request.getEndTime())
+                .repeatPattern(request.getRepeatPattern())
+                .repeatInterval(request.getRepeatInterval())
+                .repeatDays(request.getRepeatDays())
+                .build();
 
         periodicScheduleRepo.save(periodicSchedule);
 
@@ -114,16 +121,7 @@ public class PeriodicScheduleService {
 
         PeriodicSchedule periodicSchedule = periodicScheduleRepo.findById(Id)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_SCHEDULE));
-        periodicSchedule.setUser(getUserById(userId));
-        periodicSchedule.setPet(getPetById(petId));
-        periodicSchedule.setName(request.getName());
-        periodicSchedule.setStartDate(request.getStartDate());
-        periodicSchedule.setEndDate(request.getEndDate());
-        periodicSchedule.setStartTime(request.getStartTime());
-        periodicSchedule.setEndTime(request.getEndTime());
-        periodicSchedule.setRepeatPattern(request.getRepeatPattern());
-        periodicSchedule.setRepeatInterval(request.getRepeatInterval());
-        periodicSchedule.setRepeatDays(request.getRepeatDays());
+        periodicSchedule.updatePeriodicSchedule(request,petRepository);
         periodicScheduleRepo.save(periodicSchedule);
 
         singleScheduleRepository.deleteByPeriodicSchedule(periodicSchedule);
