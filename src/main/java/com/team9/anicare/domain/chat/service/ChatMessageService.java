@@ -3,6 +3,7 @@ package com.team9.anicare.domain.chat.service;
 import com.team9.anicare.domain.chat.dto.ChatMessageRequestDTO;
 import com.team9.anicare.domain.chat.dto.ChatMessageResponseDTO;
 import com.team9.anicare.domain.chat.entity.ChatMessage;
+import com.team9.anicare.domain.chat.entity.ChatParticipant;
 import com.team9.anicare.domain.chat.entity.ChatRoom;
 import com.team9.anicare.domain.chat.repository.ChatMessageRepository;
 import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
@@ -31,6 +32,7 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
     private final ChatParticipantRepository chatParticipantRepository;
+    private final ChatParticipant chatParticipant;
 
 
     /**
@@ -47,13 +49,22 @@ public class ChatMessageService {
 
         // 채팅방 조회
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(requestDTO.getRoomId())
-                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+
+        // 참여자 여부 확인
+        boolean isParticipant = chatParticipantRepository.findByUserAndChatRoom(sender, chatRoom)
+                .filter(ChatParticipant::isActive)
+                .isPresent();
+
+        if (!isParticipant) {
+            throw new IllegalStateException("채팅방에 참여 중인 사용자가 아닙니다.");
+        }
 
         // 수신자 조회 (선택적)
         User receiver = null;
         if (requestDTO.getReceiverId() != null) {
             receiver = userRepository.findById(requestDTO.getReceiverId())
-                    .orElseThrow(() -> new IllegalArgumentException("수신자를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new EntityNotFoundException("수신자를 찾을 수 없습니다."));
         }
 
         ChatMessage chatMessage = ChatMessage.builder()
@@ -66,6 +77,11 @@ public class ChatMessageService {
                 .build();
 
         chatMessageRepository.save(chatMessage);
+
+        // 마지막 메시지 업데이트
+        chatRoom.setLastMessage(chatMessage.getContent());
+        chatRoom.setLastMessageTime(chatMessage.getSentAt());
+        chatRoomRepository.save(chatRoom);
 
         // DTO 변환 및 반환
         return convertToResponseDTO(chatMessage);
@@ -81,11 +97,13 @@ public class ChatMessageService {
      */
     public ChatMessageResponseDTO sendSystemMessage(String content, String roomId, ChatMessage.MessageType type) {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
 
         // 시스템 메시지 생성
+        User systemUser = User.builder().id(0L).name("SYSTEM").build();
+
         ChatMessage systemMessage = ChatMessage.builder()
-                .sender(null) // 시스템 메시지는 발신자가 없음
+                .sender(systemUser)
                 .content(content)
                 .type(type)
                 .chatRoom(chatRoom)
@@ -107,7 +125,7 @@ public class ChatMessageService {
      */
     public List<ChatMessageResponseDTO> getMessagesByRoom(String roomId) {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
 
         return chatMessageRepository.findByChatRoomOrderBySentAtAsc(chatRoom).stream()
                 .map(this::convertToResponseDTO)
