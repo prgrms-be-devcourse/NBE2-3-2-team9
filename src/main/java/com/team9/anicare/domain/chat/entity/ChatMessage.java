@@ -73,6 +73,7 @@ public class ChatMessage {
     public enum MessageType {
         ENTER,
         TALK,
-        EXIT
+        EXIT,
+        SYSTEM
     }
 }
