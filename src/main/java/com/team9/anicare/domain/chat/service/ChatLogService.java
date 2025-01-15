@@ -1,7 +1,5 @@
 package com.team9.anicare.domain.chat.service;
 
-import com.team9.anicare.domain.chat.dto.ChatMessageDTO;
-import com.team9.anicare.domain.chat.dto.ChatRoomDTO;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
