@@ -23,4 +23,8 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
 
     // 특정 채팅방에 참여 중인 관리자 목록 조회
     List<ChatParticipant> findByChatRoomAndIsAdminTrue(ChatRoom chatRoom);
+
+    // 채팅방에서 활성 상태인 관리자의 수를 반환
+    long countByChatRoomAndIsAdminTrueAndIsActiveTrue(ChatRoom chatRoom);
+
 }
