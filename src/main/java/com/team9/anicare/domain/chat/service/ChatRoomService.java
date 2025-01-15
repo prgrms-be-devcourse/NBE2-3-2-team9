@@ -93,6 +93,18 @@ public class ChatRoomService {
 
 
     /**
+     * 대기 중인(관리자가 없는) 채팅방 조회
+     *
+     * @return 관리자가 없는 채팅방 목록
+     */
+    public List<ChatRoomResponseDTO> getWaitingRooms() {
+        return chatRoomRepository.findByOccupiedFalse().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+
+    /**
      * 관리자 참여 여부 확인
      * - 특정 채팅방에 관리자가 참여 중인지 확인
      *
