@@ -6,9 +6,13 @@ import com.team9.anicare.domain.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface CommunityLikeRepository extends JpaRepository<CommunityLike, Long> {
 
-    boolean existsByCommunityAndUser(Community community, User user);
+    boolean existsByCommunityIdAndUserId(Long communityId, Long userId);
+
+    Optional<CommunityLike> findByCommunityIdAndUserId(Long communityId, Long userId);
 
 }
