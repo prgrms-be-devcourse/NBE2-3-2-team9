@@ -27,6 +27,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     List<ChatRoom> findByCreator(User creator);
 
 
-    // 관리자가 참여 중인 채팅방 조회
-    List<ChatRoom> findByAdminsContaining(User admin);
+    // 관리자가 없는(occupied = false) 대기 중인 채팅방 조회
+    List<ChatRoom> findByOccupiedFalse();
 }
