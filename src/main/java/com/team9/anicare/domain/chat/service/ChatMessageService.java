@@ -43,38 +43,22 @@ public class ChatMessageService {
      */
     public ChatMessageResponseDTO sendMessage(Long senderId, ChatMessageRequestDTO requestDTO) {
         // 발신자 조회
-        User sender = userRepository.findById(senderId)
-                .orElseThrow(() -> new EntityNotFoundException("발신자를 찾을 수 없습니다."));
+        User sender = findUserById(senderId);
 
         // 채팅방 조회
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(requestDTO.getRoomId())
-                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+        ChatRoom chatRoom = findChatRoomById(requestDTO.getRoomId());
 
         // 참여자 여부 확인
         validateParticipant(sender, chatRoom);
 
         // 수신자 조회 (선택적)
-        User receiver = null;
-        if (requestDTO.getReceiverId() != null) {
-            receiver = userRepository.findById(requestDTO.getReceiverId())
-                    .orElseThrow(() -> new EntityNotFoundException("수신자를 찾을 수 없습니다."));
-        }
+        User receiver = requestDTO.getReceiverId() != null
+                ? findUserById(requestDTO.getReceiverId())
+                : null;
 
-        ChatMessage chatMessage = ChatMessage.builder()
-                .sender(sender)
-                .receiver(receiver)
-                .content(requestDTO.getContent())
-                .type(requestDTO.getType())
-                .chatRoom(chatRoom)
-                .sentAt(LocalDateTime.now())
-                .build();
+        ChatMessage chatMessage = createChatMessage(sender, receiver, requestDTO, chatRoom);
 
-        chatMessageRepository.save(chatMessage);
-
-        // 마지막 메시지 업데이트
-        chatRoom.setLastMessage(chatMessage.getContent());
-        chatRoom.setLastMessageTime(chatMessage.getSentAt());
-        chatRoomRepository.save(chatRoom);
+        saveMessageAndUpdateRoom(chatMessage, chatRoom);
 
         // DTO 변환 및 반환
         return convertToResponseDTO(chatMessage);
@@ -89,28 +73,18 @@ public class ChatMessageService {
      * @param type    메시지 타입 (ENTER, EXIT)
      */
     public ChatMessageResponseDTO sendSystemMessage(String content, String roomId, ChatMessage.MessageType type) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+        ChatRoom chatRoom = findChatRoomById(roomId);
 
-        // 시스템 메시지 생성
-        User systemUser = User.builder().id(0L).name("SYSTEM").build();
-
-        ChatMessage systemMessage = ChatMessage.builder()
-                .sender(systemUser) // SYSTEM 유저 사용
+        ChatMessageRequestDTO requestDTO = ChatMessageRequestDTO.builder()
                 .content(content)
                 .type(type)
-                .chatRoom(chatRoom)
-                .sentAt(LocalDateTime.now())
+                .roomId(roomId)
                 .build();
 
-        chatMessageRepository.save(systemMessage);
+        ChatMessage systemMessage = createChatMessage(getSystemUser(), null, requestDTO, chatRoom);
+        saveMessageAndUpdateRoom(systemMessage, chatRoom);
 
-        // 마지막 메시지 업데이트
-        chatRoom.setLastMessage(systemMessage.getContent());
-        chatRoom.setLastMessageTime(systemMessage.getSentAt());
-        chatRoomRepository.save(chatRoom);
-
-        return ChatMessageResponseDTO.systemMessage(content, type);
+        return convertToResponseDTO(systemMessage);
     }
 
 
@@ -122,12 +96,37 @@ public class ChatMessageService {
      * @return 채팅 메시지 목록 DTO
      */
     public List<ChatMessageResponseDTO> getMessagesByRoom(String roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+        ChatRoom chatRoom = findChatRoomById(roomId);
 
         return chatMessageRepository.findByChatRoomOrderBySentAtAsc(chatRoom).stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+
+    /**
+     * 메시지 생성 (일반/시스템 공통)
+     */
+    private ChatMessage createChatMessage(User sender, User receiver, ChatMessageRequestDTO requestDTO, ChatRoom chatRoom) {
+        return ChatMessage.builder()
+                .sender(sender)
+                .receiver(receiver)
+                .content(requestDTO.getContent())
+                .type(requestDTO.getType())
+                .chatRoom(chatRoom)
+                .sentAt(LocalDateTime.now())
+                .build();
+    }
+
+
+    /**
+     * 메시지 저장 및 채팅방의 마지막 메시지 업데이트
+     */
+    private void saveMessageAndUpdateRoom(ChatMessage chatMessage, ChatRoom chatRoom) {
+        chatMessageRepository.save(chatMessage);
+        chatRoom.setLastMessage(chatMessage.getContent());
+        chatRoom.setLastMessageTime(chatMessage.getSentAt());
+        chatRoomRepository.save(chatRoom);
     }
 
 
@@ -159,5 +158,30 @@ public class ChatMessageService {
         if (!isParticipant) {
             throw new IllegalStateException("채팅방에 참여 중인 사용자가 아닙니다.");
         }
+    }
+
+
+    /**
+     * 사용자 조회
+     */
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
+    }
+
+
+    /**
+     * 채팅방 조회
+     */
+    private ChatRoom findChatRoomById(String roomId) {
+        return chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다. RoomID: " + roomId));
+    }
+
+    /**
+     * 시스템 메시지를 위한 가상 SYSTEM 유저 생성
+     */
+    private User getSystemUser() {
+        return User.builder().id(0L).name("SYSTEM").build();
     }
 }
