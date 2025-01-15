@@ -127,7 +127,7 @@ public class ChatRoomService {
      */
     public boolean isDoctorPresent(String roomId) {
         List<ChatParticipant> participants = chatParticipantRepository.findByRoomIdAndIsActive(roomId, true);
-        return participants.stream().anyMatch(ChatParticipant::isDoctor);
+        return participants.stream().anyMatch(ChatParticipant::isAdmin);
     }
 
     /**
