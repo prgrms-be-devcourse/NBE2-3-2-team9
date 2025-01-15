@@ -12,6 +12,7 @@ import com.team9.anicare.domain.schedule.repository.SingleScheduleRepository;
 import com.team9.anicare.domain.user.model.User;
 import com.team9.anicare.domain.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,24 @@ public class SingleScheduleService {
         }
 
         List<SingleScheduleDTO> singleScheduleDTOs = lists.stream()
-                .map(singleschedule -> modelMapper.map(singleschedule, SingleScheduleDTO.class))
+                .map(singleSchedule -> {
+                    SingleScheduleDTO.SingleScheduleDTOBuilder builder = SingleScheduleDTO.builder()
+                            .id(singleSchedule.getId())
+                            .name(singleSchedule.getName())
+                            .petId(singleSchedule.getPet().getId())
+                            .userId(singleSchedule.getUser().getId())
+                            .startDatetime(singleSchedule.getStartDatetime())
+                            .endDatetime(singleSchedule.getEndDatetime())
+                            .createdAt(singleSchedule.getCreatedAt())
+                            .updatedAt(singleSchedule.getUpdatedAt());
+
+                    PeriodicSchedule periodicSchedule = singleSchedule.getPeriodicSchedule();
+                    if (periodicSchedule != null) {
+                        builder = builder.periodicScheduleId(periodicSchedule.getId());
+                    }
+
+                    return builder.build();
+                })
                 .collect(Collectors.toList());
 
         return singleScheduleDTOs;
@@ -95,7 +113,7 @@ public class SingleScheduleService {
             periodicScheduleRepository.deleteById(periodicSchedule.getId());
         }
 
-        singleSchedule.updateSingleSchedule(request,petRepository);
+        singleSchedule.updateSingleSchedule(request, petRepository);
 
         singlescheduleRepository.save(singleSchedule);
 
@@ -118,12 +136,12 @@ public class SingleScheduleService {
         if (singlescheduleRepository.existsById(singleScheduleId)) {
             PeriodicSchedule periodicSchedule = singleScheduleRepository.findPeriodicScheduleById(singleScheduleId);
             if (periodicSchedule != null) {
-               if (singleScheduleRepository.countByPeriodicScheduleId(periodicSchedule) == 1) {
-                   singleScheduleRepository.deleteById(singleScheduleId);
-                   periodicScheduleRepository.deleteById(periodicSchedule.getId());
-               }  else {
-                   singleScheduleRepository.deleteById(singleScheduleId);
-               }
+                if (singleScheduleRepository.countByPeriodicScheduleId(periodicSchedule) == 1) {
+                    singleScheduleRepository.deleteById(singleScheduleId);
+                    periodicScheduleRepository.deleteById(periodicSchedule.getId());
+                } else {
+                    singleScheduleRepository.deleteById(singleScheduleId);
+                }
             } else {
                 singleScheduleRepository.deleteById(singleScheduleId);
             }
@@ -131,6 +149,7 @@ public class SingleScheduleService {
             throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
         }
     }
+
     private User getUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(RuntimeException::new);
     }
