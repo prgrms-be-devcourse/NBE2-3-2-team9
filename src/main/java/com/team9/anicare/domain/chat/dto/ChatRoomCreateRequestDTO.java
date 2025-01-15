@@ -1,6 +1,7 @@
 package com.team9.anicare.domain.chat.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
