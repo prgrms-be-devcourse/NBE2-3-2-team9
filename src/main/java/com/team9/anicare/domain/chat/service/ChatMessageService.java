@@ -51,13 +51,7 @@ public class ChatMessageService {
                 .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
 
         // 참여자 여부 확인
-        boolean isParticipant = chatParticipantRepository.findByUserAndChatRoom(sender, chatRoom)
-                .filter(ChatParticipant::isActive)
-                .isPresent();
-
-        if (!isParticipant) {
-            throw new IllegalStateException("채팅방에 참여 중인 사용자가 아닙니다.");
-        }
+        validateParticipant(sender, chatRoom);
 
         // 수신자 조회 (선택적)
         User receiver = null;
@@ -87,7 +81,7 @@ public class ChatMessageService {
     }
 
     /**
-     * 🔹 시스템 메시지 전송
+     * 시스템 메시지 전송
      * - 사용자의 입장/퇴장 등의 시스템 알림 메시지 전송
      *
      * @param roomId  채팅방 ID
@@ -151,5 +145,19 @@ public class ChatMessageService {
                 .type(chatMessage.getType())
                 .sentAt(chatMessage.getSentAt())
                 .build();
+    }
+
+
+    /**
+     * 참여자 유효성 검사
+     */
+    private void validateParticipant(User sender, ChatRoom chatRoom) {
+        boolean isParticipant = chatParticipantRepository.findByUserAndChatRoom(sender, chatRoom)
+                .filter(ChatParticipant::isActive)
+                .isPresent();
+
+        if (!isParticipant) {
+            throw new IllegalStateException("채팅방에 참여 중인 사용자가 아닙니다.");
+        }
     }
 }
