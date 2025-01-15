@@ -22,6 +22,7 @@ public class ChatParticipantService {
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final ChatServiceUtil chatServiceUtil;
 
     /**
      * 채팅방 입장 처리
@@ -32,11 +33,9 @@ public class ChatParticipantService {
      * @param isAdmin 관리자 여부
      */
     public void joinChatRoom(String roomId, Long userId, boolean isAdmin) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+        ChatRoom chatRoom = chatServiceUtil.findChatRoomById(roomId);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        User user = chatServiceUtil.findUserById(userId);
 
         // 이미 참여 중인지 확인
         chatParticipantRepository.findByUserAndChatRoom(user, chatRoom)
@@ -77,22 +76,18 @@ public class ChatParticipantService {
      * @param userId 퇴장할 사용자 ID
      */
     public void leaveChatRoom(String roomId, Long userId) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+        ChatRoom chatRoom = chatServiceUtil.findChatRoomById(roomId);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        User user = chatServiceUtil.findUserById(userId);
 
-        ChatParticipant participant = chatParticipantRepository.findByUserAndChatRoom(user, chatRoom)
-                .orElseThrow(() -> new EntityNotFoundException("참여자를 찾을 수 없습니다."));
+        ChatParticipant participant = chatServiceUtil.findParticipantByUserAndRoom(user, chatRoom);
 
         participant.setActive(false);
         chatParticipantRepository.save(participant);
 
-        // 모든 관리자가 나갔는지 확인하고, 채팅방 상태 변경
-        boolean isAdminPresent = chatParticipantRepository.findByChatRoomAndIsAdminTrue(chatRoom)
-                .stream()
-                .anyMatch(ChatParticipant::isActive);
+        // 모든 관리자가 나갔는지 확인
+        boolean isAdminPresent = chatParticipantRepository.countByChatRoomAndIsAdminTrueAndIsActiveTrue(chatRoom) > 0;
+
 
         if (!isAdminPresent) {
             chatRoom.setOccupied(false);
@@ -108,8 +103,7 @@ public class ChatParticipantService {
      * @return 참여자 목록
      */
     public List<ChatParticipant> getParticipantsByRoom(String roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+        ChatRoom chatRoom = chatServiceUtil.findChatRoomById(roomId);
 
         return chatParticipantRepository.findByChatRoom(chatRoom);
     }
@@ -123,11 +117,9 @@ public class ChatParticipantService {
      * @return 참여 중이면 true, 아니면 false
      */
     public boolean isUserInRoom(String roomId, Long userId) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+        ChatRoom chatRoom = chatServiceUtil.findChatRoomById(roomId);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        User user = chatServiceUtil.findUserById(userId);
 
         return chatParticipantRepository.findByUserAndChatRoom(user, chatRoom)
                 .filter(ChatParticipant::isActive)
