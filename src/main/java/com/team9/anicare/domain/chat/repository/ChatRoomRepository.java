@@ -17,11 +17,15 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     // roomId로 채팅방 조회
     Optional<ChatRoom> findByRoomId(String roomId);
 
+    // 채팅방 이름 또는 설명에 키워드가 포함된 채팅방 검색
+    List<ChatRoom> findByRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String roomName, String description);
+
+    // 특정 roomId 목록에 해당하는 채팅방 조회
+    List<ChatRoom> findByRoomIdIn(List<String> roomIds);
+
     // 특정 사용자가 생성한 채팅방 목록 조회
     List<ChatRoom> findByCreator(User creator);
 
-    // 채팅방 이름으로 검색
-    List<ChatRoom> findByRoomNameContaining(String keyword);
 
     // 관리자가 참여 중인 채팅방 조회
     List<ChatRoom> findByAdminsContaining(User admin);
