@@ -1,7 +1,6 @@
 package com.team9.anicare.domain.chat.controller;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.team9.anicare.domain.chat.dto.ChatRoomDTO;
 import com.team9.anicare.domain.chat.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
