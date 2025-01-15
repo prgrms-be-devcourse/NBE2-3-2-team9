@@ -32,7 +32,6 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
     private final ChatParticipantRepository chatParticipantRepository;
-    private final ChatParticipant chatParticipant;
 
 
     /**
@@ -103,7 +102,7 @@ public class ChatMessageService {
         User systemUser = User.builder().id(0L).name("SYSTEM").build();
 
         ChatMessage systemMessage = ChatMessage.builder()
-                .sender(systemUser)
+                .sender(systemUser) // SYSTEM 유저 사용
                 .content(content)
                 .type(type)
                 .chatRoom(chatRoom)
@@ -111,6 +110,11 @@ public class ChatMessageService {
                 .build();
 
         chatMessageRepository.save(systemMessage);
+
+        // 마지막 메시지 업데이트
+        chatRoom.setLastMessage(systemMessage.getContent());
+        chatRoom.setLastMessageTime(systemMessage.getSentAt());
+        chatRoomRepository.save(chatRoom);
 
         return ChatMessageResponseDTO.systemMessage(content, type);
     }
