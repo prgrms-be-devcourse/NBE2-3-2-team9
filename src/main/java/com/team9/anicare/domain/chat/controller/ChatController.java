@@ -1,6 +1,5 @@
 package com.team9.anicare.domain.chat.controller;
 
-import com.team9.anicare.domain.chat.dto.ChatMessageDTO;
 import com.team9.anicare.domain.chat.service.ChatLogService;
 import com.team9.anicare.domain.chat.service.ChatRoomService;
 import com.team9.anicare.domain.chat.service.RedisMessagePublisher;
