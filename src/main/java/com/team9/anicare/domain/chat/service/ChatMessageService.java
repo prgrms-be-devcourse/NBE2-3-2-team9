@@ -139,6 +139,7 @@ public class ChatMessageService {
     private ChatMessageResponseDTO convertToResponseDTO(ChatMessage chatMessage) {
         return ChatMessageResponseDTO.builder()
                 .messageId(chatMessage.getId())
+                .roomId(chatMessage.getChatRoom().getRoomId())
                 .senderName(chatMessage.getSender() != null ? chatMessage.getSender().getName() : "SYSTEM")
                 .content(chatMessage.getContent())
                 .type(chatMessage.getType())

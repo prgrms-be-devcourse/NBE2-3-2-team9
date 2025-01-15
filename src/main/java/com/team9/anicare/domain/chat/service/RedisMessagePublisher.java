@@ -126,6 +126,7 @@ public class RedisMessagePublisher {
     private ChatMessageResponseDTO convertToResponseDTO(ChatMessage chatMessage) {
         return ChatMessageResponseDTO.builder()
                 .messageId(chatMessage.getId())
+                .roomId(chatMessage.getChatRoom().getRoomId())
                 .senderName(chatMessage.getSender().getName())
                 .content(chatMessage.getContent())
                 .type(chatMessage.getType())
