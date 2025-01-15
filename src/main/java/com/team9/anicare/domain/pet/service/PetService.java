@@ -40,7 +40,18 @@ public class PetService {
         }
 
         List<PetDTO> petDTOs = lists.stream()
-                .map(pet -> modelMapper.map(pet, PetDTO.class))
+                .map(pet -> PetDTO.builder()
+                        .id(pet.getId())
+                        .userId(pet.getUser().getId())
+                        .speciesId(pet.getSpecies().getId())
+                        .breedId(pet.getBreed().getId())
+                        .name(pet.getName())
+                        .age(pet.getAge())
+                        .picture(pet.getPicture())
+                        .gender(pet.getGender())
+                        .createdAt(pet.getCreatedAt())
+                        .updatedAt(pet.getUpdatedAt())
+                        .build())
                 .collect(Collectors.toList());
 
         return petDTOs;
