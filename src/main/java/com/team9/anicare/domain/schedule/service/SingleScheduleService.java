@@ -52,17 +52,27 @@ public class SingleScheduleService {
             throw new CustomException(ResultCode.INVALID_DATETIME_VALUE);
         }
 
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        SingleSchedule singleSchedule = SingleSchedule.builder()
+                .name(request.getName())
+                .pet(getPetById(request.getPetId()))
+                .user(getUserById(userId))
+                .startDatetime(request.getStartDatetime())
+                .endDatetime(request.getEndDatetime())
+                .build();
 
-        SingleSchedule singleschedule = modelMapper.map(request, SingleSchedule.class);
-        singleschedule.setUser(getUserById(userId));
-        singleschedule.setPet(getPetById(petId));
-        singlescheduleRepository.save(singleschedule);
+        singlescheduleRepository.save(singleSchedule);
 
-        SingleScheduleDTO singleScheduleDTO = modelMapper.map(singleschedule, SingleScheduleDTO.class);
-        singleScheduleDTO.setUserId(userId);
-        singleScheduleDTO.setPetId(petId);
-        singleScheduleDTO.setPetName(request.getPetName());
+        SingleScheduleDTO singleScheduleDTO = SingleScheduleDTO.builder()
+                .id(singleSchedule.getId())
+                .name(singleSchedule.getName())
+                .petId(singleSchedule.getPet().getId())
+                .userId(singleSchedule.getUser().getId())
+                .startDatetime(singleSchedule.getStartDatetime())
+                .endDatetime(singleSchedule.getEndDatetime())
+                .petName(request.getPetName())
+                .createdAt(singleSchedule.getCreatedAt())
+                .updatedAt(singleSchedule.getUpdatedAt())
+                .build();
 
         return singleScheduleDTO;
     }
@@ -77,19 +87,29 @@ public class SingleScheduleService {
             throw new CustomException(ResultCode.INVALID_DATETIME_VALUE);
         }
 
-        SingleSchedule singleschedule = singlescheduleRepository.findById(Id)
+        SingleSchedule singleSchedule = singlescheduleRepository.findById(Id)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_SCHEDULE));
-        singleschedule.setName(request.getName());
-        singleschedule.setStartDatetime(request.getStartDatetime());
-        singleschedule.setEndDatetime(request.getEndDatetime());
-        singleschedule.setPet(getPetById(petId));
-        singlescheduleRepository.save(singleschedule);
+        PeriodicSchedule periodicSchedule = singleSchedule.getPeriodicSchedule();
 
+        if (singleScheduleRepository.countByPeriodicScheduleId(periodicSchedule) == 1) {
+            periodicScheduleRepository.deleteById(periodicSchedule.getId());
+        }
 
-        SingleScheduleDTO singleScheduleDTO = modelMapper.map(singleschedule, SingleScheduleDTO.class);
-        singleScheduleDTO.setUserId(userId);
-        singleScheduleDTO.setPetId(petId);
-        singleScheduleDTO.setPetName(request.getPetName());
+        singleSchedule.updateSingleSchedule(request,petRepository);
+
+        singlescheduleRepository.save(singleSchedule);
+
+        SingleScheduleDTO singleScheduleDTO = SingleScheduleDTO.builder()
+                .id(singleSchedule.getId())
+                .name(singleSchedule.getName())
+                .petId(singleSchedule.getPet().getId())
+                .userId(singleSchedule.getUser().getId())
+                .startDatetime(singleSchedule.getStartDatetime())
+                .endDatetime(singleSchedule.getEndDatetime())
+                .petName(request.getPetName())
+                .createdAt(singleSchedule.getCreatedAt())
+                .updatedAt(singleSchedule.getUpdatedAt())
+                .build();
 
         return singleScheduleDTO;
     }

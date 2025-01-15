@@ -182,15 +182,14 @@ public class PeriodicScheduleService {
         LocalDateTime startDatetime = LocalDateTime.of(date, periodicSchedule.getStartTime());
         LocalDateTime endDatetime = LocalDateTime.of(date, periodicSchedule.getEndTime());
 
-        SingleSchedule schedule = new SingleSchedule();
-        schedule.setUser(periodicSchedule.getUser());
-        schedule.setPet(periodicSchedule.getPet());
-        schedule.setPeriodicSchedule(periodicSchedule);
-        schedule.setName(periodicSchedule.getName());
-        schedule.setStartDatetime(startDatetime);
-        schedule.setEndDatetime(endDatetime);
-
-        return schedule;
+        return SingleSchedule.builder()
+                .name(periodicSchedule.getName())
+                .pet(periodicSchedule.getPet())
+                .periodicSchedule(periodicSchedule)
+                .user(periodicSchedule.getUser())
+                .startDatetime(startDatetime)
+                .endDatetime(endDatetime)
+                .build();
     }
 
     private List<DayOfWeek> parseRepeatDays(String repeatDays) {
