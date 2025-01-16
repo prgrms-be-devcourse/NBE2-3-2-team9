@@ -1,5 +1,6 @@
 package com.team9.anicare.domain.chat.service;
 
+import com.team9.anicare.domain.chat.entity.ChatMessage;
 import com.team9.anicare.domain.chat.entity.ChatParticipant;
 import com.team9.anicare.domain.chat.entity.ChatRoom;
 import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
@@ -21,8 +22,9 @@ public class ChatParticipantService {
 
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final UserRepository userRepository;
     private final ChatServiceUtil chatServiceUtil;
+    private final ChatMessageService chatMessageService;
+
 
     /**
      * 채팅방 입장 처리
@@ -75,21 +77,22 @@ public class ChatParticipantService {
      * @param roomId 채팅방 ID
      * @param userId 퇴장할 사용자 ID
      */
-    public void leaveChatRoom(String roomId, Long userId) {
+    public void leaveChatRoom(String roomId, Long userId, boolean isAdmin) {
         ChatRoom chatRoom = chatServiceUtil.findChatRoomById(roomId);
 
         User user = chatServiceUtil.findUserById(userId);
 
+        // 참여자 비활성화 처리
         ChatParticipant participant = chatServiceUtil.findParticipantByUserAndRoom(user, chatRoom);
-
         participant.setActive(false);
         chatParticipantRepository.save(participant);
 
-        // 모든 관리자가 나갔는지 확인
-        boolean isAdminPresent = chatParticipantRepository.countByChatRoomAndIsAdminTrueAndIsActiveTrue(chatRoom) > 0;
+        // 시스템 메시지 전송
+        String content = isAdmin ? "관리자가 퇴장했습니다." : "사용자가 퇴장했습니다.";
+        chatMessageService.sendSystemMessage(content, roomId, ChatMessage.MessageType.EXIT);
 
-
-        if (!isAdminPresent) {
+        // 모든 관리자가 나갔는지 확인 후 occupied 상태 변경
+        if (isAdmin && chatParticipantRepository.countByChatRoomAndIsAdminTrueAndIsActiveTrue(chatRoom) == 0) {
             chatRoom.setOccupied(false);
             chatRoomRepository.save(chatRoom);
         }

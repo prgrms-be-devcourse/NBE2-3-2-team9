@@ -23,10 +23,12 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     // 특정 roomId 목록에 해당하는 채팅방 조회
     List<ChatRoom> findByRoomIdIn(List<String> roomIds);
 
-    // 특정 사용자가 생성한 채팅방 목록 조회
-    List<ChatRoom> findByCreator(User creator);
-
-
     // 관리자가 없는(occupied = false) 대기 중인 채팅방 조회
     List<ChatRoom> findByOccupiedFalse();
+
+    // 사용자가 생성한 채팅방에서 검색
+    List<ChatRoom> findByCreatorIdAndRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(Long creatorId, String roomName, String description);
+
+    // 특정 사용자가 생성한 채팅방 목록 조회 (User ID 기준)
+    List<ChatRoom> findByCreatorId(Long creatorId);
 }

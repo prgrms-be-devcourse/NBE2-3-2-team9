@@ -78,21 +78,6 @@ public class ChatRoomService {
 
 
     /**
-     * 특정 채팅방 조회
-     * - roomId를 기준으로 채팅방 조회
-     *
-     * @param roomId 조회할 채팅방 ID
-     * @return 채팅방 정보 DTO
-     */
-    public ChatRoomResponseDTO getRoomById(String roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
-
-        return convertToDTO(chatRoom);
-    }
-
-
-    /**
      * 대기 중인(관리자가 없는) 채팅방 조회
      *
      * @return 관리자가 없는 채팅방 목록
@@ -105,59 +90,11 @@ public class ChatRoomService {
 
 
     /**
-     * 관리자 참여 여부 확인
-     * - 특정 채팅방에 관리자가 참여 중인지 확인
-     *
-     * @param roomId 채팅방 ID
-     * @return 관리자가 참여 중이면 true, 아니면 false
-     */
-    public boolean isAdminPresent(String roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
-
-        return chatParticipantRepository.findByChatRoomAndIsAdminTrue(chatRoom)
-                .stream().anyMatch(ChatParticipant::isActive);
-    }
-
-
-    /**
-     * 사용자 퇴장 처리
-     * - 사용자가 채팅방에서 나갈 때 호출되는 메서드
-     * - 관리자가 모두 나갔을 경우, 채팅방 상태를 비활성화(occupied = false)
-     *
-     * @param roomId 채팅방 ID
-     * @param userId 퇴장한 사용자 ID
-     */
-    public void handleUserExit(String roomId, Long userId) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-        ChatParticipant participant = chatParticipantRepository.findByUserAndChatRoom(user, chatRoom)
-                .orElseThrow(() -> new IllegalArgumentException("참여자를 찾을 수 없습니다."));
-
-        participant.setActive(false);
-        chatParticipantRepository.save(participant);
-
-        // 퇴장한 사용자가 관리자일 경우, 다른 관리자가 참여 중인지 확인 후 상태 변경
-        if (participant.isAdmin() && !isAdminPresent(roomId)) {
-            chatRoom.setOccupied(false);
-            chatRoomRepository.save(chatRoom);
-        }
-    }
-
-
-    /**
-     * 키워드 기반 채팅방 검색
+     * ✅ 관리자 전용 - 전체 채팅방 검색
      * - 채팅방 이름, 설명, 메시지 내용에서 키워드를 검색
-     *
-     * @param keyword 검색할 키워드
-     * @return 검색 결과에 해당하는 채팅방 목록 DTO
      */
-    public List<ChatRoomResponseDTO> searchChatRooms (String keyword){
-        // 1. 채팅방 이름 또는 설명에 키워드가 포함된 채팅방 검색
+    public List<ChatRoomResponseDTO> searchAllChatRooms(String keyword) {
+        // 1. 채팅방 이름 또는 설명 검색
         List<ChatRoom> roomsByNameOrDescription = chatRoomRepository
                 .findByRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword);
 
@@ -169,15 +106,70 @@ public class ChatRoomService {
         List<ChatRoom> roomsByMessages = chatRoomRepository
                 .findByRoomIdIn(roomIdsByMessages);
 
-        // 4. 두 결과를 합치고 중복 제거
-        List<ChatRoom> combinedRooms = roomsByNameOrDescription;
-        combinedRooms.addAll(roomsByMessages);
-        combinedRooms = combinedRooms.stream().distinct().collect(Collectors.toList());
+        // 4. 두 결과 합치고 중복 제거
+        roomsByNameOrDescription.addAll(roomsByMessages);
+        List<ChatRoom> combinedRooms = roomsByNameOrDescription.stream().distinct().collect(Collectors.toList());
 
-        // 5. DTO로 변환 후 반환
+        // 5. DTO 변환
         return combinedRooms.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+
+    /**
+     * ✅ 사용자 전용 - 본인이 참여하거나 생성한 채팅방 검색
+     * - 채팅방 이름, 설명, 메시지 내용에서 키워드를 검색
+     */
+    public List<ChatRoomResponseDTO> searchUserChatRooms(Long userId, String keyword) {
+        // 1. 사용자가 참여 중인 채팅방 ID 조회
+        List<String> participantRoomIds = chatParticipantRepository.findRoomIdsByUserId(userId);
+
+        // 2. 사용자가 생성한 채팅방 검색 (이름 or 설명에 키워드 포함)
+        List<ChatRoom> createdRooms = chatRoomRepository
+                .findByCreatorIdAndRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(userId, keyword, keyword);
+
+        List<ChatRoom> roomsParticipatedByUser = chatRoomRepository
+                .findByRoomIdIn(participantRoomIds)
+                .stream()
+                .filter(room -> room.getRoomName().toLowerCase().contains(keyword.toLowerCase()) ||
+                        room.getDescription().toLowerCase().contains(keyword.toLowerCase()))
+                .collect(Collectors.toList());
+
+        // 3. 참여 중인 채팅방 중에서 키워드가 포함된 채팅방 검색
+        List<ChatRoom> participantRooms = chatRoomRepository
+                .findByRoomIdIn(participantRoomIds)
+                .stream()
+                .filter(room -> room.getRoomName().toLowerCase().contains(keyword.toLowerCase()) ||
+                        room.getDescription().toLowerCase().contains(keyword.toLowerCase()))
+                .collect(Collectors.toList());
+
+        // 4. 결과 합치기 및 중복 제거
+        createdRooms.addAll(participantRooms);
+        List<ChatRoom> combinedRooms = createdRooms.stream().distinct().collect(Collectors.toList());
+
+        // 5. DTO 변환 및 반환
+        return combinedRooms.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+
+    /**
+     * 사용자 전용 - 본인이 생성한 채팅방 조회
+     *
+     * @param userId 사용자 ID
+     * @return 사용자가 생성한 채팅방 정보 DTO (없으면 예외 발생)
+     */
+    public ChatRoomResponseDTO getRoomByUserId(Long userId) {
+        // 사용자가 생성한 채팅방 조회
+        ChatRoom chatRoom = chatRoomRepository.findByCreatorId(userId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("생성한 채팅방이 없습니다."));
+
+        // DTO로 변환 후 반환
+        return convertToDTO(chatRoom);
     }
 
 
