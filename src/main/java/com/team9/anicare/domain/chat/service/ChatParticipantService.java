@@ -67,6 +67,12 @@ public class ChatParticipantService {
             chatRoom.setOccupied(true);
             chatRoomRepository.save(chatRoom);
         }
+
+
+        // ✅ 관리자가 입장했을 때 시스템 메시지 전송 (없는게 나은가?)
+        if (isAdmin) {
+            chatMessageService.sendSystemMessage("관리자가 입장했습니다. 궁금한 점을 물어보세요!", roomId, ChatMessage.MessageType.SYSTEM);
+        }
     }
 
 
