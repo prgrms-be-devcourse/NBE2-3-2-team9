@@ -53,6 +53,22 @@ public class UserChatRoomController {
     }
 
 
+    @Operation(summary = "채팅방 입장 (User)", description = "사용자가 채팅방에 입장합니다.")
+    @PostMapping("/rooms/{roomId}/enter")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> enterChatRoom(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable String roomId) {
+
+        Long userId = userDetails.getUserId();
+
+        // ✅ 사용자 채팅방 입장 처리
+        chatParticipantService.joinChatRoom(roomId, userId, false);
+
+        return ResponseEntity.ok("채팅방에 입장했습니다.");
+    }
+
+
     @Operation(summary = "채팅방 퇴장 (User)", description = "사용자가 채팅방에서 나갑니다.")
     @PostMapping("/rooms/{roomId}/exit")
     public ResponseEntity<String> exitChatRoom(
