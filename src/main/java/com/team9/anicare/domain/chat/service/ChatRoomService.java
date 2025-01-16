@@ -62,7 +62,7 @@ public class ChatRoomService {
         chatRoomRepository.save(chatRoom);
 
         chatMessageService.sendSystemMessage(
-                String.format("채팅방이 생성되었습니다. 방 제목: %s, 설명: %s", requestDTO.getRoomName(), requestDTO.getDescription()),
+                String.format("채팅방이 생성되었습니다.<br>방 제목: %s<br>설명: %s", requestDTO.getRoomName(), requestDTO.getDescription()),
                 chatRoom.getRoomId(),
                 ChatMessage.MessageType.SYSTEM
         );
