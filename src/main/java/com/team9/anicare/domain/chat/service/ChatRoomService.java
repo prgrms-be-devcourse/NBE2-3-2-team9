@@ -3,6 +3,7 @@ package com.team9.anicare.domain.chat.service;
 
 import com.team9.anicare.domain.chat.dto.ChatRoomCreateRequestDTO;
 import com.team9.anicare.domain.chat.dto.ChatRoomResponseDTO;
+import com.team9.anicare.domain.chat.entity.ChatMessage;
 import com.team9.anicare.domain.chat.entity.ChatParticipant;
 import com.team9.anicare.domain.chat.entity.ChatRoom;
 import com.team9.anicare.domain.chat.repository.ChatMessageRepository;
@@ -29,9 +30,10 @@ import java.util.stream.Collectors;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
-    private final UserRepository userRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatMessageService chatMessageService;
+    private final ChatServiceUtil chatServiceUtil;
 
 
     /**
@@ -45,8 +47,8 @@ public class ChatRoomService {
      */
     public ChatRoomResponseDTO createChatRoom(Long userId, ChatRoomCreateRequestDTO requestDTO) {
         // 채팅방 생성자 조회
-        User creator = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        User creator = chatServiceUtil.findUserById(userId);
+
 
         // 채팅방 생성 및 저장
         ChatRoom chatRoom = ChatRoom.builder()
@@ -58,6 +60,12 @@ public class ChatRoomService {
                 .build();
 
         chatRoomRepository.save(chatRoom);
+
+        chatMessageService.sendSystemMessage(
+                String.format("채팅방이 생성되었습니다. 방 제목: %s, 설명: %s", requestDTO.getRoomName(), requestDTO.getDescription()),
+                chatRoom.getRoomId(),
+                ChatMessage.MessageType.SYSTEM
+        );
 
         // DTO로 변환하여 반환
         return convertToDTO(chatRoom);
