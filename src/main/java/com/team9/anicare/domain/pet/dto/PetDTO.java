@@ -8,7 +8,6 @@ import java.util.Date;
 
 @Getter
 @Builder
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PetDTO {
@@ -26,7 +25,6 @@ public class PetDTO {
     private LocalDateTime updatedAt;
 
     @Getter
-    @Builder
     public static class AddPetDTO {
         private Long breedId;
         private Long speciesId;
@@ -36,7 +34,6 @@ public class PetDTO {
     }
 
     @Getter
-    @Builder
     public static class UpdatePetDTO {
         private Long id;
         private Long breedId;
