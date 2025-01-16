@@ -4,7 +4,9 @@ package com.team9.anicare.common.exception;
 import com.team9.anicare.common.response.Result;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -51,4 +53,16 @@ public class GlobalExceptionHandler {
         Result<Map<String, String>> result = new Result<>(ResultCode.MISSING_PARAMETER, errors);
         return ResponseEntity.status(ResultCode.MISSING_PARAMETER.getCode()).body(result);
     }
+
+    // Validation 실패 처리
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Result<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            errors.put(error.getField(), error.getDefaultMessage());
+        }
+        Result<Map<String, String>> result = new Result<>(ResultCode.INVALID_REQUEST, errors);
+        return ResponseEntity.status(ResultCode.INVALID_REQUEST.getCode()).body(result);
+    }
+
 }

@@ -89,14 +89,6 @@ public class KakaoService {
 
         if (response.getStatusCode().is2xxSuccessful()) {
             try {
-//                ObjectMapper objectMapper = new ObjectMapper();
-//                JsonNode rootNode = objectMapper.readTree(response.getBody());
-//
-//                // 사용자 정보 추출
-//                String nickname = rootNode.get("kakao_account").get("profile").get("nickname").asText();
-//                String email = rootNode.get("kakao_account").get("email").asText();
-//                String profileImg = rootNode.get("kakao_account").get("profile").get("profile_image_url").asText();
-
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(response.getBody());
 
@@ -115,9 +107,10 @@ public class KakaoService {
                 String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 
                 // RefreshToken 암호화 후 저장
-                String encryptedRefreshToken = passwordEncoder.encode(refreshToken);
-                user.setRefreshtoken(encryptedRefreshToken);
-                userService.updateUser(user);
+                User updatedUser = user.toBuilder()
+                        .refreshtoken(passwordEncoder.encode(refreshToken)) // RefreshToken만 변경
+                        .build();
+                userService.updateUser(updatedUser);
 
                 // UserResponseDTO 반환
                 return new UserResponseDTO(user.getId(), nickname, email, jwtAccessToken, refreshToken, profileImg);

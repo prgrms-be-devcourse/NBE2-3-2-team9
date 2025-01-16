@@ -2,10 +2,7 @@ package com.team9.anicare.domain.user.service;
 
 import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.common.exception.ResultCode;
-import com.team9.anicare.domain.user.dto.CreateAdminDTO;
-import com.team9.anicare.domain.user.dto.UpdateAdminDTO;
-import com.team9.anicare.domain.user.dto.UpdateUserDTO;
-import com.team9.anicare.domain.user.dto.UserDetailResponseDTO;
+import com.team9.anicare.domain.user.dto.*;
 import com.team9.anicare.domain.user.mapper.UserMapper;
 import com.team9.anicare.domain.user.model.Role;
 import com.team9.anicare.domain.user.model.User;
@@ -24,27 +21,26 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    public CreateAdminDTO createAdmin(CreateAdminDTO createAdminDTO) {
+    public AdminResponseDTO createAdmin(CreateAdminDTO createAdminDTO) {
         // 이메일 중복 체크
         if (userRepository.existsByEmail(createAdminDTO.getEmail())) {
             throw new CustomException(ResultCode.EMAIL_ALREADY_EXISTS); // 사용자 정의 예외
         }
-
-        // DTO -> User 매핑
-        User user =userMapper.toUser(createAdminDTO);
-
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(createAdminDTO.getPassword());
-        user.setPassword(encodedPassword);
-
-        // 관리자 역할 설정
-        user.setRole(Role.ADMIN);
-
-        // 사용자 저장
+        User user = User.builder()
+                .email(createAdminDTO.getEmail())
+                .name(createAdminDTO.getName())
+                .password(encodedPassword)
+                .profileImg(createAdminDTO.getProfileImg())
+                .role(Role.ADMIN)
+                .build();
         userRepository.save(user);
-
-        // 저장된 데이터를 DTO로 반환
-        return userMapper.toCreateAdminDTO(user);
+        return AdminResponseDTO.builder()
+                .email(user.getEmail())
+                .name(user.getName())
+                .profileImg(user.getProfileImg())
+                .build();
     }
 
 
@@ -59,21 +55,25 @@ public class UserService {
 
 
     public String adminUpdate(Long id, UpdateAdminDTO updateAdminDTO) {
-            Optional<User> optionalUser = userRepository.findById(id);
+        Optional<User> optionalUser = userRepository.findById(id);
 
-            User user = optionalUser.get();
-            // 필요한 필드만 업데이트
-            if (updateAdminDTO.getPassword() != null) {
-                user.setPassword(passwordEncoder.encode(updateAdminDTO.getPassword()));
-            }
-            if (updateAdminDTO.getName() != null) {
-                user.setName(updateAdminDTO.getName());
-            }
-            if (updateAdminDTO.getProfileImg() != null) {
-                user.setProfileImg(updateAdminDTO.getProfileImg());
-            }
-            userRepository.save(user);
-            return "업데이트 성공";
+        User user = optionalUser.get();
+
+        User updatedUser = User.builder()
+                .id(user.getId()) // ID 유지
+                .name(updateAdminDTO.getName() != null ? updateAdminDTO.getName() : user.getName()) // 이름 업데이트 또는 기존 값 유지
+                .password(updateAdminDTO.getPassword() != null ? updateAdminDTO.getPassword() : user.getPassword())
+                .profileImg(updateAdminDTO.getProfileImg() != null ? updateAdminDTO.getProfileImg() : user.getProfileImg())
+                .email(updateAdminDTO.getEmail() != null ? updateAdminDTO.getEmail() : user.getEmail())
+                .pets(user.getPets()) // 기존 pets 유지
+                .refreshtoken(user.getRefreshtoken())
+                .years_of_experience(user.getYears_of_experience())
+                .role(user.getRole())
+                .communities(user.getCommunities()) // 기존 communities 유지
+                .build();
+
+        userRepository.save(updatedUser);
+        return "업데이트 성공";
 
     }
 
@@ -93,6 +93,7 @@ public class UserService {
                 .refreshtoken(user.getRefreshtoken())
                 .profileImg(user.getProfileImg())
                 .email(user.getEmail())
+                .years_of_experience(user.getYears_of_experience())
                 .role(user.getRole())
                 .communities(user.getCommunities()) // 기존 communities 유지
                 .build();

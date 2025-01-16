@@ -9,13 +9,13 @@ import lombok.*;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor // Builder를 사용하려면 필요
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends CommonEntity {
     @Id
@@ -29,7 +29,6 @@ public class User extends CommonEntity {
     private String name;
 
     @Column()
-    @JsonIgnore
     private String password;
 
     @Column()
@@ -43,10 +42,10 @@ public class User extends CommonEntity {
     private String refreshtoken;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Community> communities;
+    private List<Community> communities = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Pet> pets;
+    private List<Pet> pets = new ArrayList<>(); // 초기화
 
 
 
