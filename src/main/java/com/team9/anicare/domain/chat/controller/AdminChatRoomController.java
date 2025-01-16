@@ -48,6 +48,22 @@ public class AdminChatRoomController {
     }
 
 
+    @Operation(summary = "채팅방 입장 (Admin)", description = "관리자가 채팅방에 입장합니다.")
+    @PostMapping("/rooms/{roomId}/enter")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> enterChatRoomAsAdmin(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable String roomId) {
+
+        Long adminId = userDetails.getUserId();
+
+        // ✅ 관리자 채팅방 입장 처리
+        chatParticipantService.joinChatRoom(roomId, adminId, true);
+
+        return ResponseEntity.ok("채팅방에 입장했습니다.");
+    }
+
+
     /**
      * 관리자 - 채팅방 퇴장
      */
