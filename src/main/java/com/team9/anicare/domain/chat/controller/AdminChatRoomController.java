@@ -27,7 +27,7 @@ public class AdminChatRoomController {
     @Operation(summary = "대기 중인 채팅방 조회")
     @GetMapping("/rooms/waiting")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<ChatRoomResponseDTO> getWaitingRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public List<ChatRoomResponseDTO> getWaitingRooms() {
         return chatRoomService.getWaitingRooms();
     }
 
