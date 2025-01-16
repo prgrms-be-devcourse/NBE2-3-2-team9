@@ -17,6 +17,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    private final StompChannelInterceptor stompChannelInterceptor;
+
     /**
      * 클라이언트 연결을 위한 WebSocket 엔드포인트 등록
      *
@@ -54,6 +56,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        // registration.interceptors(new StompChannelInterceptor(jwtTokenProvider));
+        registration.interceptors(stompChannelInterceptor);
     }
 }

@@ -10,6 +10,8 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 
 /**
  * StompChannelInterceptor
@@ -25,19 +27,30 @@ public class StompChannelInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-            /* 클라이언트에서 전달된 JWT 토큰 검증하는 로직입니다.
-             * 추후 이러한 내용도 추가할 수 있다면 주석 해제하고 사용하시면 됩니다.
 
-            String token = accessor.getFirstNativeHeader("Authorization");
-            if (token == null || !jwtTokenProvider.validateToken(token)) {
-                log.error("WebSocket 연결 실패: 잘못된 JWT 토큰");
-                throw new IllegalArgumentException("Invalid JWT Token");
-            }
-            log.info("WebSocket 연결 성공: 사용자 토큰 유효");
-
-            */
+        if (accessor == null) {
+            return message;
         }
+
+        StompCommand command = accessor.getCommand();
+
+        // WebSocket 연결 및 메시지 전송 시 JWT 토큰 검증
+        if (StompCommand.CONNECT.equals(command) || StompCommand.SEND.equals(command)) {
+            String token = accessor.getFirstNativeHeader("Authorization");
+
+            // 토큰 유효성 검증
+            if (!StringUtils.hasText(token) || !jwtTokenProvider.validateToken(token)) {
+                log.error("WebSocket 연결 실패: 유효하지 않은 JWT 토큰");
+                throw new IllegalArgumentException("Invalid or missing JWT Token");
+            }
+
+            // 토큰에서 사용자 ID 추출 및 세션에 저장
+            String userId = String.valueOf(jwtTokenProvider.getId(token));
+            accessor.setUser(() -> userId);
+
+            log.info("WebSocket 인증 성공: 사용자 ID = {}", userId);
+        }
+
         return message;
     }
 }
