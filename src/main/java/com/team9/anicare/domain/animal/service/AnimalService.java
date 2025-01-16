@@ -29,36 +29,43 @@ public class AnimalService {
         Species species = speciesRepository.findByName(createAnimalDTO.getSpeciesName());
 
         // 만약 품종을 입력했다면
-        if(createAnimalDTO.getBreedName() != null) {
+        if (createAnimalDTO.getBreedName() != null) {
             if (species != null) {
                 // 이미 종과 품종 존재
                 if (breedRepository.existsByNameAndSpecies(createAnimalDTO.getBreedName(), species)) {
                     throw new CustomException(ResultCode.DUPLICATE_SPECIES_AND_BREED);
                 } else { // 종만 존재 -> 품종만 추가
-                    Breed breed = new Breed();
-                    breed.setSpecies(species);
-                    breed.setName(createAnimalDTO.getBreedName());
+                    Breed breed = Breed.builder()
+                            .species(species)
+                            .name(createAnimalDTO.getBreedName())
+                            .build();
+
                     breedRepository.save(breed);
                 }
             } else { // 모두 존재X -> 종, 품종 추가
-                species = new Species();
-                species.setName(createAnimalDTO.getSpeciesName());
+                species = Species.builder()
+                        .name(createAnimalDTO.getSpeciesName())
+                        .build();
+
                 speciesRepository.save(species);
 
-                Breed breed = new Breed();
-                breed.setSpecies(species);
-                breed.setName(createAnimalDTO.getBreedName());
+                Breed breed = Breed.builder()
+                        .species(species)
+                        .name(createAnimalDTO.getBreedName())
+                        .build();
+
                 breedRepository.save(breed);
             }
         }
         // 종만 입력했다면
         else {
-            if(species == null) {
-                species = new Species();
-                species.setName(createAnimalDTO.getSpeciesName());
+            if (species == null) {
+                species = Species.builder()
+                        .name(createAnimalDTO.getSpeciesName())
+                        .build();
+
                 speciesRepository.save(species);
-            }
-            else {
+            } else {
                 throw new CustomException(ResultCode.DUPLICATE_SPECIES);
             }
         }
@@ -72,7 +79,13 @@ public class AnimalService {
         }
 
         List<FindSpeciesDTO> findSpeciesDTOs = lists.stream()
-                .map(species -> modelMapper.map(species, FindSpeciesDTO.class))
+                .map(species -> { FindSpeciesDTO.FindSpeciesDTOBuilder builder = FindSpeciesDTO.builder()
+                        .id(species.getId())
+                        .name(species.getName());
+
+                    return builder.build();
+
+                })
                 .collect(Collectors.toList());
 
         return findSpeciesDTOs;
@@ -88,7 +101,13 @@ public class AnimalService {
         }
 
         List<FindBreedDTO> findBreedDTOs = lists.stream()
-                .map(breed -> modelMapper.map(breed, FindBreedDTO.class))
+                .map(breed -> {FindBreedDTO.FindBreedDTOBuilder builder = FindBreedDTO.builder()
+                        .id(breed.getId())
+                        .speciesId(breed.getSpecies().getId())
+                        .name(breed.getName());
+
+                    return builder.build();
+                })
                 .collect(Collectors.toList());
 
         return findBreedDTOs;
