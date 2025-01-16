@@ -4,22 +4,15 @@ package com.team9.anicare.domain.chat.service;
 import com.team9.anicare.domain.chat.dto.ChatRoomCreateRequestDTO;
 import com.team9.anicare.domain.chat.dto.ChatRoomResponseDTO;
 import com.team9.anicare.domain.chat.entity.ChatMessage;
-import com.team9.anicare.domain.chat.entity.ChatParticipant;
 import com.team9.anicare.domain.chat.entity.ChatRoom;
 import com.team9.anicare.domain.chat.repository.ChatMessageRepository;
 import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
 import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
 import com.team9.anicare.domain.user.model.User;
-import com.team9.anicare.domain.user.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
