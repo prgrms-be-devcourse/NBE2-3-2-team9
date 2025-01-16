@@ -142,7 +142,7 @@ public class ChatRoomService {
                 .stream()
                 .filter(room -> room.getRoomName().toLowerCase().contains(keyword.toLowerCase()) ||
                         room.getDescription().toLowerCase().contains(keyword.toLowerCase()))
-                .collect(Collectors.toList());
+                .toList();
 
         // 3. 참여 중인 채팅방 중에서 키워드가 포함된 채팅방 검색
         List<ChatRoom> participantRooms = chatRoomRepository
@@ -150,11 +150,11 @@ public class ChatRoomService {
                 .stream()
                 .filter(room -> room.getRoomName().toLowerCase().contains(keyword.toLowerCase()) ||
                         room.getDescription().toLowerCase().contains(keyword.toLowerCase()))
-                .collect(Collectors.toList());
+                .toList();
 
         // 4. 결과 합치기 및 중복 제거
         createdRooms.addAll(participantRooms);
-        List<ChatRoom> combinedRooms = createdRooms.stream().distinct().collect(Collectors.toList());
+        List<ChatRoom> combinedRooms = createdRooms.stream().distinct().toList();
 
         // 5. DTO 변환 및 반환
         return combinedRooms.stream()
