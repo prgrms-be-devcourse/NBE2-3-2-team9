@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Setter
 @Builder
 public class SingleScheduleDTO {
     private Long id;
@@ -23,7 +22,6 @@ public class SingleScheduleDTO {
     private LocalDateTime updatedAt;
 
     @Getter
-    @Builder
     public static class AddSingleScheduleDTO {
         private Long petId;
         private String name;
@@ -33,7 +31,6 @@ public class SingleScheduleDTO {
     }
 
     @Getter
-    @Builder
     public static class UpdateSingleScheduleDTO {
         private Long id;
         private Long petId;
