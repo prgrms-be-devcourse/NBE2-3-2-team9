@@ -101,35 +101,4 @@ public class ChatParticipantService {
             chatRoomRepository.save(chatRoom);
         }
     }
-
-
-    /**
-     * 특정 채팅방 참여자 목록 조회
-     *
-     * @param roomId 채팅방 ID
-     * @return 참여자 목록
-     */
-    public List<ChatParticipant> getParticipantsByRoom(String roomId) {
-        ChatRoom chatRoom = chatServiceUtil.findChatRoomById(roomId);
-
-        return chatParticipantRepository.findByChatRoom(chatRoom);
-    }
-
-
-    /**
-     * 특정 사용자의 참여 여부 확인
-     *
-     * @param roomId 채팅방 ID
-     * @param userId 사용자 ID
-     * @return 참여 중이면 true, 아니면 false
-     */
-    public boolean isUserInRoom(String roomId, Long userId) {
-        ChatRoom chatRoom = chatServiceUtil.findChatRoomById(roomId);
-
-        User user = chatServiceUtil.findUserById(userId);
-
-        return chatParticipantRepository.findByUserAndChatRoom(user, chatRoom)
-                .filter(ChatParticipant::isActive)
-                .isPresent();
-    }
 }
