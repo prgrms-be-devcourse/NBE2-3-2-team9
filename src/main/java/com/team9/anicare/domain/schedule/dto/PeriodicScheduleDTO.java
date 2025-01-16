@@ -2,17 +2,14 @@ package com.team9.anicare.domain.schedule.dto;
 
 
 import com.team9.anicare.domain.schedule.model.RepeatPattern;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Getter
-@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PeriodicScheduleDTO {
@@ -32,7 +29,6 @@ public class PeriodicScheduleDTO {
     private LocalDateTime updatedAt;
 
     @Getter
-    @Setter
     public static class AddPeriodicScheduleDTO {
         private Long petId;
         private String petName;
@@ -47,7 +43,6 @@ public class PeriodicScheduleDTO {
     }
 
     @Getter
-    @Setter
     public static class UpdatePeriodicScheduleDTO {
         private Long id;
         private Long petId;
