@@ -43,7 +43,24 @@ public class PeriodicScheduleService {
         }
 
         List<PeriodicScheduleDTO> periodicScheduleDTOs = lists.stream()
-                .map(periodicSchedule -> modelMapper.map(periodicSchedule, PeriodicScheduleDTO.class))
+                .map(periodicSchedule -> {
+                    PeriodicScheduleDTO.PeriodicScheduleDTOBuilder builder = PeriodicScheduleDTO.builder()
+                            .id(periodicSchedule.getId())
+                            .petId(periodicSchedule.getPet().getId())
+                            .userId(periodicSchedule.getUser().getId())
+                            .name(periodicSchedule.getName())
+                            .startDate(periodicSchedule.getStartDate())
+                            .endDate(periodicSchedule.getEndDate())
+                            .startTime(periodicSchedule.getStartTime())
+                            .endTime(periodicSchedule.getEndTime())
+                            .repeatPattern(periodicSchedule.getRepeatPattern())
+                            .repeatInterval(periodicSchedule.getRepeatInterval())
+                            .repeatDays(periodicSchedule.getRepeatDays())
+                            .createdAt(periodicSchedule.getCreatedAt())
+                            .updatedAt(periodicSchedule.getUpdatedAt());
+
+                    return builder.build();
+                })
                 .collect(Collectors.toList());
 
         return periodicScheduleDTOs;
@@ -88,10 +105,23 @@ public class PeriodicScheduleService {
 
         createSchedules(periodicSchedule);
 
-        PeriodicScheduleDTO periodicScheduleDTO = modelMapper.map(periodicSchedule, PeriodicScheduleDTO.class);
-        periodicScheduleDTO.setUserId(userId);
-        periodicScheduleDTO.setPetId(petId);
-        periodicScheduleDTO.setPetName(request.getPetName());
+        PeriodicScheduleDTO periodicScheduleDTO = PeriodicScheduleDTO.builder()
+                .id(periodicSchedule.getId())
+                .petId(periodicSchedule.getPet().getId())
+                .userId(periodicSchedule.getUser().getId())
+                .name(periodicSchedule.getName())
+                .startDate(periodicSchedule.getStartDate())
+                .endDate(periodicSchedule.getEndDate())
+                .startTime(periodicSchedule.getStartTime())
+                .endTime(periodicSchedule.getEndTime())
+                .repeatPattern(periodicSchedule.getRepeatPattern())
+                .repeatInterval(periodicSchedule.getRepeatInterval())
+                .repeatDays(periodicSchedule.getRepeatDays())
+                .createdAt(periodicSchedule.getCreatedAt())
+                .updatedAt(periodicSchedule.getUpdatedAt())
+                .petName(request.getPetName())
+                .build();
+
         return periodicScheduleDTO;
     }
 
@@ -121,16 +151,29 @@ public class PeriodicScheduleService {
 
         PeriodicSchedule periodicSchedule = periodicScheduleRepo.findById(Id)
                 .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_SCHEDULE));
-        periodicSchedule.updatePeriodicSchedule(request,petRepository);
+        periodicSchedule.updatePeriodicSchedule(request, petRepository);
         periodicScheduleRepo.save(periodicSchedule);
 
         singleScheduleRepository.deleteByPeriodicSchedule(periodicSchedule);
         createSchedules(periodicSchedule);
 
-        PeriodicScheduleDTO periodicScheduleDTO = modelMapper.map(periodicSchedule, PeriodicScheduleDTO.class);
-        periodicScheduleDTO.setUserId(userId);
-        periodicScheduleDTO.setPetId(petId);
-        periodicScheduleDTO.setPetName(request.getPetName());
+        PeriodicScheduleDTO periodicScheduleDTO = PeriodicScheduleDTO.builder()
+                .id(periodicSchedule.getId())
+                .petId(periodicSchedule.getPet().getId())
+                .userId(periodicSchedule.getUser().getId())
+                .name(periodicSchedule.getName())
+                .startDate(periodicSchedule.getStartDate())
+                .endDate(periodicSchedule.getEndDate())
+                .startTime(periodicSchedule.getStartTime())
+                .endTime(periodicSchedule.getEndTime())
+                .repeatPattern(periodicSchedule.getRepeatPattern())
+                .repeatInterval(periodicSchedule.getRepeatInterval())
+                .repeatDays(periodicSchedule.getRepeatDays())
+                .createdAt(periodicSchedule.getCreatedAt())
+                .updatedAt(periodicSchedule.getUpdatedAt())
+                .petName(request.getPetName())
+                .build();
+
         return periodicScheduleDTO;
     }
 
