@@ -6,8 +6,6 @@ import com.team9.anicare.domain.chat.entity.ChatRoom;
 import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
 import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
 import com.team9.anicare.domain.user.model.User;
-import com.team9.anicare.domain.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
