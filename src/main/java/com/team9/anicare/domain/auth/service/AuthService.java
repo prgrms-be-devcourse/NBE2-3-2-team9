@@ -27,6 +27,7 @@ public class AuthService {
     private final String cookieName = "REFRESHTOKEN";
 
 
+
     public TokenResponseDTO login(LoginAdminDTO loginAdminDTO , HttpServletResponse response) {
         Optional<User> optionalUser = userRepository.findByEmail(loginAdminDTO.getEmail());
         if (optionalUser.isEmpty()) {
@@ -44,8 +45,17 @@ public class AuthService {
         cookie.setPath("/");
         cookie.setMaxAge(604800);
         response.addCookie(cookie);
-        user.setRefreshtoken(passwordEncoder.encode(refreshToken));
-        userRepository.save(user);
+        User updatedUser = User.builder()
+                .id(user.getId())
+                .email(user.getEmail()) // 누락 방지
+                .password(user.getPassword())
+                .role(user.getRole()) // 다른 필드도 명시
+                .pets(user.getPets())
+                .years_of_experience(user.getYears_of_experience())
+                .refreshtoken(passwordEncoder.encode(refreshToken)) // 변경 필드
+                .build();
+
+        userRepository.save(updatedUser);
 
         return new TokenResponseDTO(accessToken);
     }
@@ -56,8 +66,18 @@ public class AuthService {
         User user = optionalUser.get();
 
         // 2. RefreshToken 초기화
-        user.setRefreshtoken(null);
-        userRepository.save(user);
+        User updatedUser = User.builder()
+                .id(user.getId())
+                .email(user.getEmail()) // 누락 방지
+                .password(user.getPassword())
+                .name(user.getName())
+                .role(user.getRole()) // 다른 필드도 명시
+                .pets(user.getPets())
+                .years_of_experience(user.getYears_of_experience())
+                .refreshtoken(null) // 변경 필드
+                .build();
+
+        userRepository.save(updatedUser);
 
         // 3. Cookie에서 RefreshToken 삭제
         Cookie cookie = new Cookie(cookieName, null); // 쿠키 값 제거

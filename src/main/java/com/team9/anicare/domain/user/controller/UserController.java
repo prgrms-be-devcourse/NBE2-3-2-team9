@@ -1,10 +1,7 @@
 package com.team9.anicare.domain.user.controller;
 
 import com.team9.anicare.domain.auth.security.CustomUserDetails;
-import com.team9.anicare.domain.user.dto.CreateAdminDTO;
-import com.team9.anicare.domain.user.dto.UpdateAdminDTO;
-import com.team9.anicare.domain.user.dto.UpdateUserDTO;
-import com.team9.anicare.domain.user.dto.UserDetailResponseDTO;
+import com.team9.anicare.domain.user.dto.*;
 import com.team9.anicare.domain.user.model.User;
 import com.team9.anicare.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,9 +25,9 @@ public class UserController {
     // 관리자 생성
     @Operation(summary = "관리자 회원가입")
     @PostMapping("/admin")
-    public ResponseEntity<CreateAdminDTO> signup(@Valid @RequestBody CreateAdminDTO createAdminDTO) {
+    public ResponseEntity<AdminResponseDTO> signup(@Valid @RequestBody CreateAdminDTO createAdminDTO) {
         // 서비스에서 관리자 생성
-        CreateAdminDTO savedAdmin = userService.createAdmin(createAdminDTO);
+        AdminResponseDTO savedAdmin = userService.createAdmin(createAdminDTO);
 
         // 201 Created와 함께 반환
         return ResponseEntity

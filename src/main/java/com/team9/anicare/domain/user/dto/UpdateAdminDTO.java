@@ -2,6 +2,7 @@ package com.team9.anicare.domain.user.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,10 @@ public class UpdateAdminDTO {
     )
     @Schema(description = "비밀번호", example = "newpassword123!")
     private String password; // 선택 사항으로 처리
+
+    @Schema(description = "관리자 이메일", example = "admin@anicare.com")
+    @Email(message = "올바른 이메일 형식이 아닙니다.")
+    private String email;
 
     @Schema(description = "관리자 이름", example = "새로운 관리자 이름")
     private String name; // 선택 사항으로 처리
