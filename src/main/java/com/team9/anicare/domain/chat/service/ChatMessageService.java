@@ -74,7 +74,14 @@ public class ChatMessageService {
             chatServiceUtil.validateParticipant(sender, chatRoom);
         }
 
-        ChatMessage chatMessage = createChatMessage(sender, null, requestDTO, chatRoom);
+        // ✅ 상대방(Receiver) 조회 (발신자가 아닌 사람)
+        User receiver = chatParticipantRepository.findByChatRoom(chatRoom).stream()
+                .filter(participant -> !participant.getUser().getId().equals(sender.getId()))
+                .map(ChatParticipant::getUser)
+                .findFirst()
+                .orElse(null);
+
+        ChatMessage chatMessage = createChatMessage(sender, receiver, requestDTO, chatRoom);
         saveMessageAndUpdateRoom(chatMessage, chatRoom);
 
         return convertToResponseDTO(chatMessage);
