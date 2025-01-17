@@ -10,6 +10,7 @@ import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
 import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
 import com.team9.anicare.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -71,10 +72,11 @@ public class ChatRoomService {
      *
      * @return 전체 채팅방 목록 DTO
      */
-    public List<ChatRoomResponseDTO> getAllChatRooms() {
-        return chatRoomRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public Page<ChatRoomResponseDTO> getAllChatRooms(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return chatRoomRepository.findAll(pageable)
+                .map(this::convertToDTO);
     }
 
 
@@ -83,10 +85,11 @@ public class ChatRoomService {
      *
      * @return 관리자가 없는 채팅방 목록
      */
-    public List<ChatRoomResponseDTO> getWaitingRooms() {
-        return chatRoomRepository.findByOccupiedFalse().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public Page<ChatRoomResponseDTO> getWaitingRooms(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return chatRoomRepository.findByOccupiedFalse(pageable)
+                .map(this::convertToDTO);
     }
 
 
@@ -94,10 +97,12 @@ public class ChatRoomService {
      * ✅ 관리자 전용 - 전체 채팅방 검색
      * - 채팅방 이름, 설명, 메시지 내용에서 키워드를 검색
      */
-    public List<ChatRoomResponseDTO> searchAllChatRooms(String keyword) {
+    public Page<ChatRoomResponseDTO> searchAllChatRooms(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
         // 1. 채팅방 이름 또는 설명 검색
-        List<ChatRoom> roomsByNameOrDescription = chatRoomRepository
-                .findByRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword);
+        Page<ChatRoom> roomsByNameOrDescription = chatRoomRepository
+                .findByRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
 
         // 2. 메시지 내용에 키워드가 포함된 채팅방 ID 검색
         List<String> roomIdsByMessages = chatMessageRepository
@@ -108,13 +113,16 @@ public class ChatRoomService {
                 .findByRoomIdIn(roomIdsByMessages);
 
         // 4. 두 결과 합치고 중복 제거
-        roomsByNameOrDescription.addAll(roomsByMessages);
-        List<ChatRoom> combinedRooms = roomsByNameOrDescription.stream().distinct().toList();
+        List<ChatRoom> combinedRooms = roomsByNameOrDescription.getContent();
+        combinedRooms.addAll(roomsByMessages);
+        List<ChatRoom> distinctRooms = combinedRooms.stream().distinct().toList();
 
         // 5. DTO 변환
-        return combinedRooms.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return new PageImpl<>(
+                distinctRooms.stream().map(this::convertToDTO).toList(),
+                pageable,
+                distinctRooms.size()
+        );
     }
 
 

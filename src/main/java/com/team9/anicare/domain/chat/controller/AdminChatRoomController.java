@@ -7,6 +7,7 @@ import com.team9.anicare.domain.chat.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,24 +28,34 @@ public class AdminChatRoomController {
     @Operation(summary = "대기 중인 채팅방 조회")
     @GetMapping("/rooms/waiting")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<ChatRoomResponseDTO> getWaitingRooms() {
-        return chatRoomService.getWaitingRooms();
+    public Page<ChatRoomResponseDTO> getWaitingRooms(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
+    {
+        return chatRoomService.getWaitingRooms(page, size);
     }
 
 
     @Operation(summary = "모든 채팅방 조회")
     @GetMapping("/rooms")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<ChatRoomResponseDTO> getAllChatRooms() {
-        return chatRoomService.getAllChatRooms();
+    public Page<ChatRoomResponseDTO> getAllChatRooms(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
+    {
+        return chatRoomService.getAllChatRooms(page, size);
     }
 
 
     @Operation(summary = "채팅방 검색 (Admin)")
     @GetMapping("/rooms/search")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<ChatRoomResponseDTO> searchChatRooms(@RequestParam String keyword) {
-        return chatRoomService.searchAllChatRooms(keyword);
+    public Page<ChatRoomResponseDTO> searchChatRooms(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
+    {
+        return chatRoomService.searchAllChatRooms(keyword, page, size);
     }
 
 
