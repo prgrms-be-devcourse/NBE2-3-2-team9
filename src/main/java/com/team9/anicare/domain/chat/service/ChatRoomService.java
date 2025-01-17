@@ -155,15 +155,18 @@ public class ChatRoomService {
      * @param userId 사용자 ID
      * @return 사용자가 생성한 채팅방 정보 DTO (없으면 예외 발생)
      */
-    public ChatRoomResponseDTO getRoomByUserId(Long userId) {
+    public List<ChatRoomResponseDTO> getRoomsByUserId(Long userId) {
         // 사용자가 생성한 채팅방 조회
-        ChatRoom chatRoom = chatRoomRepository.findByCreatorId(userId)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("생성한 채팅방이 없습니다."));
+        List<ChatRoom> chatRooms = chatRoomRepository.findByCreatorId(userId);
+
+        if (chatRooms.isEmpty()) {
+            throw new IllegalArgumentException("생성한 채팅방이 없습니다.");
+        }
 
         // DTO로 변환 후 반환
-        return convertToDTO(chatRoom);
+        return chatRooms.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
 

@@ -36,9 +36,9 @@ public class UserChatRoomController {
     @Operation(summary = "내 채팅방 조회")
     @GetMapping("/rooms")
     @PreAuthorize("hasRole('USER')")
-    public ChatRoomResponseDTO getMyChatRoom(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public List<ChatRoomResponseDTO> getMyChatRoom(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
-        return chatRoomService.getRoomByUserId(userId);
+        return chatRoomService.getRoomsByUserId(userId);
     }
 
 
