@@ -14,8 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Tag(name = "User Chat Room", description = "사용자 전용 채팅방 관리 API")
 @RestController
 @RequestMapping("/api/user/chat")
