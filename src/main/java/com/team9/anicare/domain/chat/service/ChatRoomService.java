@@ -177,6 +177,8 @@ public class ChatRoomService {
      * @return 채팅방 응답 DTO
      */
     private ChatRoomResponseDTO convertToDTO(ChatRoom chatRoom) {
+        User creator = chatRoom.getCreator();
+
         return ChatRoomResponseDTO.builder()
                 .roomId(chatRoom.getRoomId())
                 .roomName(chatRoom.getRoomName())
@@ -185,6 +187,10 @@ public class ChatRoomService {
                 .lastMessage(chatRoom.getLastMessage())
                 .lastMessageTime(chatRoom.getLastMessageTime())
                 .createdAt(chatRoom.getCreatedAt())
+                // 생성자 정보 추가
+                .creatorId(creator.getId())
+                .creatorName(creator.getName())
+                .creatorProfileImage(creator.getProfileImg())
                 .build();
     }
 }
