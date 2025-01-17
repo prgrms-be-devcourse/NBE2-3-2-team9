@@ -131,7 +131,9 @@ public class ChatRoomService {
      * ✅ 사용자 전용 - 본인이 참여하거나 생성한 채팅방 검색
      * - 채팅방 이름, 설명, 메시지 내용에서 키워드를 검색
      */
-    public List<ChatRoomResponseDTO> searchUserChatRooms(Long userId, String keyword) {
+    public Page<ChatRoomResponseDTO> searchUserChatRooms(Long userId, String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
         // 1. 사용자가 참여 중인 채팅방 ID 조회
         List<String> participantRoomIds = chatParticipantRepository.findRoomIdsByUserId(userId);
 
@@ -152,9 +154,11 @@ public class ChatRoomService {
         List<ChatRoom> combinedRooms = createdRooms.stream().distinct().toList();
 
         // 5. DTO 변환 및 반환
-        return combinedRooms.stream()
-                .map(chatRoom -> convertToDTO(chatRoom, userId))
-                .collect(Collectors.toList());
+        return new PageImpl<>(
+                combinedRooms.stream().map(chatRoom -> convertToDTO(chatRoom, userId)).toList(),
+                pageable,
+                combinedRooms.size()
+        );
     }
 
 
@@ -164,18 +168,20 @@ public class ChatRoomService {
      * @param userId 사용자 ID
      * @return 사용자가 생성한 채팅방 정보 DTO (없으면 예외 발생)
      */
-    public List<ChatRoomResponseDTO> getRoomsByUserId(Long userId) {
-        // 사용자가 생성한 채팅방 조회
-        List<ChatRoom> chatRooms = chatRoomRepository.findByCreatorId(userId);
+    public Page<ChatRoomResponseDTO> getRoomsByUserId(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        if (chatRooms.isEmpty()) {
+        // 페이지네이션 적용해서 채팅방 조회
+        Page<ChatRoom> chatRoomsPage = chatRoomRepository.findByCreatorId(userId, pageable);
+
+
+        // 조회된 결과가 없을 경우 예외 처리
+        if (chatRoomsPage.isEmpty()) {
             throw new IllegalArgumentException("생성한 채팅방이 없습니다.");
         }
 
         // DTO로 변환 후 반환
-        return chatRooms.stream()
-                .map(chatRoom -> convertToDTO(chatRoom, userId))
-                .collect(Collectors.toList());
+        return chatRoomsPage.map(chatRoom -> convertToDTO(chatRoom, userId));
     }
 
 

@@ -31,5 +31,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     List<ChatRoom> findByCreatorIdAndRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(Long creatorId, String roomName, String description);
 
     // 특정 사용자가 생성한 채팅방 목록 조회 (User ID 기준)
-    List<ChatRoom> findByCreatorId(Long creatorId);
+    Page<ChatRoom> findByCreatorId(Long userId, Pageable pageable);
 }

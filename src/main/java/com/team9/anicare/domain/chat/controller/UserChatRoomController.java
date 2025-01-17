@@ -8,6 +8,7 @@ import com.team9.anicare.domain.chat.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,27 +39,27 @@ public class UserChatRoomController {
     @Operation(summary = "내 채팅방 조회")
     @GetMapping("/rooms")
     @PreAuthorize("hasRole('USER')")
-    public List<ChatRoomResponseDTO> getMyChatRoom(
+    public Page<ChatRoomResponseDTO> getMyChatRoom(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size)
     {
         Long userId = userDetails.getUserId();
-        return chatRoomService.getRoomsByUserId(userId);
+        return chatRoomService.getRoomsByUserId(userId, page, size);
     }
 
 
     @Operation(summary = "내 채팅방 검색", description = "사용자가 본인이 참여한 채팅방을 검색하는 API입니다.")
     @GetMapping("/rooms/search")
     @PreAuthorize("hasRole('USER')")
-    public List<ChatRoomResponseDTO> searchMyChatRooms(
+    public Page<ChatRoomResponseDTO> searchMyChatRooms(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size)
     {
         Long userId = userDetails.getUserId();
-        return chatRoomService.searchUserChatRooms(userId, keyword);
+        return chatRoomService.searchUserChatRooms(userId, keyword, page, size);
     }
 
 
