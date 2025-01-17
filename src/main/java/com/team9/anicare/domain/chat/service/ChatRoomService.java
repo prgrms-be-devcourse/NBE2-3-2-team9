@@ -191,13 +191,20 @@ public class ChatRoomService {
      * @return 채팅방 응답 DTO
      */
     private ChatRoomResponseDTO convertToDTO(ChatRoom chatRoom, Long currentUserId) {
-// 현재 사용자를 제외한 상대방 찾기
+        // 현재 사용자를 제외한 상대방 찾기
         ChatParticipant opponentParticipant = chatParticipantRepository.findByChatRoom(chatRoom).stream()
                 .filter(participant -> !participant.getUser().getId().equals(currentUserId))
                 .findFirst()
                 .orElse(null);
 
         User opponent = (opponentParticipant != null) ? opponentParticipant.getUser() : null;
+
+        // 상대방 접속 상태 조회 (Redis)
+        String opponentStatus = "disconnected";  // 기본값: 오프라인
+        if (opponent != null) {
+            opponentStatus = chatServiceUtil.getUserStatus(opponent.getId().toString());  // Redis에서 상태 조회
+        }
+
         return ChatRoomResponseDTO.builder()
                 .roomId(chatRoom.getRoomId())
                 .roomName(chatRoom.getRoomName())
@@ -210,6 +217,8 @@ public class ChatRoomService {
                 .opponentId(opponent != null ? opponent.getId() : null)
                 .opponentName(opponent != null ? opponent.getName() : "상대방 없음")
                 .opponentProfileImage(opponent != null ? opponent.getProfileImg() : null)
+                // 상대방 접속 상태 추가
+                .opponentStatus(opponentStatus)
                 .build();
     }
 }
