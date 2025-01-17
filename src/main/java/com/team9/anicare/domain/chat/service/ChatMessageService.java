@@ -76,8 +76,8 @@ public class ChatMessageService {
 
         // ✅ 상대방(Receiver) 조회 (발신자가 아닌 사람)
         User receiver = chatParticipantRepository.findByChatRoom(chatRoom).stream()
-                .filter(participant -> !participant.getUser().getId().equals(sender.getId()))
                 .map(ChatParticipant::getUser)
+                .filter(user -> !user.getId().equals(sender.getId()))
                 .findFirst()
                 .orElse(null);
 
