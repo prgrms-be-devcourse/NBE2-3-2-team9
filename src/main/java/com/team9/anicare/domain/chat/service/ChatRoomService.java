@@ -4,6 +4,7 @@ package com.team9.anicare.domain.chat.service;
 import com.team9.anicare.domain.chat.dto.ChatRoomCreateRequestDTO;
 import com.team9.anicare.domain.chat.dto.ChatRoomResponseDTO;
 import com.team9.anicare.domain.chat.entity.ChatMessage;
+import com.team9.anicare.domain.chat.entity.ChatParticipant;
 import com.team9.anicare.domain.chat.entity.ChatRoom;
 import com.team9.anicare.domain.chat.repository.ChatMessageRepository;
 import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
@@ -62,7 +63,7 @@ public class ChatRoomService {
         );
 
         // DTO로 변환하여 반환
-        return convertToDTO(chatRoom);
+        return convertToDTO(chatRoom, userId);
     }
 
 
@@ -76,7 +77,7 @@ public class ChatRoomService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         return chatRoomRepository.findAll(pageable)
-                .map(this::convertToDTO);
+                .map(chatRoom -> convertToDTO(chatRoom, null));
     }
 
 
@@ -89,7 +90,7 @@ public class ChatRoomService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         return chatRoomRepository.findByOccupiedFalse(pageable)
-                .map(this::convertToDTO);
+                .map(chatRoom -> convertToDTO(chatRoom, null));
     }
 
 
@@ -119,7 +120,7 @@ public class ChatRoomService {
 
         // 5. DTO 변환
         return new PageImpl<>(
-                distinctRooms.stream().map(this::convertToDTO).toList(),
+                distinctRooms.stream().map(chatRoom -> convertToDTO(chatRoom, null)).toList(),
                 pageable,
                 distinctRooms.size()
         );
@@ -152,7 +153,7 @@ public class ChatRoomService {
 
         // 5. DTO 변환 및 반환
         return combinedRooms.stream()
-                .map(this::convertToDTO)
+                .map(chatRoom -> convertToDTO(chatRoom, userId))
                 .collect(Collectors.toList());
     }
 
@@ -173,7 +174,7 @@ public class ChatRoomService {
 
         // DTO로 변환 후 반환
         return chatRooms.stream()
-                .map(this::convertToDTO)
+                .map(chatRoom -> convertToDTO(chatRoom, userId))
                 .collect(Collectors.toList());
     }
 
@@ -184,9 +185,14 @@ public class ChatRoomService {
      * @param chatRoom 변환할 채팅방 엔티티
      * @return 채팅방 응답 DTO
      */
-    private ChatRoomResponseDTO convertToDTO(ChatRoom chatRoom) {
-        User creator = chatRoom.getCreator();
+    private ChatRoomResponseDTO convertToDTO(ChatRoom chatRoom, Long currentUserId) {
+// 현재 사용자를 제외한 상대방 찾기
+        ChatParticipant opponentParticipant = chatParticipantRepository.findByChatRoom(chatRoom).stream()
+                .filter(participant -> !participant.getUser().getId().equals(currentUserId))
+                .findFirst()
+                .orElse(null);
 
+        User opponent = (opponentParticipant != null) ? opponentParticipant.getUser() : null;
         return ChatRoomResponseDTO.builder()
                 .roomId(chatRoom.getRoomId())
                 .roomName(chatRoom.getRoomName())
@@ -195,10 +201,10 @@ public class ChatRoomService {
                 .lastMessage(chatRoom.getLastMessage())
                 .lastMessageTime(chatRoom.getLastMessageTime())
                 .createdAt(chatRoom.getCreatedAt())
-                // 생성자 정보 추가
-                .creatorId(creator.getId())
-                .creatorName(creator.getName())
-                .creatorProfileImage(creator.getProfileImg())
+                // 상대방 정보 추가
+                .opponentId(opponent != null ? opponent.getId() : null)
+                .opponentName(opponent != null ? opponent.getName() : "상대방 없음")
+                .opponentProfileImage(opponent != null ? opponent.getProfileImg() : null)
                 .build();
     }
 }

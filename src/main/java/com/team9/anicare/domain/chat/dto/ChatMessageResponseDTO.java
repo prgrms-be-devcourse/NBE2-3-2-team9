@@ -19,6 +19,11 @@ public class ChatMessageResponseDTO {
     private ChatMessage.MessageType type;
     private LocalDateTime sentAt;
 
+    // 상대방 정보 추가
+    private Long opponentId;
+    private String opponentName;
+    private String opponentProfileImg;
+
     /**
      * 시스템 메시지 응답 생성 메서드
      */

@@ -146,6 +146,18 @@ public class ChatMessageService {
      * @return 메시지 응답 DTO
      */
     private ChatMessageResponseDTO convertToResponseDTO(ChatMessage chatMessage) {
+
+        ChatRoom chatRoom = chatMessage.getChatRoom();
+        User sender = chatMessage.getSender();
+
+        // 상대방 찾기 (발신자 제외)
+        ChatParticipant opponentParticipant = chatParticipantRepository.findByChatRoom(chatRoom).stream()
+                .filter(participant -> !participant.getUser().getId().equals(sender.getId()))
+                .findFirst()
+                .orElse(null);
+
+        User opponent = (opponentParticipant != null) ? opponentParticipant.getUser() : null;
+
         return ChatMessageResponseDTO.builder()
                 .messageId(chatMessage.getId())
                 .roomId(chatMessage.getChatRoom().getRoomId())
@@ -153,6 +165,11 @@ public class ChatMessageService {
                 .content(chatMessage.getContent())
                 .type(chatMessage.getType())
                 .sentAt(chatMessage.getSentAt())
+
+                // 상대방 정보 추가
+                .opponentId(opponent != null ? opponent.getId() : null)
+                .opponentName(opponent != null ? opponent.getName() : "상대방 없음")
+                .opponentProfileImg(opponent != null ? opponent.getProfileImg() : null)
                 .build();
     }
 

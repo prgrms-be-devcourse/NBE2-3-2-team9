@@ -19,8 +19,8 @@ public class ChatRoomResponseDTO {
     private LocalDateTime lastMessageTime;
     private LocalDateTime createdAt;
 
-    // 생성자 정보 추가
-    private Long creatorId;
-    private String creatorName;
-    private String creatorProfileImage;
+    // 상대방 정보 추가
+    private Long opponentId;
+    private String opponentName;
+    private String opponentProfileImage;
 }
