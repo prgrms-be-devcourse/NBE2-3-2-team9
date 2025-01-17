@@ -1,7 +1,6 @@
 package com.team9.anicare.domain.chat.repository;
 
 import com.team9.anicare.domain.chat.entity.ChatRoom;
-import com.team9.anicare.domain.user.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

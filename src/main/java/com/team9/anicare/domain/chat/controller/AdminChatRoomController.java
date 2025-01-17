@@ -13,8 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Tag(name = "Admin Chat Room", description = "관리자 전용 채팅방 관리 API")
 @RestController
 @RequestMapping("/api/admin/chat")
