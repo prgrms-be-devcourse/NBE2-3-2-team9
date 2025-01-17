@@ -46,7 +46,7 @@ public class ChatMessage {
 
     // 메시지가 속한 채팅방 ID (ChatRoom의 roomId와 연결)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", referencedColumnName = "roomId")
+    @JoinColumn(name = "room_id", referencedColumnName = "roomId", nullable = false)
     private ChatRoom chatRoom;
 
     // 메시지 전송 시간

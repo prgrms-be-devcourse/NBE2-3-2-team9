@@ -23,4 +23,7 @@ public class ChatRoomResponseDTO {
     private Long opponentId;
     private String opponentName;
     private String opponentProfileImage;
+
+    // 상대방 접속 상태 추가
+    private String opponentStatus;
 }
