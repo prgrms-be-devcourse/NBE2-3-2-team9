@@ -9,8 +9,6 @@ import com.team9.anicare.domain.chat.repository.ChatMessageRepository;
 import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
 import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
 import com.team9.anicare.domain.user.model.User;
-import com.team9.anicare.domain.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -53,14 +51,14 @@ public class ChatMessageService {
      * @param content 시스템 메시지 내용
      * @param type    메시지 타입 (ENTER, EXIT)
      */
-    public ChatMessageResponseDTO sendSystemMessage(String content, String roomId, ChatMessage.MessageType type) {
+    public void sendSystemMessage(String content, String roomId, ChatMessage.MessageType type) {
         ChatMessageRequestDTO requestDTO = ChatMessageRequestDTO.builder()
                 .content(content)
                 .type(type)
                 .roomId(roomId)
                 .build();
 
-        return processAndSendMessage(null, requestDTO);  // senderId를 null로 넘기면 SYSTEM 메시지
+        processAndSendMessage(null, requestDTO);  // senderId를 null로 넘기면 SYSTEM 메시지
     }
 
 
@@ -76,7 +74,14 @@ public class ChatMessageService {
             chatServiceUtil.validateParticipant(sender, chatRoom);
         }
 
-        ChatMessage chatMessage = createChatMessage(sender, null, requestDTO, chatRoom);
+        // ✅ 상대방(Receiver) 조회 (발신자가 아닌 사람)
+        User receiver = chatParticipantRepository.findByChatRoom(chatRoom).stream()
+                .map(ChatParticipant::getUser)
+                .filter(user -> !user.getId().equals(sender.getId()))
+                .findFirst()
+                .orElse(null);
+
+        ChatMessage chatMessage = createChatMessage(sender, receiver, requestDTO, chatRoom);
         saveMessageAndUpdateRoom(chatMessage, chatRoom);
 
         return convertToResponseDTO(chatMessage);
@@ -146,6 +151,18 @@ public class ChatMessageService {
      * @return 메시지 응답 DTO
      */
     private ChatMessageResponseDTO convertToResponseDTO(ChatMessage chatMessage) {
+
+        ChatRoom chatRoom = chatMessage.getChatRoom();
+        User sender = chatMessage.getSender();
+
+        // 상대방 찾기 (발신자 제외)
+        ChatParticipant opponentParticipant = chatParticipantRepository.findByChatRoom(chatRoom).stream()
+                .filter(participant -> !participant.getUser().getId().equals(sender.getId()))
+                .findFirst()
+                .orElse(null);
+
+        User opponent = (opponentParticipant != null) ? opponentParticipant.getUser() : null;
+
         return ChatMessageResponseDTO.builder()
                 .messageId(chatMessage.getId())
                 .roomId(chatMessage.getChatRoom().getRoomId())
@@ -153,6 +170,11 @@ public class ChatMessageService {
                 .content(chatMessage.getContent())
                 .type(chatMessage.getType())
                 .sentAt(chatMessage.getSentAt())
+
+                // 상대방 정보 추가
+                .opponentId(opponent != null ? opponent.getId() : null)
+                .opponentName(opponent != null ? opponent.getName() : "상대방 없음")
+                .opponentProfileImg(opponent != null ? opponent.getProfileImg() : null)
                 .build();
     }
 
