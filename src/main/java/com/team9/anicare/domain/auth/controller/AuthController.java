@@ -101,7 +101,8 @@ public class AuthController {
         // 5. userId와 함께 응답 반환
         Map<String, Object> responseMap = Map.of(
                 "accessToken", tokenResponseDTO.getAccessToken(),
-                "userId", userInfo.getId()
+                "userId", userInfo.getId(),
+                "role" , userInfo.getRole()
         );
         return ResponseEntity.ok(responseMap); // ResponseEntity로 반환
     }

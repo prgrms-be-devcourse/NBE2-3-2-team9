@@ -113,7 +113,7 @@ public class KakaoService {
                 userService.updateUser(updatedUser);
 
                 // UserResponseDTO 반환
-                return new UserResponseDTO(user.getId(), nickname, email, jwtAccessToken, refreshToken, profileImg);
+                return new UserResponseDTO(user.getId(), nickname, email, jwtAccessToken, refreshToken, profileImg, user.getRole());
             } catch (Exception e) {
                 throw new RuntimeException("사용자 정보 응답 파싱에 실패했습니다.", e);
             }
