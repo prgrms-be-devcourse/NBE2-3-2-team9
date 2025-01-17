@@ -51,14 +51,14 @@ public class ChatMessageService {
      * @param content 시스템 메시지 내용
      * @param type    메시지 타입 (ENTER, EXIT)
      */
-    public ChatMessageResponseDTO sendSystemMessage(String content, String roomId, ChatMessage.MessageType type) {
+    public void sendSystemMessage(String content, String roomId, ChatMessage.MessageType type) {
         ChatMessageRequestDTO requestDTO = ChatMessageRequestDTO.builder()
                 .content(content)
                 .type(type)
                 .roomId(roomId)
                 .build();
 
-        return processAndSendMessage(null, requestDTO);  // senderId를 null로 넘기면 SYSTEM 메시지
+        processAndSendMessage(null, requestDTO);  // senderId를 null로 넘기면 SYSTEM 메시지
     }
 
 
