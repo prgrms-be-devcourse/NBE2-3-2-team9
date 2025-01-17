@@ -27,8 +27,10 @@ public class UserChatRoomController {
     @Operation(summary = "채팅방 생성 (User)")
     @PostMapping("/rooms")
     @PreAuthorize("hasRole('USER')")
-    public ChatRoomResponseDTO createRoom(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                          @RequestBody ChatRoomCreateRequestDTO requestDTO) {
+    public ChatRoomResponseDTO createRoom(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody ChatRoomCreateRequestDTO requestDTO)
+    {
         Long userId = userDetails.getUserId();
         return chatRoomService.createChatRoom(userId, requestDTO);
     }
@@ -36,7 +38,11 @@ public class UserChatRoomController {
     @Operation(summary = "내 채팅방 조회")
     @GetMapping("/rooms")
     @PreAuthorize("hasRole('USER')")
-    public List<ChatRoomResponseDTO> getMyChatRoom(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public List<ChatRoomResponseDTO> getMyChatRoom(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
+    {
         Long userId = userDetails.getUserId();
         return chatRoomService.getRoomsByUserId(userId);
     }
@@ -45,8 +51,12 @@ public class UserChatRoomController {
     @Operation(summary = "내 채팅방 검색", description = "사용자가 본인이 참여한 채팅방을 검색하는 API입니다.")
     @GetMapping("/rooms/search")
     @PreAuthorize("hasRole('USER')")
-    public List<ChatRoomResponseDTO> searchMyChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                       @RequestParam String keyword) {
+    public List<ChatRoomResponseDTO> searchMyChatRooms(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
+    {
         Long userId = userDetails.getUserId();
         return chatRoomService.searchUserChatRooms(userId, keyword);
     }
