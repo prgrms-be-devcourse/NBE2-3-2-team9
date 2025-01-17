@@ -65,4 +65,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ResultCode.INVALID_REQUEST.getCode()).body(result);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Result<Map<String, String>>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        // 에러 메시지를 Map에 담기
+        Map<String, String> errors = new HashMap<>();
+        errors.put("error", ex.getMessage());
+
+        // Result 객체 생성
+        Result<Map<String, String>> result = new Result<>(ResultCode.INVALID_REQUEST, errors);
+
+        // 응답 반환
+        return ResponseEntity.status(ResultCode.INVALID_REQUEST.getCode()).body(result);
+    }
+
+
 }
