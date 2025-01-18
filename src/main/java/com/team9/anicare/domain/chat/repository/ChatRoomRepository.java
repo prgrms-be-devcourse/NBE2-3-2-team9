@@ -18,9 +18,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     // roomId로 채팅방 조회
     Optional<ChatRoom> findByRoomId(String roomId);
 
-    // 특정 roomId 목록에 해당하는 채팅방 조회
-    List<ChatRoom> findByRoomIdIn(List<String> roomIds);
-
     // 관리자가 없는(occupied = false) 대기 중인 채팅방 조회
     Page<ChatRoom> findByOccupiedFalse(Pageable pageable);
 
