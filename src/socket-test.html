@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket 연결 테스트</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+
+<h2>🔌 WebSocket 연결 상태 확인</h2>
+
+<button onclick="connect()">🔗 연결하기</button>
+
+<div id="status">상태: 연결되지 않음</div>
+
+<script>
+    let stompClient = null;
+
+    // ✅ 새로 발급받은 JWT 토큰을 입력
+    const jwtToken = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzM3MTk2MjUyLCJleHAiOjE3MzcxOTk4NTJ9.CUmHxbPPU77l5yjamcwne02_OrdYCkBPWfPpxVzSEM8";
+
+    // WebSocket 연결
+    function connect() {
+        const socket = new SockJS('http://localhost:8080/chat-socket');
+        stompClient = Stomp.over(socket);
+
+        // ✅ JWT 토큰을 Authorization 헤더에 추가
+        stompClient.connect(
+            { Authorization: jwtToken },
+            function (frame) {
+                document.getElementById('status').innerText = '상태: 연결됨 ✅';
+                console.log('Connected: ' + frame);
+
+                // ✅ 구독 경로 확인
+                stompClient.subscribe('/topic/test', function (message) {
+                    showMessage(message.body);
+                });
+            },
+            function (error) {
+                document.getElementById('status').innerText = '상태: 연결 실패 ❌';
+                console.error('연결 실패:', error);
+            }
+        );
+    }
+</script>
+
+</body>
+</html>

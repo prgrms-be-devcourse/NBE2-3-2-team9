@@ -23,6 +23,7 @@ public class ChatMessage {
     // 메시지 고유 ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     // 발신자 (관리자 or 사용자)
@@ -36,12 +37,12 @@ public class ChatMessage {
     private User receiver;
 
     // 메시지 내용
-    @Column(nullable = false, length = 1000)
+    @Column(name = "content", nullable = false, length = 1000)
     private String content;
 
     // 메시지 유형 (ENTER, TALK, EXIT)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     private MessageType type;
 
     // 메시지가 속한 채팅방 ID (ChatRoom의 roomId와 연결)
@@ -50,7 +51,7 @@ public class ChatMessage {
     private ChatRoom chatRoom;
 
     // 메시지 전송 시간
-    @Column(nullable = false)
+    @Column(name = "sent_at", nullable = false)
     private LocalDateTime sentAt;
 
 

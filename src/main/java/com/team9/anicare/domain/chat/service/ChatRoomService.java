@@ -13,6 +13,7 @@ import com.team9.anicare.domain.chat.repository.ChatMessageRepository;
 import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
 import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
 import com.team9.anicare.domain.user.model.User;
+import com.team9.anicare.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * - 채팅방 생성, 조회, 검색, 참여자 관리 등 채팅방 관련 비즈니스 로직을 처리하는 서비스 클래스
@@ -33,6 +35,9 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatMessageService chatMessageService;
     private final ChatServiceUtil chatServiceUtil;
+    private final UserService userService;
+
+    private final Random random = new Random();
 
 
     /**
@@ -45,11 +50,10 @@ public class ChatRoomService {
      * @return 생성된 채팅방 정보 DTO
      */
     public ChatRoomResponseDTO createChatRoom(Long userId, ChatRoomCreateRequestDTO requestDTO) {
-        // 채팅방 생성자 조회
+        // 1️⃣ 채팅방 생성자 조회
         User creator = chatServiceUtil.findUserById(userId);
 
-
-        // 채팅방 생성 및 저장
+        // 2️⃣ 채팅방 생성
         ChatRoom chatRoom = ChatRoom.builder()
                 .roomId(ChatRoom.generateUniqueRoomId())  // 고유한 roomId 생성
                 .roomName(requestDTO.getRoomName())       // 요청에서 받아온 채팅방 이름
@@ -60,14 +64,60 @@ public class ChatRoomService {
 
         chatRoomRepository.save(chatRoom);
 
+        // 3️⃣ 랜덤 관리자 배정
+        User randomAdmin = assignRandomAdminToRoom(chatRoom);
+
+        // 4️⃣ 시스템 메시지 전송 (채팅방 생성 알림)
         chatMessageService.sendSystemMessage(
                 String.format("채팅방이 생성되었습니다.<br>방 제목: %s<br>설명: %s", requestDTO.getRoomName(), requestDTO.getDescription()),
                 chatRoom.getRoomId(),
                 ChatMessage.MessageType.SYSTEM
         );
 
-        // DTO로 변환하여 반환
+        // 5️⃣ 시스템 메시지 전송 (관리자 배정 알림)
+        if (randomAdmin != null) {
+            chatMessageService.sendSystemMessage(
+                    String.format("관리자 %s님이 채팅방에 배정되었습니다.", randomAdmin.getName()),
+                    chatRoom.getRoomId(),
+                    ChatMessage.MessageType.SYSTEM
+            );
+        }
+
+        // 6️⃣ DTO 변환 후 반환
         return convertToDTO(chatRoom, userId);
+    }
+
+
+    /**
+     * 관리자 중 랜덤으로 한 명을 채팅방에 배정
+     */
+    private User assignRandomAdminToRoom(ChatRoom chatRoom) {
+        // 1️⃣ 관리자 리스트 조회
+        List<User> admins = userService.findAllAdmins();
+
+        if (admins.isEmpty()) {
+            // 관리자가 없을 경우
+            return null;
+        }
+
+        // 2️⃣ 랜덤으로 관리자 선택
+        User selectedAdmin = admins.get(random.nextInt(admins.size()));
+
+        // 3️⃣ 선택된 관리자를 채팅방에 참여자로 등록
+        ChatParticipant adminParticipant = ChatParticipant.builder()
+                .chatRoom(chatRoom)
+                .user(selectedAdmin)
+                .isAdmin(true)
+                .isActive(true)
+                .build();
+
+        chatParticipantRepository.save(adminParticipant);
+
+        // 4️⃣ 채팅방 상태 업데이트 (관리자 참여)
+        chatRoom.setOccupied(true);
+        chatRoomRepository.save(chatRoom);
+
+        return selectedAdmin;
     }
 
 

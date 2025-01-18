@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -143,4 +144,8 @@ public class UserService {
     }
 
 
+    // 모든 관리자 조회 메서드
+    public List<User> findAllAdmins() {
+        return userRepository.findByRole(Role.ADMIN);
+    }
 }
