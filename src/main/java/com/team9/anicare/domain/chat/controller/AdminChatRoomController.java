@@ -1,5 +1,7 @@
 package com.team9.anicare.domain.chat.controller;
 
+import com.team9.anicare.common.dto.PageDTO;
+import com.team9.anicare.common.dto.PageRequestDTO;
 import com.team9.anicare.domain.auth.security.CustomUserDetails;
 import com.team9.anicare.domain.chat.dto.ChatRoomResponseDTO;
 import com.team9.anicare.domain.chat.service.ChatParticipantService;
@@ -26,34 +28,29 @@ public class AdminChatRoomController {
     @Operation(summary = "대기 중인 채팅방 조회")
     @GetMapping("/rooms/waiting")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<ChatRoomResponseDTO> getWaitingRooms(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
+    public PageDTO<ChatRoomResponseDTO> getWaitingRooms(@ModelAttribute PageRequestDTO pageRequestDTO)
     {
-        return chatRoomService.getWaitingRooms(page, size);
+        return chatRoomService.getWaitingRooms(pageRequestDTO);
     }
 
 
     @Operation(summary = "모든 채팅방 조회")
     @GetMapping("/rooms")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<ChatRoomResponseDTO> getAllChatRooms(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
+    public PageDTO<ChatRoomResponseDTO> getAllChatRooms(@ModelAttribute PageRequestDTO pageRequestDTO)
     {
-        return chatRoomService.getAllChatRooms(page, size);
+        return chatRoomService.getAllChatRooms(pageRequestDTO);
     }
 
 
     @Operation(summary = "채팅방 검색 (Admin)")
     @GetMapping("/rooms/search")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<ChatRoomResponseDTO> searchChatRooms(
+    public PageDTO<ChatRoomResponseDTO> searchChatRooms(
             @RequestParam String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
+            @ModelAttribute PageRequestDTO pageRequestDTO)
     {
-        return chatRoomService.searchAllChatRooms(keyword, page, size);
+        return chatRoomService.searchAllChatRooms(keyword, pageRequestDTO);
     }
 
 

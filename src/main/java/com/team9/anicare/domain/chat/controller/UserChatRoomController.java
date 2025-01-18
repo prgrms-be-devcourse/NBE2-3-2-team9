@@ -1,5 +1,7 @@
 package com.team9.anicare.domain.chat.controller;
 
+import com.team9.anicare.common.dto.PageDTO;
+import com.team9.anicare.common.dto.PageRequestDTO;
 import com.team9.anicare.domain.auth.security.CustomUserDetails;
 import com.team9.anicare.domain.chat.dto.ChatRoomCreateRequestDTO;
 import com.team9.anicare.domain.chat.dto.ChatRoomResponseDTO;
@@ -23,6 +25,7 @@ public class UserChatRoomController {
     private final ChatRoomService chatRoomService;
     private final ChatParticipantService chatParticipantService;
 
+
     @Operation(summary = "채팅방 생성 (User)")
     @PostMapping("/rooms")
     @PreAuthorize("hasRole('USER')")
@@ -34,30 +37,27 @@ public class UserChatRoomController {
         return chatRoomService.createChatRoom(userId, requestDTO);
     }
 
+
     @Operation(summary = "내 채팅방 조회")
     @GetMapping("/rooms")
     @PreAuthorize("hasRole('USER')")
-    public Page<ChatRoomResponseDTO> getMyChatRoom(
+    public PageDTO<ChatRoomResponseDTO> getMyChatRooms(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
-    {
+            @ModelAttribute PageRequestDTO pageRequestDTO) {
         Long userId = userDetails.getUserId();
-        return chatRoomService.getRoomsByUserId(userId, page, size);
+        return chatRoomService.getRoomsByUserId(userId, pageRequestDTO);
     }
 
 
-    @Operation(summary = "내 채팅방 검색", description = "사용자가 본인이 참여한 채팅방을 검색하는 API입니다.")
+    @Operation(summary = "내 채팅방 검색", description = "사용자가 본인이 참여한 채팅방을 검색")
     @GetMapping("/rooms/search")
     @PreAuthorize("hasRole('USER')")
-    public Page<ChatRoomResponseDTO> searchMyChatRooms(
+    public PageDTO<ChatRoomResponseDTO> searchMyChatRooms(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
-    {
+            @ModelAttribute PageRequestDTO pageRequestDTO) {
         Long userId = userDetails.getUserId();
-        return chatRoomService.searchUserChatRooms(userId, keyword, page, size);
+        return chatRoomService.searchUserChatRooms(userId, keyword, pageRequestDTO);
     }
 
 
