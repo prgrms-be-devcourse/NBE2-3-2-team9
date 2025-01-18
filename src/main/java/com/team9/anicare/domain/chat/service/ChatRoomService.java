@@ -14,9 +14,11 @@ import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
 import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
 import com.team9.anicare.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -111,28 +113,46 @@ public class ChatRoomService {
     public PageDTO<ChatRoomResponseDTO> searchAllChatRooms(String keyword, PageRequestDTO pageRequestDTO) {
         var pageable = pageRequestDTO.toPageRequest();
 
-        // 1. 채팅방 이름 또는 설명 검색
-        var roomsByNameOrDescription = chatRoomRepository.findByRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
+        List<ChatRoomResponseDTO> finalResults = new ArrayList<>();
+        int currentPage = pageable.getPageNumber();
+        boolean hasMoreData = true;
 
-        // 2. 메시지 내용에 키워드가 포함된 채팅방 ID 검색
-        List<String> roomIdsByMessages = chatMessageRepository.findDistinctChatRoomIdsByKeyword(keyword);
+        while (finalResults.size() < pageable.getPageSize() && hasMoreData) {
+            // 1. 채팅방 이름 또는 설명 검색 (페이징 적용)
+            Page<ChatRoom> roomsByNameOrDescriptionPage = chatRoomRepository
+                    .findByRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                            keyword, keyword, PageRequest.of(currentPage, pageable.getPageSize()));
 
+            // 2. 메시지 내용에 키워드가 포함된 채팅방 ID 검색
+            List<String> roomIdsByMessages = chatMessageRepository.findDistinctChatRoomIdsByKeyword(keyword);
 
-        // 3. 메시지 내용에서 검색된 채팅방 조회
-        List<ChatRoom> roomsByMessages = chatRoomRepository.findByRoomIdIn(roomIdsByMessages);
+            // 3. 메시지 내용에서 검색된 채팅방 조회 (페이징 적용)
+            Page<ChatRoom> roomsByMessagesPage = chatRoomRepository
+                    .findByRoomIdIn(roomIdsByMessages, PageRequest.of(currentPage, pageable.getPageSize()));
 
+            // 4. 두 결과 합치고 중복 제거
+            List<ChatRoom> combinedRooms = new ArrayList<>(roomsByNameOrDescriptionPage.getContent());
+            combinedRooms.addAll(roomsByMessagesPage.getContent());
+            List<ChatRoom> distinctRooms = combinedRooms.stream().distinct().toList();
 
-        // 4. 두 결과 합치고 중복 제거
-        List<ChatRoom> combinedRooms = roomsByNameOrDescription.getContent();
-        combinedRooms.addAll(roomsByMessages);
-        List<ChatRoom> distinctRooms = combinedRooms.stream().distinct().toList();
+            // 5. DTO 변환 및 결과 추가
+            List<ChatRoomResponseDTO> pageResults = distinctRooms.stream()
+                    .map(chatRoom -> convertToDTO(chatRoom, null))
+                    .toList();
 
-        // 5. DTO 변환
-        List<ChatRoomResponseDTO> content = distinctRooms.stream().map(chatRoom -> convertToDTO(chatRoom, null)).toList();
+            finalResults.addAll(pageResults);
 
-        PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), distinctRooms.size());
-        return new PageDTO<>(content, meta);
+            // 6. 더 이상 데이터가 없으면 반복 중단
+            hasMoreData = roomsByNameOrDescriptionPage.hasNext() || roomsByMessagesPage.hasNext();
+            currentPage++;
+        }
+
+        // 7. 메타 정보 생성
+        PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), finalResults.size());
+
+        return new PageDTO<>(finalResults, meta);
     }
+
 
 
     /**
@@ -142,30 +162,47 @@ public class ChatRoomService {
     public PageDTO<ChatRoomResponseDTO> searchUserChatRooms(Long userId, String keyword, PageRequestDTO pageRequestDTO) {
         var pageable = pageRequestDTO.toPageRequest();
 
-        // 1. 사용자가 참여 중인 채팅방 ID 조회
-        List<String> participantRoomIds = chatParticipantRepository.findRoomIdsByUserId(userId);
+        List<ChatRoomResponseDTO> finalResults = new ArrayList<>();
+        int currentPage = pageable.getPageNumber();
+        boolean hasMoreData = true;
 
-        // 2. 사용자가 생성한 채팅방 검색 (이름 or 설명에 키워드 포함)
-        List<ChatRoom> createdRooms = chatRoomRepository.findByCreatorIdAndRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(userId, keyword, keyword);
+        while (finalResults.size() < pageable.getPageSize() && hasMoreData) {
+            // 1. 사용자가 생성한 채팅방 검색 (이름 or 설명에 키워드 포함)
+            Page<ChatRoom> createdRoomsPage = chatRoomRepository
+                    .findByCreatorIdAndRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                            userId, keyword, keyword, PageRequest.of(currentPage, pageable.getPageSize()));
 
-        // 3. 참여 중인 채팅방 중에서 키워드가 포함된 채팅방 검색
-        List<ChatRoom> participantRooms = chatRoomRepository
-                .findByRoomIdIn(participantRoomIds)
-                .stream()
-                .filter(room -> room.getRoomName().toLowerCase().contains(keyword.toLowerCase()) ||
-                        room.getDescription().toLowerCase().contains(keyword.toLowerCase()))
-                .toList();
+            // 2. 사용자가 참여 중인 채팅방 ID 조회
+            List<String> participantRoomIds = chatParticipantRepository.findRoomIdsByUserId(userId);
 
-        // 4. 결과 합치기 및 중복 제거
-        createdRooms.addAll(participantRooms);
-        List<ChatRoom> combinedRooms = createdRooms.stream().distinct().toList();
+            // 3. 참여 중인 채팅방 중에서 키워드가 포함된 채팅방 검색
+            Page<ChatRoom> participantRoomsPage = chatRoomRepository
+                    .findByRoomIdInAndRoomNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                            participantRoomIds, keyword, keyword, PageRequest.of(currentPage, pageable.getPageSize()));
 
-        // 5. DTO 변환 및 반환
-        List<ChatRoomResponseDTO> content = combinedRooms.stream().map(chatRoom -> convertToDTO(chatRoom, userId)).toList();
+            // 4. 결과 합치기 및 중복 제거
+            List<ChatRoom> combinedRooms = new ArrayList<>(createdRoomsPage.getContent());
+            combinedRooms.addAll(participantRoomsPage.getContent());
+            List<ChatRoom> distinctRooms = combinedRooms.stream().distinct().toList();
 
-        PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), combinedRooms.size());
-        return new PageDTO<>(content, meta);
+            // 5. DTO 변환 및 결과 추가
+            List<ChatRoomResponseDTO> pageResults = distinctRooms.stream()
+                    .map(chatRoom -> convertToDTO(chatRoom, userId))
+                    .toList();
+
+            finalResults.addAll(pageResults);
+
+            // 6. 다음 페이지 조회 여부 확인
+            hasMoreData = createdRoomsPage.hasNext() || participantRoomsPage.hasNext();
+            currentPage++;
+        }
+
+        // 7. 메타 정보 생성
+        PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), finalResults.size());
+
+        return new PageDTO<>(finalResults, meta);
     }
+
 
 
     /**
