@@ -38,6 +38,10 @@ public class StompChannelInterceptor implements ChannelInterceptor {
         if (StompCommand.CONNECT.equals(command) || StompCommand.SEND.equals(command)) {
             String token = accessor.getFirstNativeHeader("Authorization");
 
+            if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
+                token = token.substring(7); // "Bearer " 부분 제거
+            }
+
             // 토큰 유효성 검증
             if (!StringUtils.hasText(token) || !jwtTokenProvider.validateToken(token)) {
                 log.error("WebSocket 연결 실패: 유효하지 않은 JWT 토큰");
