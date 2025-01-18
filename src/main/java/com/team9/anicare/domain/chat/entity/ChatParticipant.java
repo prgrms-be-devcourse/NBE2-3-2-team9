@@ -23,6 +23,7 @@ public class ChatParticipant {
     // 참여자 고유 ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     /**
@@ -40,13 +41,13 @@ public class ChatParticipant {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(name = "is_admin", nullable = false)
     private boolean isAdmin;  // 관리자 여부
 
-    @Column(nullable = false)
+    @Column(name = "is_active", nullable = false)
     private boolean isActive;  // 현재 참여 중인지 여부
 
-    @Column(nullable = false)
+    @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt;
 
 
