@@ -10,20 +10,25 @@
 
 <h2>🔌 WebSocket 연결 상태 확인</h2>
 
+<!-- 연결 및 구독 버튼 -->
 <button onclick="connect()">🔗 연결하기</button>
+<button onclick="disconnect()">❌ 연결 끊기</button>
 
 <div id="status">상태: 연결되지 않음</div>
+<div id="user-status">사용자 상태: 업데이트 없음</div>
 
 <script>
     let stompClient = null;
 
     // ✅ 새로 발급받은 JWT 토큰을 입력
-    const jwtToken = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzM3MTk2MjUyLCJleHAiOjE3MzcxOTk4NTJ9.CUmHxbPPU77l5yjamcwne02_OrdYCkBPWfPpxVzSEM8";
+    const jwtToken = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzM3MzA0Mjc2LCJleHAiOjE3MzczMDc4NzZ9.3xKjsxA1ScqexMm2itNBgLOp7VxfCZZ-xfDrLDGANkE";
 
     // WebSocket 연결
     function connect() {
         const socket = new SockJS('http://localhost:8080/chat-socket');
         stompClient = Stomp.over(socket);
+
+        stompClient.debug = console.log;
 
         // ✅ JWT 토큰을 Authorization 헤더에 추가
         stompClient.connect(
@@ -32,9 +37,13 @@
                 document.getElementById('status').innerText = '상태: 연결됨 ✅';
                 console.log('Connected: ' + frame);
 
-                // ✅ 구독 경로 확인
-                stompClient.subscribe('/topic/test', function (message) {
-                    showMessage(message.body);
+                // ✅ 사용자 상태 구독
+                const userId = "1"; // 테스트할 사용자 ID
+                stompClient.subscribe(`/topic/user-status/${userId}`, function (message) {
+                    console.log("Subscribed successfully to: ", `/topic/user-status/${userId}`);
+                    console.log("Raw message: ", message);
+                    console.log("Message body: ", message.body);
+                    updateUserStatus(userId, message.body);
                 });
             },
             function (error) {
@@ -42,6 +51,23 @@
                 console.error('연결 실패:', error);
             }
         );
+    }
+
+    // 연결 끊기
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect(() => {
+                document.getElementById('status').innerText = '상태: 연결 해제됨 ❎';
+                console.log("Disconnected");
+            });
+        }
+    }
+
+    // 사용자 상태 업데이트
+    function updateUserStatus(userId, status) {
+        const statusDiv = document.getElementById('user-status');
+        statusDiv.innerText = `사용자 상태: ${userId} → ${status}`;
+        console.log(`사용자 상태 업데이트: ${userId} → ${status}`);
     }
 </script>
 
