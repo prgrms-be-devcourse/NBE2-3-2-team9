@@ -87,6 +87,8 @@ public class PeriodicScheduleService {
         if (request.getRepeatInterval() <= 0) {
             throw new CustomException(ResultCode.INVALID_REQUEST);
         }
+        String petName = getPetById(petId).getName();
+
 
         PeriodicSchedule periodicSchedule = PeriodicSchedule.builder()
                 .user(getUserById(userId))
@@ -119,7 +121,7 @@ public class PeriodicScheduleService {
                 .repeatDays(periodicSchedule.getRepeatDays())
                 .createdAt(periodicSchedule.getCreatedAt())
                 .updatedAt(periodicSchedule.getUpdatedAt())
-                .petName(request.getPetName())
+                .petName(periodicSchedule.getPet().getName())
                 .build();
 
         return periodicScheduleDTO;
