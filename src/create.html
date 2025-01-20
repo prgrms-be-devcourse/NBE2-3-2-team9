@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅방 생성 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .room-list, .chat-input {
+            margin-bottom: 20px;
+        }
+        .chat-input input, .chat-input button {
+            padding: 10px;
+            margin-right: 10px;
+        }
+        .chat-input input {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .chat-input button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>채팅방 생성 테스트</h1>
+
+    <div class="chat-input">
+        <input id="new-room-name" type="text" placeholder="채팅방 이름 입력" />
+        <input id="new-room-desc" type="text" placeholder="채팅방 설명 입력" />
+        <button onclick="createRoom()">채팅방 생성</button>
+    </div>
+
+    <div id="room-list" class="room-list">
+        <h2>채팅방 목록</h2>
+        <div>목록을 불러오는 중...</div>
+    </div>
+
+    <button onclick="fetchChatRooms()">채팅방 목록 새로고침</button>
+</div>
+
+<script>
+    const apiUrl = "http://localhost:8080/api/chat";
+    const jwtToken = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzM3MzMxNjQ1LCJleHAiOjE3MzczMzUyNDV9.C2SgxAU6DaFYO20QXQoHT-K9-Y_icC_BaAGfc6Q49kI";
+
+    // 채팅방 생성
+    async function createRoom() {
+        const roomName = document.getElementById("new-room-name").value.trim();
+        const description = document.getElementById("new-room-desc").value.trim();
+        const participantName = "TestUser"; // 테스트용 사용자 이름
+
+        if (!roomName) {
+            alert("채팅방 이름을 입력하세요!");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiUrl}/rooms`, {
+                method: "POST",
+                headers: {
+                    "Authorization": jwtToken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    roomName,
+                    description,
+                    participantName
+                })
+            });
+
+            if (response.ok) {
+                alert("채팅방이 성공적으로 생성되었습니다!");
+                fetchChatRooms(); // 목록 갱신
+            } else {
+                const errorData = await response.json();
+                alert(`채팅방 생성 실패: ${JSON.stringify(errorData)}`);
+            }
+        } catch (error) {
+            console.error("채팅방 생성 중 오류 발생:", error);
+            alert("채팅방 생성 중 문제가 발생했습니다. 콘솔을 확인하세요.");
+        }
+    }
+
+    // 채팅방 목록 가져오기
+    async function fetchChatRooms() {
+        try {
+            const response = await fetch(`${apiUrl}/rooms`, {
+                method: "GET",
+                headers: {
+                    "Authorization": jwtToken
+                }
+            });
+
+            if (response.ok) {
+                const rooms = await response.json();
+                const roomList = document.getElementById("room-list");
+                roomList.innerHTML = rooms.map(room => `
+                    <div>
+                        <strong>${room.roomName}</strong> - ${room.description}
+                    </div>
+                `).join("");
+            } else {
+                console.error("채팅방 목록 가져오기 실패:", await response.text());
+            }
+        } catch (error) {
+            console.error("채팅방 목록 로드 중 오류 발생:", error);
+        }
+    }
+
+    // 초기 로드 시 채팅방 목록 가져오기
+    fetchChatRooms();
+</script>
+</body>
+</html>

@@ -6,7 +6,6 @@ import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
 import com.team9.anicare.domain.user.model.User;
 import com.team9.anicare.domain.user.repository.UserRepository;
 import com.team9.anicare.domain.chat.entity.ChatParticipant;
-import static com.team9.anicare.global.constants.ChatConstants.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

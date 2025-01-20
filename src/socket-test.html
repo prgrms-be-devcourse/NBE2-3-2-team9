@@ -2,47 +2,147 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>WebSocket 연결 테스트</title>
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅 및 WebSocket 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .chat-box, .room-list {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .chat-input input, .chat-input button {
+            padding: 10px;
+        }
+        .chat-input input {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .chat-input button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 10px;
+            max-width: 60%;
+            word-wrap: break-word;
+        }
+
+        .sent {
+            background-color: #e0f7fa;
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .received {
+            background-color: #f1f1f1;
+            align-self: flex-start;
+            text-align: left;
+        }
+
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            overflow-y: auto;
+            height: 300px;
+        }
+    </style>
 </head>
 <body>
+<div class="container">
+    <h1>채팅 및 WebSocket 테스트</h1>
 
-<h2>🔌 WebSocket 연결 상태 확인</h2>
+    <!-- WebSocket 연결 상태 확인 -->
+    <section id="connection-section">
+        <h2>WebSocket 연결 상태 확인</h2>
+        <button onclick="connect()">🔗 연결하기</button>
+        <button onclick="disconnect()">❌ 연결 끊기</button>
+        <div id="status">상태: 연결되지 않음</div>
+        <div id="user-status">사용자 상태: 업데이트 없음</div>
+    </section>
 
-<!-- 연결 및 구독 버튼 -->
-<button onclick="connect()">🔗 연결하기</button>
-<button onclick="disconnect()">❌ 연결 끊기</button>
+    <!-- 채팅 방 목록 및 채팅 기능 -->
+    <section id="room-section">
+        <h2>Chat Rooms</h2>
+        <div class="chat-input">
+            <input id="username" type="text" placeholder="Enter your username" />
+        </div>
+        <div class="chat-input">
+            <input id="keyword" type="text" placeholder="Search chat rooms..." />
+            <button onclick="searchRooms()">Search</button>
+            <button onclick="fetchChatRooms()">Refresh</button>
+        </div>
+        <div class="room-list" id="room-list"></div>
+        <div class="chat-input">
+            <input id="new-room-name" type="text" placeholder="New room name..." />
+            <input id="new-room-desc" type="text" placeholder="Room description..." />
+            <button onclick="createRoom()">Create Room</button>
+        </div>
+    </section>
 
-<div id="status">상태: 연결되지 않음</div>
-<div id="user-status">사용자 상태: 업데이트 없음</div>
+    <section id="chat-section" style="display: none;">
+        <h2>Chat Room: <span id="current-room-name"></span></h2>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="chat-input">
+            <input id="new-message" type="text" placeholder="Type your message..." />
+            <button onclick="sendMessage()">Send</button>
+            <button onclick="exitRoom()">Exit Room</button>
+        </div>
+        <button onclick="backToRooms()">Back to Room List</button>
+    </section>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 <script>
+    // WebSocket 및 채팅 관련 스크립트는 이전 코드에서 통합
+    const apiUrl = "http://localhost:8080/api/user/chat";
     let stompClient = null;
+    let currentRoomId = null;
+    let isSubscribed = false;
 
-    // ✅ 새로 발급받은 JWT 토큰을 입력
-    const jwtToken = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzM3MzA0Mjc2LCJleHAiOjE3MzczMDc4NzZ9.3xKjsxA1ScqexMm2itNBgLOp7VxfCZZ-xfDrLDGANkE";
+    const jwtToken = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzIiwiaWF0IjoxNzM3MzQxNDU3LCJleHAiOjE3MzczNDUwNTd9.UZklbbUXASY38ze_XcTvW9xDu-YnFaY8NTUWxGKhWTM";
 
-    // WebSocket 연결
     function connect() {
         const socket = new SockJS('http://localhost:8080/chat-socket');
         stompClient = Stomp.over(socket);
 
-        stompClient.debug = console.log;
-
-        // ✅ JWT 토큰을 Authorization 헤더에 추가
         stompClient.connect(
             { Authorization: jwtToken },
             function (frame) {
                 document.getElementById('status').innerText = '상태: 연결됨 ✅';
                 console.log('Connected: ' + frame);
 
-                // ✅ 사용자 상태 구독
-                const userId = "1"; // 테스트할 사용자 ID
+                const userId = "1";
                 stompClient.subscribe(`/topic/user-status/${userId}`, function (message) {
-                    console.log("Subscribed successfully to: ", `/topic/user-status/${userId}`);
-                    console.log("Raw message: ", message);
-                    console.log("Message body: ", message.body);
                     updateUserStatus(userId, message.body);
                 });
             },
@@ -53,7 +153,6 @@
         );
     }
 
-    // 연결 끊기
     function disconnect() {
         if (stompClient !== null) {
             stompClient.disconnect(() => {
@@ -63,13 +162,192 @@
         }
     }
 
-    // 사용자 상태 업데이트
     function updateUserStatus(userId, status) {
         const statusDiv = document.getElementById('user-status');
         statusDiv.innerText = `사용자 상태: ${userId} → ${status}`;
         console.log(`사용자 상태 업데이트: ${userId} → ${status}`);
     }
-</script>
 
+    // Fetch chat rooms
+    async function fetchChatRooms() {
+        try {
+            const response = await fetch(`${apiUrl}/rooms`);
+            const rooms = await response.json();
+            const roomList = document.getElementById("room-list");
+            roomList.innerHTML = rooms.map(room => `
+                <div>
+                    <strong>${room.roomName}</strong> - ${room.description}
+                    <button onclick="enterRoom('${room.roomId}', '${room.roomName}')">Enter</button>
+                </div>
+            `).join("");
+        } catch (error) {
+            console.error("Error fetching chat rooms:", error);
+        }
+    }
+
+    // Search chat rooms
+    async function searchRooms() {
+        const keyword = document.getElementById("keyword").value.trim();
+
+        if (!keyword) {
+            fetchChatRooms();
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiUrl}/rooms/search?keyword=${encodeURIComponent(keyword)}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": jwtToken,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log("Rooms Response:", result);
+
+            const roomList = document.getElementById("room-list");
+
+            // 중첩된 data 필드로 접근
+            if (result.data && Array.isArray(result.data.data)) {
+                roomList.innerHTML = result.data.data.map(room => `
+            <div>
+                <strong>${room.roomName}</strong> - ${room.description}
+                <button onclick="enterRoom('${room.roomId}', '${room.roomName}')">Enter</button>
+            </div>
+        `).join("");
+
+                // meta 정보 로그로 확인
+                console.log("Pagination Info:", result.data.meta);
+            } else {
+                throw new Error("Unexpected response format.");
+            }
+        } catch (error) {
+            console.error("Error searching chat rooms:", error);
+            alert("Error searching chat rooms: " + error.message);
+        }
+    }
+
+
+
+    // Create a new room
+    // 채팅방 생성
+    async function createRoom() {
+        const roomName = document.getElementById("new-room-name").value.trim();
+        const description = document.getElementById("new-room-desc").value.trim();
+
+        if (!roomName) {
+            alert("채팅방 이름을 입력하세요!");
+            return;
+        }
+
+        try {
+            console.log("Sending JWT token:", jwtToken); // JWT 확인 로그
+            const response = await fetch(`${apiUrl}/rooms`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `${jwtToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    roomName: roomName,
+                    description: description
+                })
+            });
+
+            if (response.ok) {
+                alert("채팅방이 성공적으로 생성되었습니다!");
+                fetchChatRooms(); // 목록 갱신
+            } else {
+                const errorData = await response.json();
+                alert(`채팅방 생성 실패: ${JSON.stringify(errorData)}`);
+            }
+        } catch (error) {
+            console.error("채팅방 생성 중 오류 발생:", error);
+            alert("채팅방 생성 중 문제가 발생했습니다. 콘솔을 확인하세요.");
+        }
+    }
+
+
+    // Enter a chat room
+    async function enterRoom(roomId, roomName) {
+        currentRoomId = roomId; // 선택한 방 ID 저장
+        document.getElementById("current-room-name").textContent = roomName;
+        document.getElementById("room-section").style.display = "none"; // 방 리스트 숨김
+        document.getElementById("chat-section").style.display = "block"; // 채팅 화면 표시
+
+        connect(); // WebSocket 연결 시작
+        fetchChatLogs(); // 기존 채팅 기록 로드
+    }
+
+    // Fetch chat logs
+    async function fetchChatLogs() {
+        try {
+            const response = await fetch(`${apiUrl}/rooms/${currentRoomId}/logs`);
+            const data = await response.json();
+
+            const messages = Array.isArray(data) ? data : data.messages || [];
+            messages.forEach(msg => updateChatBox({
+                sender: msg.sender,
+                content: msg.content,
+                timestamp: msg.timestamp
+            }));
+        } catch (error) {
+            console.error("Error fetching chat logs:", error);
+        }
+
+    }
+
+    // Send a message
+    function sendMessage() {
+        const content = document.getElementById("new-message").value.trim();
+        const username = document.getElementById("username").value.trim(); // 사용자 이름을 동적으로 가져옴
+
+        if (!content || !currentRoomId || !username) return;
+
+        if (!stompClient || !stompClient.connected) {
+            alert("WebSocket is not connected.");
+            console.error("stompClient is not connected.");
+            return;
+        }
+
+        const message = {
+            sender:  username,
+            roomId: currentRoomId,
+            content,
+            timestamp: new Date().toLocaleString(), // 현재 시간 추가
+            type: "TALK"
+        };
+
+        stompClient.send(`/app/chat/${currentRoomId}`, {}, JSON.stringify(message));
+        console.log("Message sent:", message);
+
+        document.getElementById("new-message").value = "";
+    }
+
+    function exitRoom() {
+        currentRoomId = null;
+        if (stompClient) {
+            stompClient.disconnect();
+            stompClient = null;
+        }
+        document.getElementById("room-section").style.display = "block";
+        document.getElementById("chat-section").style.display = "none";
+    }
+
+    // Back to room list
+    function backToRooms() {
+        currentRoomId = null;
+        document.getElementById("room-section").style.display = "block";
+        document.getElementById("chat-section").style.display = "none";
+        fetchChatRooms();
+    }
+
+    fetchChatRooms(); // 초기 로드 시 방 목록 가져오기
+</script>
 </body>
 </html>
