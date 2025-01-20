@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -42,6 +43,9 @@ public class ChatRoom {
     // 관리자가 채팅방에 참여 중인지 여부
     @Column(name = "occupied", nullable = false)
     private boolean occupied;
+
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatParticipant> participants = new ArrayList<>();
 
     // 채팅방 생성자 (일반 사용자)
     @ManyToOne(fetch = FetchType.LAZY)

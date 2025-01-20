@@ -31,13 +31,14 @@ public class ChatParticipant {
      * 하나의 채팅방에 여러 명의 사용자가 참여할 수 있음
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chat_room_id", nullable = false)
+    @JoinColumn(name = "room_id")
     private ChatRoom chatRoom;
 
     /**
      * 참여자 정보 (User 또는 Admin)
      * User 엔티티와 연결되어 있으며, Role을 통해 관리자 또는 일반 사용자 구분
-     */    @ManyToOne(fetch = FetchType.LAZY)
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
