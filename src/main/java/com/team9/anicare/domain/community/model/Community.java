@@ -9,6 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -33,6 +36,13 @@ public class Community extends CommonEntity {
     private int commentCount;
 
     private int likeCount;
+
+    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    // Community와 Like 간의 관계 설정
+    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommunityLike> likes = new ArrayList<>();
 
     @Builder
     public Community(User user, String title, String content, String picture, String animalSpecies, int commentCount, int likeCount) {
