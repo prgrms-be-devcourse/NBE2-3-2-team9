@@ -48,6 +48,7 @@ public class PeriodicScheduleService {
                     PeriodicScheduleDTO.PeriodicScheduleDTOBuilder builder = PeriodicScheduleDTO.builder()
                             .id(periodicSchedule.getId())
                             .petId(periodicSchedule.getPet().getId())
+                            .petName(periodicSchedule.getPet().getName())
                             .userId(periodicSchedule.getUser().getId())
                             .name(periodicSchedule.getName())
                             .startDate(periodicSchedule.getStartDate())
