@@ -49,6 +49,8 @@ public class PetService {
                         .age(pet.getAge())
                         .picture(pet.getPicture())
                         .gender(pet.getGender())
+                        .speciesName(pet.getSpecies().getName())
+                        .breedName(pet.getBreed().getName())
                         .createdAt(pet.getCreatedAt())
                         .updatedAt(pet.getUpdatedAt())
                         .build())
