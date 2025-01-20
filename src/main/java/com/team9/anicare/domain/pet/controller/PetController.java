@@ -58,7 +58,7 @@ public class PetController {
 
     @Operation(summary = "반려동물 삭제", description = "반려동물 삭제 API 입니다. 필수 요청 항목 : ID(Pet)" )
     @DeleteMapping("/pet/{petId}")
-    public void deletePets(@RequestParam Long petId) {
+    public void deletePets(@PathVariable Long petId) {
         petService.deletePet(petId);
     }
 }
