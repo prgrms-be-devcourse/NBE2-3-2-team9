@@ -27,7 +27,7 @@ public class UserChatRoomController {
 
     @Operation(summary = "채팅방 생성 (User)")
     @PostMapping("/rooms")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ChatRoomResponseDTO createRoom(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody ChatRoomCreateRequestDTO requestDTO)

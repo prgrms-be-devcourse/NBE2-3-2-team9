@@ -57,10 +57,19 @@ public class ChatServiceUtil {
      * 시스템 메시지를 전송하기 위한 시스템 사용자 객체 생성
      * @return 시스템 사용자 (User 객체)
      */
-    public User getSystemUser()
-    {
-        return User.builder().id(SYSTEM_USER_ID).name(SYSTEM_USER_NAME).build();
+    public User getSystemUser() {
+        String systemEmail = "system@domain.com"; // 시스템 계정 고유 이메일
+        return userRepository.findByEmail(systemEmail) // 이메일로 DB에서 조회
+                .orElseGet(() -> { // 없으면 새로 생성
+                    User systemUser = User.builder()
+                            .email(systemEmail)
+                            .name("SYSTEM")
+                            .password("system")  // 필요 시 안전한 방식으로 암호화
+                            .build();
+                    return userRepository.save(systemUser); // DB에 저장 후 반환
+                });
     }
+
 
 
     /**

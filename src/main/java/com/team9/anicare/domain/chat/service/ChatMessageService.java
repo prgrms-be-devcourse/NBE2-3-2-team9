@@ -52,13 +52,18 @@ public class ChatMessageService {
      * @param type    메시지 타입 (ENTER, EXIT)
      */
     public void sendSystemMessage(String content, String roomId, ChatMessage.MessageType type) {
+        User systemUser = chatServiceUtil.getSystemUser(); // 시스템 사용자 계정 가져오기
+        if (systemUser == null) {
+            throw new IllegalArgumentException("시스템 사용자 계정이 설정되지 않았습니다.");
+        }
+
         ChatMessageRequestDTO requestDTO = ChatMessageRequestDTO.builder()
                 .content(content)
                 .type(type)
                 .roomId(roomId)
                 .build();
 
-        processAndSendMessage(null, requestDTO);  // senderId를 null로 넘기면 SYSTEM 메시지
+        processAndSendMessage(systemUser.getId(), requestDTO);  // senderId를 null로 넘기면 SYSTEM 메시지
     }
 
 
@@ -66,13 +71,12 @@ public class ChatMessageService {
      * 공통 메시지 처리 로직
      */
     private ChatMessageResponseDTO processAndSendMessage(Long senderId, ChatMessageRequestDTO requestDTO) {
-        User sender = (senderId != null) ? chatServiceUtil.findUserById(senderId) : chatServiceUtil.getSystemUser();
-        ChatRoom chatRoom = chatServiceUtil.findChatRoomById(requestDTO.getRoomId());
-
-        // 시스템 메시지일 경우 참여자 검증 생략
-        if (senderId != null) {
-            chatServiceUtil.validateParticipant(sender, chatRoom);
+        if (senderId == null || senderId <= 0) {
+            throw new IllegalArgumentException("유효하지 않은 발신자 ID입니다.");
         }
+
+        User sender = chatServiceUtil.findUserById(senderId);
+        ChatRoom chatRoom = chatServiceUtil.findChatRoomById(requestDTO.getRoomId());
 
         // ✅ 상대방(Receiver) 조회 (발신자가 아닌 사람)
         User receiver = chatParticipantRepository.findByChatRoom(chatRoom).stream()
