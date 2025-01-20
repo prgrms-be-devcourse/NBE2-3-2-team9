@@ -92,9 +92,11 @@ public class UserService {
                 .years_of_experience(updateUserDTO.getYears_of_experience() != 0 ? updateUserDTO.getYears_of_experience() : user.getYears_of_experience()) // 경험 업데이트 또는 기존 값 유지
                 .pets(user.getPets()) // 기존 pets 유지
                 .refreshtoken(user.getRefreshtoken())
+                .chatMessages(user.getChatMessages())
+                .chatRooms(user.getChatRooms())
+                .comments(user.getComments())
                 .profileImg(user.getProfileImg())
                 .email(user.getEmail())
-                .years_of_experience(user.getYears_of_experience())
                 .role(user.getRole())
                 .communities(user.getCommunities()) // 기존 communities 유지
                 .build();
