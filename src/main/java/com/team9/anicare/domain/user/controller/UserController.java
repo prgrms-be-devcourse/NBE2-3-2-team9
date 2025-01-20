@@ -66,8 +66,8 @@ public class UserController {
 
     // 사용자 삭제
     @Operation(summary = "회원 탈퇴")
-    @DeleteMapping
-    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/user")
+    @PreAuthorize("hasRole('USER')")
     public String delete(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return userService.deleteUser(userDetails.getUserId());
     }

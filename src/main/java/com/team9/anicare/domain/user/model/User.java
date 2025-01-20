@@ -2,6 +2,9 @@ package com.team9.anicare.domain.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team9.anicare.common.entities.CommonEntity;
+import com.team9.anicare.domain.chat.entity.ChatMessage;
+import com.team9.anicare.domain.chat.entity.ChatRoom;
+import com.team9.anicare.domain.community.model.Comment;
 import com.team9.anicare.domain.community.model.Community;
 import com.team9.anicare.domain.pet.model.Pet;
 import jakarta.persistence.*;
@@ -41,12 +44,21 @@ public class User extends CommonEntity {
     @JsonIgnore
     private String refreshtoken;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE,  orphanRemoval = true)
     private List<Community> communities = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Pet> pets = new ArrayList<>(); // 초기화
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE,  orphanRemoval = true)
+    private List<Pet> pets = new ArrayList<>();
 
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatMessage> chatMessages = new ArrayList<>();
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments  = new ArrayList<>();
+
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatRoom> chatRooms  = new ArrayList<>();
 
 
     @Enumerated(EnumType.STRING)
