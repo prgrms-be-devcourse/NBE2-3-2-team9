@@ -207,9 +207,11 @@ public class PeriodicScheduleService {
             }
         } else if (periodicSchedule.getRepeatPattern() == RepeatPattern.WEEKLY) {
             List<DayOfWeek> targetDays = parseRepeatDays(periodicSchedule.getRepeatDays());
-            while (!currentDate.isAfter(periodicSchedule.getEndDate())) {
+            LocalDate targetDate = currentDate;
+            while (!targetDate.isAfter(periodicSchedule.getEndDate())) {
                 for (DayOfWeek dayOfWeek : targetDays) {
-                    LocalDate targetDate = currentDate.with(TemporalAdjusters.nextOrSame(dayOfWeek));
+                    LocalDate weekStart = currentDate.minusDays(currentDate.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue());
+                    targetDate = weekStart.plusDays(dayOfWeek.getValue() - DayOfWeek.MONDAY.getValue());
                     if (!targetDate.isBefore(periodicSchedule.getStartDate()) && !targetDate.isAfter(periodicSchedule.getEndDate())) {
                         schedules.add(createSchedule(periodicSchedule, targetDate));
                     }
