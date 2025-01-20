@@ -22,6 +22,7 @@ public class PeriodicScheduleController {
     private PeriodicScheduleService periodicScheduleService;
 
     @Operation(summary = "정기 일정 조회", description = "정기 일정 조회 API 입니다. 로그인 토큰이 필요합니다" )
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/periodicSchedules")
     public ResponseEntity<List<PeriodicScheduleDTO>> findPeriodicSchedules(@AuthenticationPrincipal CustomUserDetails userDetails) {
         List<PeriodicScheduleDTO> periodicScheduleDTOs = periodicScheduleService.findPeriodicSchedules(userDetails.getUserId());
