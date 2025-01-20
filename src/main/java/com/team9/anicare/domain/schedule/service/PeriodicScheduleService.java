@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -208,7 +209,7 @@ public class PeriodicScheduleService {
             List<DayOfWeek> targetDays = parseRepeatDays(periodicSchedule.getRepeatDays());
             while (!currentDate.isAfter(periodicSchedule.getEndDate())) {
                 for (DayOfWeek dayOfWeek : targetDays) {
-                    LocalDate targetDate = currentDate.with(dayOfWeek);
+                    LocalDate targetDate = currentDate.with(TemporalAdjusters.nextOrSame(dayOfWeek));
                     if (!targetDate.isBefore(periodicSchedule.getStartDate()) && !targetDate.isAfter(periodicSchedule.getEndDate())) {
                         schedules.add(createSchedule(periodicSchedule, targetDate));
                     }
