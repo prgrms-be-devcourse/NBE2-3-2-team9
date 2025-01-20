@@ -41,13 +41,13 @@ public class PeriodicScheduleController {
     @PutMapping("/periodicSchedule/{scheduleId}")
     public ResponseEntity<PeriodicScheduleDTO> updatePeriodicSchedule(@RequestBody PeriodicScheduleDTO.UpdatePeriodicScheduleDTO request,
                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
-        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.updatePeriodicSchedule(request, userDetails.getUserId());
+        PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.updatePeriodicSchedule(request, 1L);
         return ResponseEntity.status(HttpStatus.OK).body(periodicScheduleDTO);
     }
 
     @Operation(summary = "정기 일정 삭제", description = "정기 일정 삭제 API 입니다. ID가 필요합니다")
     @DeleteMapping("/periodicSchedule/{scheduleId}")
-    public void deleteSingleSchedule(@RequestParam Long periodicScheduleId) {
-        periodicScheduleService.deletePeriodicSchedule(periodicScheduleId);
+    public void deleteSingleSchedule(@PathVariable Long scheduleId) {
+        periodicScheduleService.deletePeriodicSchedule(scheduleId);
     }
 }
