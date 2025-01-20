@@ -181,9 +181,9 @@ public class PeriodicScheduleService {
         return periodicScheduleDTO;
     }
 
-    public void deletePeriodicSchedule(Long periodicScheduleId) {
-        if (periodicScheduleRepo.existsById(periodicScheduleId)) {
-            periodicScheduleRepo.deleteById(periodicScheduleId);
+    public void deletePeriodicSchedule(Long scheduleId) {
+        if (periodicScheduleRepo.existsById(scheduleId)) {
+            periodicScheduleRepo.deleteById(scheduleId);
         } else {
             throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
         }

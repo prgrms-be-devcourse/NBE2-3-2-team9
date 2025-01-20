@@ -132,18 +132,18 @@ public class SingleScheduleService {
         return singleScheduleDTO;
     }
 
-    public void deleteSingleSchedule(Long singleScheduleId) {
-        if (singlescheduleRepository.existsById(singleScheduleId)) {
-            PeriodicSchedule periodicSchedule = singleScheduleRepository.findPeriodicScheduleById(singleScheduleId);
+    public void deleteSingleSchedule(Long scheduleId) {
+        if (singlescheduleRepository.existsById(scheduleId)) {
+            PeriodicSchedule periodicSchedule = singleScheduleRepository.findPeriodicScheduleById(scheduleId);
             if (periodicSchedule != null) {
                 if (singleScheduleRepository.countByPeriodicScheduleId(periodicSchedule) == 1) {
-                    singleScheduleRepository.deleteById(singleScheduleId);
+                    singleScheduleRepository.deleteById(scheduleId);
                     periodicScheduleRepository.deleteById(periodicSchedule.getId());
                 } else {
-                    singleScheduleRepository.deleteById(singleScheduleId);
+                    singleScheduleRepository.deleteById(scheduleId);
                 }
             } else {
-                singleScheduleRepository.deleteById(singleScheduleId);
+                singleScheduleRepository.deleteById(scheduleId);
             }
         } else {
             throw new CustomException(ResultCode.NOT_EXISTS_SCHEDULE);
