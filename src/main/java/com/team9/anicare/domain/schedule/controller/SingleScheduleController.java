@@ -49,8 +49,8 @@ public class SingleScheduleController {
 
     @Operation(summary = "스케줄 삭제", description = "스케줄 삭제 API 입니다. 필수 요청 항목 : ID" )
     @DeleteMapping("/singleSchedule/{scheduleId}")
-    public void deleteSingleSchedule(@RequestParam Long singleScheduleId) {
-        singleScheduleService.deleteSingleSchedule(singleScheduleId);
+    public void deleteSingleSchedule(@PathVariable Long scheduleId) {
+        singleScheduleService.deleteSingleSchedule(scheduleId);
     }
 }
 

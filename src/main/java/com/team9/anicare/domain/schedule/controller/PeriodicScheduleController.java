@@ -47,7 +47,7 @@ public class PeriodicScheduleController {
 
     @Operation(summary = "정기 일정 삭제", description = "정기 일정 삭제 API 입니다. ID가 필요합니다")
     @DeleteMapping("/periodicSchedule/{scheduleId}")
-    public void deleteSingleSchedule(@RequestParam Long periodicScheduleId) {
-        periodicScheduleService.deletePeriodicSchedule(periodicScheduleId);
+    public void deleteSingleSchedule(@PathVariable Long scheduleId) {
+        periodicScheduleService.deletePeriodicSchedule(scheduleId);
     }
 }
