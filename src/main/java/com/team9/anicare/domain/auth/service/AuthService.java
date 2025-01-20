@@ -70,9 +70,14 @@ public class AuthService {
                 .id(user.getId())
                 .email(user.getEmail()) // 누락 방지
                 .password(user.getPassword())
+                .profileImg(user.getProfileImg())
                 .name(user.getName())
                 .role(user.getRole()) // 다른 필드도 명시
                 .pets(user.getPets())
+                .comments(user.getComments())
+                .communities(user.getCommunities())
+                .chatRooms(user.getChatRooms())
+                .chatMessages(user.getChatMessages())
                 .years_of_experience(user.getYears_of_experience())
                 .refreshtoken(null) // 변경 필드
                 .build();
@@ -80,7 +85,7 @@ public class AuthService {
         userRepository.save(updatedUser);
 
         // 3. Cookie에서 RefreshToken 삭제
-        Cookie cookie = new Cookie(cookieName, null); // 쿠키 값 제거
+        Cookie cookie = new Cookie("REFRESHTOKEN", null); // 쿠키 값 제거
         cookie.setDomain("localhost");
         cookie.setPath("/");
         cookie.setMaxAge(0); // 쿠키 만료 시간 0으로 설정
