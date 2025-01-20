@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class PeriodicScheduleController {
 
     @Operation(summary = "정기 일정 생성", description = "정기 일정 생성 API 입니다. 로그인 토큰이 필요하고 repeatDays는 repeatPattern이 WEEKLY면 필수 기입, DAILY면 기입 X 입니다" )
     @PostMapping("/periodicSchedule")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<PeriodicScheduleDTO> addPeriodicSchedule(@RequestBody PeriodicScheduleDTO.AddPeriodicScheduleDTO request,
                                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
         PeriodicScheduleDTO periodicScheduleDTO = periodicScheduleService.addPeriodicSchedule(request, userDetails.getUserId());
