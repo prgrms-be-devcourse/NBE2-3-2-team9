@@ -59,6 +59,33 @@ public class PetService {
         return petDTOs;
     }
 
+    public PetDTO getPetDetails(Long userId, Long petId) {
+        if (!userRepository.existsById(userId)) {
+            throw new CustomException(ResultCode.NOT_EXISTS_USER);
+        }
+        if (!petRepository.existsById(petId)) {
+            throw new CustomException(ResultCode.NOT_EXISTS_PET);
+        }
+        Pet pet = petRepository.findById(petId).orElseThrow(RuntimeException::new);
+
+        PetDTO petDTO = PetDTO.builder()
+                .id(pet.getId())
+                .breedId(pet.getBreed().getId())
+                .speciesId(pet.getSpecies().getId())
+                .picture(pet.getPicture())
+                .userId(pet.getUser().getId())
+                .age(pet.getAge())
+                .name(pet.getName())
+                .gender(pet.getGender())
+                .breedName(pet.getBreed().getName())
+                .speciesName(pet.getSpecies().getName())
+                .createdAt(pet.getCreatedAt())
+                .updatedAt(pet.getUpdatedAt())
+                .build();
+
+        return petDTO;
+    }
+
     public PetDTO addPet(PetDTO.AddPetDTO request, Long userId, MultipartFile file) {
         if (request.getName() == null) {
             throw new CustomException(ResultCode.MISSING_PARAMETER);
