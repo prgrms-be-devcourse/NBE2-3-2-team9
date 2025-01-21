@@ -24,13 +24,20 @@ public class PetController {
     @Autowired
     private PetService petService;
 
-    @Operation(summary = "반려동물 조회", description = "반려동물 조회 API 입니다. 필수 요청 항목 : 로그인" )
+    @Operation(summary = "반려동물 전체 조회", description = "반려동물 전체 조회 API 입니다. 필수 요청 항목 : 로그인" )
     @GetMapping("/pets")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<PetDTO>> findPets(@AuthenticationPrincipal CustomUserDetails userDetails) {
-
         List<PetDTO> petDTOs = petService.findPets(userDetails.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body(petDTOs);
+    }
+
+    @Operation(summary = "반려동물 상세 조회", description = "반려동물 상세 조회 API 입니다. 필수 요청 항목 : 로그인, petId" )
+    @GetMapping("/pets/{petId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<PetDTO> getPetDetails(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long petId) {
+        PetDTO petDTO = petService.getPetDetails(userDetails.getUserId(),petId);
+        return ResponseEntity.status(HttpStatus.OK).body(petDTO);
     }
 
     @Operation(summary = "반려동물 등록", description = "반려동물 등록 API 입니다. 필수 요청 항목 : 로그인, breedId, speciesId, name, gender(암컷 or 수컷) / 그 외 : age, file(반려동물 사진)" )
