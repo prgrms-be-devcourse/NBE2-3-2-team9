@@ -70,25 +70,6 @@ public class ChatServiceUtil {
     }
 
 
-
-    /**
-     * 사용자가 특정 채팅방에 참여 중인지 검증
-     * @param sender 검증할 사용자
-     * @param chatRoom 검증할 채팅방
-     * @throws IllegalStateException 사용자가 채팅방에 참여 중이지 않을 경우 발생
-     */
-    public void validateParticipant(User sender, ChatRoom chatRoom)
-    {
-        boolean isParticipant = chatParticipantRepository.findByUserAndChatRoom(sender, chatRoom)
-                .filter(ChatParticipant::isActive)
-                .isPresent();
-
-        if (!isParticipant) {
-            throw new IllegalStateException("해당 사용자는 채팅방에 참여 중이지 않습니다. [UserID: " + sender.getId() + ", RoomID: " + chatRoom.getRoomId() + "]");
-        }
-    }
-
-
     /**
      * 사용자와 채팅방 정보를 기반으로 참여자 정보 조회
      * @param user 조회할 사용자
