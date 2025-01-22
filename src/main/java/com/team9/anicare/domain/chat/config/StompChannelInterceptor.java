@@ -10,6 +10,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -59,7 +60,12 @@ public class StompChannelInterceptor implements ChannelInterceptor {
         Long userId = jwtTokenProvider.getId(token);
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(userId, null, null);
-        accessor.setUser(authentication); // 사용자 인증 정보를 WebSocket 세션에 설정
+
+        // SecurityContext에 인증 정보 설정
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // WebSocket 세션에 사용자 정보 설정
+        accessor.setUser(authentication);
 
         log.info("WebSocket 인증 성공: 사용자 ID = {}", userId);
 
