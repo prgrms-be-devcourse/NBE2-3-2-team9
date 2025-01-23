@@ -15,6 +15,7 @@ public class ChatMessageResponseDTO {
     private Long messageId;
     private String roomId;
     private String senderName; // 발신자 이름 (관리자, 유저 닉네임, SYSTEM)
+    private Long senderId;     // 요청한 사용자 id 추가
     private String content;
     private ChatMessage.MessageType type;
     private LocalDateTime sentAt;
