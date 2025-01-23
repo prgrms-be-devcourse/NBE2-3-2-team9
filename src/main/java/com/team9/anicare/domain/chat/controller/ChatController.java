@@ -68,19 +68,10 @@ public class ChatController {
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public List<ChatMessageResponseDTO> getMessagesByRoom(
             @PathVariable String roomId,
-            @AuthenticationPrincipal CustomUserDetails userDetails)
-    {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        // 사용자 ID 가져오기
-        Long senderId = userDetails.getUserId();
-
-        // 메시지 목록 가져오기
-        return chatMessageService.getMessagesByRoom(roomId).stream()
-                .map(message -> {
-                    // 요청한 사용자 ID를 응답 DTO에 추가
-                    message.setSenderId(senderId);
-                    return message;
-                })
-                .collect(Collectors.toList());
+        Long senderId = userDetails.getUserId(); // 요청한 사용자 ID 가져오기
+        return chatMessageService.getMessagesByRoom(roomId, senderId);
     }
+
 }
