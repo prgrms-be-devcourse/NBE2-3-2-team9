@@ -32,6 +32,7 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatServiceUtil chatServiceUtil;
+    private final RedisMessagePublisher redisMessagePublisher;
 
     /**
      * 일반 메시지 전송
@@ -42,7 +43,15 @@ public class ChatMessageService {
      */
     public ChatMessageResponseDTO sendMessage(Long senderId, ChatMessageRequestDTO requestDTO) {
         validateMessageContent(requestDTO.getContent());
-        return processAndSendMessage(senderId, requestDTO);
+
+        // 메시지 저장
+        ChatMessageResponseDTO responseDTO = processAndSendMessage(senderId, requestDTO);
+
+        // Redis 발행
+        String channel = "chatroom:" + requestDTO.getRoomId();
+        redisMessagePublisher.publish(channel, responseDTO);
+
+        return responseDTO;
     }
 
     /**

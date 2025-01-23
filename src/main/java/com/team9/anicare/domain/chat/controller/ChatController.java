@@ -38,7 +38,7 @@ public class ChatController {
      * WebSocket을 통해 채팅 메시지 전송 및 Redis 발행
      */
     @MessageMapping("/chat/{roomId}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    // @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public void sendMessage(@DestinationVariable String roomId,
                             ChatMessageRequestDTO requestDTO,
                             @AuthenticationPrincipal CustomUserDetails userDetails) {
