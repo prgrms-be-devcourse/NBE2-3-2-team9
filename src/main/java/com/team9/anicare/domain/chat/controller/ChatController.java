@@ -15,6 +15,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Tag(name = "chat", description = "채팅 API")
@@ -63,8 +65,19 @@ public class ChatController {
      */
     @Operation(summary = "채팅방 메시지 로그 조회")
     @GetMapping("/rooms/{roomId}/messages")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public List<ChatMessageResponseDTO> getMessagesByRoom(@PathVariable String roomId) {
-        return chatMessageService.getMessagesByRoom(roomId);
+
+        // SecurityContext에서 요청한 사용자 ID 가져오기
+        Long senderId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        // 메시지 목록 가져오기
+        return chatMessageService.getMessagesByRoom(roomId).stream()
+                .map(message -> {
+                    // 요청한 사용자 ID를 응답 DTO에 추가
+                    message.setSenderId(senderId);
+                    return message;
+                })
+                .collect(Collectors.toList());
     }
 }
