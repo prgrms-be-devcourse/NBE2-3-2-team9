@@ -48,9 +48,6 @@ public class ChatController {
             // 메시지 저장 및 발행
             ChatMessageResponseDTO savedMessage = chatMessageService.sendMessage(senderId, requestDTO);
 
-            // Redis 채널 발행
-            redisMessagePublisher.publish("chatroom:" + roomId, senderId, requestDTO);
-
             // WebSocket으로 메시지 브로드캐스트
             messagingTemplate.convertAndSend("/topic/chat/" + roomId, savedMessage);
 
