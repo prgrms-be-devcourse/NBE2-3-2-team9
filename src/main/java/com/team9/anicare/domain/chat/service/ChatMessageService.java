@@ -124,14 +124,37 @@ public class ChatMessageService {
      * @param roomId 조회할 채팅방 ID
      * @return 채팅 메시지 목록 DTO
      */
-    public List<ChatMessageResponseDTO> getMessagesByRoom(String roomId) {
+//    public List<ChatMessageResponseDTO> getMessagesByRoom(String roomId) {
+//        ChatRoom chatRoom = chatServiceUtil.findChatRoomById(roomId);
+//
+//        return chatMessageRepository.findByChatRoomOrderBySentAtAsc(chatRoom).stream()
+//                .map(this::convertToResponseDTO)
+//                .collect(Collectors.toList());
+//    }
+
+
+    public List<ChatMessageResponseDTO> getMessagesByRoom(String roomId, Long senderId) {
         ChatRoom chatRoom = chatServiceUtil.findChatRoomById(roomId);
 
+        // 메시지 목록을 조회하고 DTO로 변환
         return chatMessageRepository.findByChatRoomOrderBySentAtAsc(chatRoom).stream()
-                .map(this::convertToResponseDTO)
+                .map(message -> ChatMessageResponseDTO.builder()
+                        .messageId(message.getId())
+                        .roomId(message.getChatRoom().getRoomId())
+                        .senderId(message.getSender().getId()) // 발신자 ID
+                        .senderName(message.getSender().getName()) // 발신자 이름
+                        .content(message.getContent()) // 메시지 내용
+                        .type(message.getType()) // 메시지 유형
+                        .sentAt(message.getSentAt()) // 전송 시간
+                        .opponentId(message.getReceiver() != null ? message.getReceiver().getId() : null) // 상대방 ID
+                        .opponentName(message.getReceiver() != null ? message.getReceiver().getName() : null) // 상대방 이름
+                        .opponentProfileImg(message.getReceiver() != null ? message.getReceiver().getProfileImg() : null) // 상대방 프로필 이미지
+                        .build())
                 .collect(Collectors.toList());
     }
 
+
+//
 
     /**
      * 메시지 생성 (일반/시스템 공통)
