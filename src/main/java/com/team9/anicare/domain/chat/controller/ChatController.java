@@ -66,10 +66,13 @@ public class ChatController {
     @Operation(summary = "채팅방 메시지 로그 조회")
     @GetMapping("/rooms/{roomId}/messages")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public List<ChatMessageResponseDTO> getMessagesByRoom(@PathVariable String roomId) {
+    public List<ChatMessageResponseDTO> getMessagesByRoom(
+            @PathVariable String roomId,
+            @AuthenticationPrincipal CustomUserDetails userDetails)
+    {
 
-        // SecurityContext에서 요청한 사용자 ID 가져오기
-        Long senderId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        // 사용자 ID 가져오기
+        Long senderId = userDetails.getUserId();
 
         // 메시지 목록 가져오기
         return chatMessageService.getMessagesByRoom(roomId).stream()
