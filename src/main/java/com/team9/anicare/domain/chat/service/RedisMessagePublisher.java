@@ -43,20 +43,15 @@ public class RedisMessagePublisher {
      * Redis 채널로 메시지를 발행하고 DB에 저장
      *
      * @param channel  Redis 채널명
-     * @param senderId 발신자 ID
-     * @param requestDTO 메시지 내용 DTO
      */
-    public void publish(String channel, Long senderId, ChatMessageRequestDTO requestDTO) {
+    public void publish(String channel, ChatMessageResponseDTO responseDTO) {
         int attempt = 0;
         long delay = INITIAL_RETRY_DELAY_MS;
 
         while (attempt < MAX_RETRIES) {
             try {
-                // 메시지 저장
-                ChatMessage chatMessage = saveChatMessage(senderId, requestDTO);
-
                 // JSON 직렬화
-                String messageJson = objectMapper.writeValueAsString(convertToResponseDTO(chatMessage));
+                String messageJson = objectMapper.writeValueAsString(responseDTO);
 
                 // Redis 채널로 발행
                 redisTemplate.convertAndSend(channel, messageJson);

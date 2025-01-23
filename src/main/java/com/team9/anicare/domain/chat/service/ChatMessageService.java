@@ -11,6 +11,7 @@ import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
 import com.team9.anicare.domain.user.model.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
  * ChatMessageService
  * - 채팅 메시지 송수신, 조회, 시스템 메시지 관리 등 메시지 관련 비즈니스 로직 처리
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -30,6 +32,7 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatServiceUtil chatServiceUtil;
+    private final RedisMessagePublisher redisMessagePublisher;
 
     /**
      * 일반 메시지 전송
@@ -40,7 +43,15 @@ public class ChatMessageService {
      */
     public ChatMessageResponseDTO sendMessage(Long senderId, ChatMessageRequestDTO requestDTO) {
         validateMessageContent(requestDTO.getContent());
-        return processAndSendMessage(senderId, requestDTO);
+
+        // 메시지 저장
+        ChatMessageResponseDTO responseDTO = processAndSendMessage(senderId, requestDTO);
+
+        // Redis 발행
+        String channel = "chatroom:" + requestDTO.getRoomId();
+        redisMessagePublisher.publish(channel, responseDTO);
+
+        return responseDTO;
     }
 
     /**
@@ -141,7 +152,15 @@ public class ChatMessageService {
      * 메시지 저장 및 채팅방의 마지막 메시지 업데이트
      */
     private void saveMessageAndUpdateRoom(ChatMessage chatMessage, ChatRoom chatRoom) {
-        chatMessageRepository.save(chatMessage);
+        try {
+            chatMessageRepository.save(chatMessage);
+            log.info("Message saved: {}", chatMessage);
+        } catch (Exception e) {
+            log.error("Error saving message: {}", e.getMessage(), e);
+            throw new RuntimeException("메시지 저장 실패", e);
+        }
+
+        // 채팅방의 마지막 메시지 정보 업데이트
         chatRoom.setLastMessage(chatMessage.getContent());
         chatRoom.setLastMessageTime(chatMessage.getSentAt());
         chatRoomRepository.save(chatRoom);
