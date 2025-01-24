@@ -48,9 +48,9 @@ public class AuthController {
 
     @Operation(summary = "관리자 로그인")
     @PostMapping("/login")
-    public ResponseEntity<TokenResponseDTO> login(@Valid @RequestBody LoginAdminDTO loginAdminDTO, HttpServletResponse response) {
-        TokenResponseDTO tokenResponseDTO = authService.login(loginAdminDTO, response);
-        return ResponseEntity.status(HttpStatus.OK).body(tokenResponseDTO);
+    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginAdminDTO loginAdminDTO, HttpServletResponse response) {
+        Map<String, Object> responseMap = authService.login(loginAdminDTO, response);
+        return ResponseEntity.ok(responseMap);
     }
 
     @Operation(summary = "관리자 로그아웃")
@@ -89,12 +89,8 @@ public class AuthController {
 
         // 3. RefreshToken 생성 및 쿠키에 저장
         String refreshToken = jwtTokenProvider.createRefreshToken(userInfo.getId());
-        Cookie cookie = new Cookie("REFRESHTOKEN", refreshToken);
-        cookie.setHttpOnly(true); // 보안 강화
-        cookie.setPath("/");
-        cookie.setDomain("localhost");
-        cookie.setMaxAge(604800); // 7일
-        response.addCookie(cookie);
+        Cookie refreshTokenCookie = authService.createRefreshTokenCookie(refreshToken, "localhost");
+        response.addCookie(refreshTokenCookie);
 
         // 4. AccessToken 반환
         TokenResponseDTO tokenResponseDTO = new TokenResponseDTO(userInfo.getAccessToken());

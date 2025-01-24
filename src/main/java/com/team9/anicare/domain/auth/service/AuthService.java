@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -28,7 +29,8 @@ public class AuthService {
 
 
 
-    public TokenResponseDTO login(LoginAdminDTO loginAdminDTO , HttpServletResponse response) {
+
+    public Map<String, Object> login(LoginAdminDTO loginAdminDTO , HttpServletResponse response) {
         Optional<User> optionalUser = userRepository.findByEmail(loginAdminDTO.getEmail());
         if (optionalUser.isEmpty()) {
             throw  new CustomException(ResultCode.NOT_EXISTS_USER);
@@ -39,25 +41,34 @@ public class AuthService {
         }
         String accessToken = jwtTokenProvider.createToken(user.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
-        // Cookie에 refreshToken 값 추가
-        Cookie cookie = new Cookie(cookieName, refreshToken);
-        cookie.setDomain("localhost");
-        cookie.setPath("/");
-        cookie.setMaxAge(604800);
-        response.addCookie(cookie);
+
+        Cookie refreshTokenCookie = createRefreshTokenCookie(refreshToken, "localhost");
+        response.addCookie(refreshTokenCookie);
         User updatedUser = User.builder()
                 .id(user.getId())
+                .name(user.getName())
+                .profileImg(user.getProfileImg())
                 .email(user.getEmail()) // 누락 방지
                 .password(user.getPassword())
                 .role(user.getRole()) // 다른 필드도 명시
                 .pets(user.getPets())
                 .years_of_experience(user.getYears_of_experience())
                 .refreshtoken(passwordEncoder.encode(refreshToken)) // 변경 필드
+                .chatMessages(user.getChatMessages())
+                .chatRooms(user.getChatRooms())
+                .communities(user.getCommunities())
+                .comments(user.getComments())
                 .build();
 
         userRepository.save(updatedUser);
 
-        return new TokenResponseDTO(accessToken);
+        Map<String, Object> responseMap = Map.of(
+            "accessToken", accessToken,
+            "userId", user.getId(),
+            "role", user.getRole()
+        );
+
+        return responseMap;
     }
 
     public String logout(Long userId, HttpServletResponse response) {
@@ -132,6 +143,15 @@ public class AuthService {
 
             return new TokenResponseDTO(newAccessToken);
 
+    }
+
+    public Cookie createRefreshTokenCookie(String refreshToken, String domain) {
+        Cookie cookie = new Cookie("REFRESHTOKEN", refreshToken);
+        cookie.setHttpOnly(true); // 보안 강화
+        cookie.setPath("/");
+        cookie.setDomain(domain); // 도메인 설정
+        cookie.setMaxAge(604800); // 7일 (초 단위)
+        return cookie;
     }
 
 }
