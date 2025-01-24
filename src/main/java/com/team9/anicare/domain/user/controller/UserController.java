@@ -69,6 +69,9 @@ public class UserController {
     @DeleteMapping("/user")
     @PreAuthorize("hasRole('USER')")
     public String delete(@AuthenticationPrincipal CustomUserDetails userDetails) {
+
+
+
         return userService.deleteUser(userDetails.getUserId());
     }
 

@@ -37,6 +37,8 @@ public class User extends CommonEntity {
     @Column()
     private String profileImg;
 
+    @Column()
+    private String socialAccessToken; // Kakao AccessToken 저장
 
     @Column(nullable = false)
     private int years_of_experience = 0;

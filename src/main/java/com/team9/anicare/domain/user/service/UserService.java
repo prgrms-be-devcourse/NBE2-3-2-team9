@@ -2,6 +2,8 @@ package com.team9.anicare.domain.user.service;
 
 import com.team9.anicare.common.exception.CustomException;
 import com.team9.anicare.common.exception.ResultCode;
+import com.team9.anicare.domain.auth.client.KakaoClient;
+import com.team9.anicare.domain.auth.service.KakaoService;
 import com.team9.anicare.domain.user.dto.*;
 import com.team9.anicare.domain.user.mapper.UserMapper;
 import com.team9.anicare.domain.user.model.Role;
@@ -21,6 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final KakaoClient kakaoClient;
 
     public AdminResponseDTO createAdmin(CreateAdminDTO createAdminDTO) {
         // 이메일 중복 체크
@@ -68,6 +71,9 @@ public class UserService {
                 .email(updateAdminDTO.getEmail() != null ? updateAdminDTO.getEmail() : user.getEmail())
                 .pets(user.getPets()) // 기존 pets 유지
                 .refreshtoken(user.getRefreshtoken())
+                .chatMessages(user.getChatMessages())
+                .chatRooms(user.getChatRooms())
+                .socialAccessToken(user.getSocialAccessToken())
                 .years_of_experience(user.getYears_of_experience())
                 .role(user.getRole())
                 .communities(user.getCommunities()) // 기존 communities 유지
@@ -94,6 +100,7 @@ public class UserService {
                 .refreshtoken(user.getRefreshtoken())
                 .chatMessages(user.getChatMessages())
                 .chatRooms(user.getChatRooms())
+                .socialAccessToken(user.getSocialAccessToken())
                 .comments(user.getComments())
                 .profileImg(user.getProfileImg())
                 .email(user.getEmail())
@@ -110,7 +117,15 @@ public class UserService {
 
     public String deleteUser(Long id) {
             Optional<User> optionalUser = userRepository.findById(id);
-            User user = optionalUser.get();;
+            User user = optionalUser.get();
+        if (user.getRole().equals(Role.USER)) {
+            String kakaoAccessToken = user.getSocialAccessToken(); // 저장된 Kakao Access Token
+
+            if (kakaoAccessToken != null && !kakaoAccessToken.isEmpty()) {
+                kakaoClient.unlinkKakaoAccount(kakaoAccessToken); // Kakao 계정 연결 해제
+            }
+        }
+
             userRepository.deleteById(user.getId());
             return "삭제성공";
     }
