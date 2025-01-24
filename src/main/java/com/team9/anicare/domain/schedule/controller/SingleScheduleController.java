@@ -2,16 +2,20 @@ package com.team9.anicare.domain.schedule.controller;
 
 import com.team9.anicare.domain.auth.security.CustomUserDetails;
 import com.team9.anicare.domain.schedule.dto.SingleScheduleDTO;
+import com.team9.anicare.domain.schedule.service.MessageService;
 import com.team9.anicare.domain.schedule.service.SingleScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @Tag(name = "single schedule", description = "스케줄 API")
@@ -20,6 +24,14 @@ import java.util.List;
 public class SingleScheduleController {
     @Autowired
     private SingleScheduleService singleScheduleService;
+    @Autowired
+    private MessageService messageService;
+
+    @Value("${kakao.client-id}")
+    private String clientId;
+
+    @Value("${KAKAO_REDIRECT_URI_SCHEDULE}")
+    private String redirectUri;
 
     @Operation(summary = "스케줄 조회", description = "스케줄 조회 API 입니다. 필수 요청 항목 : 로그인 토큰" )
     @GetMapping("/singleSchedules")
@@ -51,6 +63,21 @@ public class SingleScheduleController {
     @DeleteMapping("/singleSchedule/{scheduleId}")
     public void deleteSingleSchedule(@PathVariable Long scheduleId) {
         singleScheduleService.deleteSingleSchedule(scheduleId);
+    }
+
+    @GetMapping("/singleSchedule/kakao")
+    public void redirectToKakao(HttpServletResponse response) throws IOException {
+        String kakaoLoginUrl = "https://kauth.kakao.com/oauth/authorize"
+                + "?response_type=code"
+                + "&client_id=" + clientId
+                + "&redirect_uri=" + redirectUri
+                + "&scope=profile_nickname,account_email";
+        response.sendRedirect(kakaoLoginUrl);
+    }
+
+    @GetMapping("/singleSchedule/kakao/callback")
+    public void requestMessage(@RequestParam String code) {
+        System.out.println(messageService.getAccessToken(code));
     }
 }
 
