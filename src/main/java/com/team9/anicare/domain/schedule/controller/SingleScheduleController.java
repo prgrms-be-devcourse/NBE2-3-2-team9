@@ -77,7 +77,10 @@ public class SingleScheduleController {
 
     @GetMapping("/singleSchedule/kakao/callback")
     public void requestMessage(@RequestParam String code) {
-        System.out.println(messageService.getAccessToken(code));
+        String accessToken = messageService.getAccessToken(code);
+        System.out.println(accessToken);
+        messageService.requestMessage(accessToken);
+
     }
 }
 
