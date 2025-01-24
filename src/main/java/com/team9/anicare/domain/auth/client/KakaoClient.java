@@ -78,4 +78,18 @@ public class KakaoClient {
             throw new RuntimeException("사용자 정보를 가져오지 못했습니다. 상태 코드: " + response.getStatusCode());
         }
     }
+
+    public void unlinkKakaoAccount(String accessToken) {
+        String unlinkUrl = "https://kapi.kakao.com/v1/user/unlink";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(unlinkUrl, HttpMethod.POST, request, String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to unlink Kakao account: " + response.getBody());
+        }
+    }
 }

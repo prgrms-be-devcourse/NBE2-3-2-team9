@@ -52,6 +52,7 @@ public class KakaoService {
         // RefreshToken 암호화 후 저장
         User updatedUser = user.toBuilder()
                 .refreshtoken(passwordEncoder.encode(refreshToken))
+                .socialAccessToken(kakaoAccessToken)
                 .build();
         userService.updateUser(updatedUser);
 

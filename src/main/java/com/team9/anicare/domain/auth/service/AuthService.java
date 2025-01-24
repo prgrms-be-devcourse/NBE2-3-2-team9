@@ -52,6 +52,7 @@ public class AuthService {
                 .password(user.getPassword())
                 .role(user.getRole()) // 다른 필드도 명시
                 .pets(user.getPets())
+                .socialAccessToken(user.getSocialAccessToken())
                 .years_of_experience(user.getYears_of_experience())
                 .refreshtoken(passwordEncoder.encode(refreshToken)) // 변경 필드
                 .chatMessages(user.getChatMessages())
@@ -82,6 +83,7 @@ public class AuthService {
                 .email(user.getEmail()) // 누락 방지
                 .password(user.getPassword())
                 .profileImg(user.getProfileImg())
+                .socialAccessToken(user.getSocialAccessToken())
                 .name(user.getName())
                 .role(user.getRole()) // 다른 필드도 명시
                 .pets(user.getPets())
