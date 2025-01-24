@@ -61,35 +61,39 @@ public class MessageService {
     }
 
     public void requestMessage(String accessToken) {
-            // 1. 요청 URL
-            String url = "https://kapi.kakao.com/v2/api/talk/memo/default/send";
+        RestTemplate restTemplate = new RestTemplate();
 
-            // 2. HTTP 헤더 설정
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + accessToken);
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED); // application/x-www-form-urlencoded
+        String url = "https://kapi.kakao.com/v2/api/talk/memo/default/send";
 
-            // 3. 요청 바디 설정
-            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-            body.add("template_object", "{\"object_type\":\"text\",\"text\":\"스케줄 알림: 내일 오전 9시에 회의가 있습니다.\",\"link\":{\"web_url\":\"https://yourapp.com/schedule\",\"mobile_web_url\":\"https://yourapp.com/schedule\"}}");
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-            // 4. HttpEntity 생성 (헤더 + 바디)
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("template_object", "{"
+                + "\"object_type\":\"text\","
+                + "\"text\":\"텍스트 영역입니다. 최대 200자 표시 가능합니다.\","
+                + "\"link\":{"
+                + "    \"web_url\":\"https://developers.kakao.com\","
+                + "    \"mobile_web_url\":\"https://developers.kakao.com\""
+                + "},"
+                + "\"button_title\":\"바로 확인\""
+                + "}");
 
-            // 5. API 호출
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    request,
-                    String.class
-            );
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-            // 6. 응답 처리
-            if (response.getStatusCode().is2xxSuccessful()) {
-                System.out.println("메시지 전송 성공: " + response.getBody());
-            } else {
-                System.out.println("메시지 전송 실패: " + response.getStatusCode());
-            }
+        ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                request,
+                String.class
+        );
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            System.out.println("메시지 전송 성공: " + response.getBody());
+        } else {
+            System.out.println("메시지 전송 실패: " + response.getStatusCode());
+        }
 
 
     }
