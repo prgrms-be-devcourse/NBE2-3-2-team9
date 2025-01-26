@@ -1,8 +1,5 @@
 package com.team9.anicare.domain.hospital.controller;
 
-import com.team9.anicare.common.exception.ResultCode;
-import com.team9.anicare.common.response.Result;
-import com.team9.anicare.domain.hospital.dto.AnimalHospitalDetailsDto;
 import com.team9.anicare.domain.hospital.dto.AnimalHospitalDto;
 import com.team9.anicare.domain.hospital.model.AnimalHospital;
 import com.team9.anicare.domain.hospital.service.AnimalHospitalService;
@@ -98,53 +95,5 @@ public class AnimalHospitalController {
 
         // 모든 조건이 없을 경우 빈 리스트 반환
         return List.of();
-    }
-
-
-    @Operation(summary = "동물병원 좋아요 추가",
-            description = "동물병원을 추가 하는 API 입니다. 요청 항목 : mgtNo:동물병원 고유번호, userId:사용자 ID")
-    @PostMapping("/api/animal-hospitals/{mgtNo}/like")
-    public ResponseEntity<Result<String>> likeHospital(
-            @PathVariable String mgtNo,
-            @RequestParam String userId) {
-        try {
-            Result<String> result = animalHospitalService.likeHospital(mgtNo, userId);
-            return ResponseEntity.ok(result);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new Result<>(ResultCode.INVALID_REQUEST, e.getMessage()));
-        }
-    }
-
-    // 동물병원 좋아요 취소
-    @Operation(summary = "동물병원 좋아요 취소",
-            description = "동물병원을 취소 하는 API 입니다. 요청 항목 : mgtNo:동물병원 고유번호, userId:사용자 ID")
-    @DeleteMapping("/api/animal-hospitals/{mgtNo}/like")
-    public ResponseEntity<Result<String>> unlikeHospital(
-            @PathVariable String mgtNo,
-            @RequestParam String userId) {
-        try {
-            Result<String> result = animalHospitalService.unlikeHospital(mgtNo, userId);
-            return ResponseEntity.ok(result);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new Result<>(ResultCode.INVALID_REQUEST, e.getMessage()));
-        }
-    }
-
-    // 좋아요 수 확인 API
-    @Operation(summary = "동물병원 좋아요 수 확인",
-            description = "동물병원 좋아요 수 확인 API 입니다. 요청 항목 : mgtNo:동물병원 고유번호")
-    @GetMapping("/api/animal-hospitals/{mgtNo}/like-count")
-    public ResponseEntity<Result<Long>> getLikeCount(@PathVariable String mgtNo) {
-        long likeCount = animalHospitalService.getLikeCount(mgtNo);
-        return ResponseEntity.ok(new Result<>(ResultCode.SUCCESS, likeCount));
-    }
-
-    //동물병원 상세검색
-    @Operation(summary = "동물병원 상세 검색",
-            description = "동물병원 검색을 하면 동물병원 정보가 나옵니다. 요청 항목 : mgtNo:동물병원 고유번호")
-    @GetMapping("/api/animal-hospitals/{mgtNo}/details")
-    public ResponseEntity<Result<AnimalHospitalDetailsDto>> getHospitalDetails(@PathVariable String mgtNo) {
-        AnimalHospitalDetailsDto hospitalDetails = animalHospitalService.getHospitalDetailsDto(mgtNo);
-        return ResponseEntity.ok(new Result<>(ResultCode.SUCCESS, hospitalDetails));
     }
 }
