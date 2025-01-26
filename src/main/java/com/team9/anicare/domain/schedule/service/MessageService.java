@@ -2,6 +2,7 @@ package com.team9.anicare.domain.schedule.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team9.anicare.domain.schedule.model.SingleSchedule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -60,7 +61,7 @@ public class MessageService {
         }
     }
 
-    public void requestMessage(String accessToken) {
+    public void requestMessage(String accessToken, SingleSchedule schedule) {
         RestTemplate restTemplate = new RestTemplate();
 
         String url = "https://kapi.kakao.com/v2/api/talk/memo/default/send";
@@ -70,15 +71,23 @@ public class MessageService {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("template_object", "{"
+
+        String jsonTemplate = "{"
                 + "\"object_type\":\"text\","
-                + "\"text\":\"텍스트 영역입니다. 최대 200자 표시 가능합니다.\","
+                + "\"text\":\"[알림] 일정이 곧 시작됩니다!\\n" +
+                "- 일정 이름: %s\\n" +
+                "- 시작 시간: %s\\n" +
+                "- 종료 시간: %s\\n\","
                 + "\"link\":{"
-                + "    \"web_url\":\"https://developers.kakao.com\","
-                + "    \"mobile_web_url\":\"https://developers.kakao.com\""
+                + "    \"web_url\":\"http://localhost:3000/\","
+                + "    \"mobile_web_url\":\"http://localhost:3000/\""
                 + "},"
-                + "\"button_title\":\"바로 확인\""
-                + "}");
+                + "\"button_title\":\"Anicare Link\""
+                + "}";
+
+        String jsonString = String.format(jsonTemplate, schedule.getName(),schedule.getStartDatetime(),schedule.getEndDatetime());
+
+        body.add("template_object", jsonString);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 

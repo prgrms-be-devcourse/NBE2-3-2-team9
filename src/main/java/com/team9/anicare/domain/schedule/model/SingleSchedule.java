@@ -46,6 +46,9 @@ public class SingleSchedule extends CommonEntity {
     @Column(name = "end_datetime", nullable = false)
     private LocalDateTime endDatetime;
 
+    @Column(name = "notificated_at", nullable = true)
+    private LocalDateTime notificatedAt;
+
     public SingleSchedule updateSingleSchedule(SingleScheduleDTO.UpdateSingleScheduleDTO request, PetRepository petRe) {
         this.name = request.getName();
         this.startDatetime = request.getStartDatetime();
@@ -54,6 +57,14 @@ public class SingleSchedule extends CommonEntity {
         this.periodicSchedule = null;
 
         return this;
+    }
+
+    public void setNotificatedAt(LocalDateTime notificatedAt) {
+        this.notificatedAt = notificatedAt;
+    }
+
+    public LocalDateTime getNotificatedAt() {
+        return notificatedAt;
     }
 }
 
