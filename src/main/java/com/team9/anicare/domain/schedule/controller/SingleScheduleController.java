@@ -24,14 +24,6 @@ import java.util.List;
 public class SingleScheduleController {
     @Autowired
     private SingleScheduleService singleScheduleService;
-    @Autowired
-    private MessageService messageService;
-
-    @Value("${kakao.client-id}")
-    private String clientId;
-
-    @Value("${KAKAO_REDIRECT_URI_SCHEDULE}")
-    private String redirectUri;
 
     @Operation(summary = "스케줄 조회", description = "스케줄 조회 API 입니다. 필수 요청 항목 : 로그인 토큰" )
     @GetMapping("/singleSchedules")
@@ -63,24 +55,6 @@ public class SingleScheduleController {
     @DeleteMapping("/singleSchedule/{scheduleId}")
     public void deleteSingleSchedule(@PathVariable Long scheduleId) {
         singleScheduleService.deleteSingleSchedule(scheduleId);
-    }
-
-    @GetMapping("/singleSchedule/kakao")
-    public void redirectToKakao(HttpServletResponse response) throws IOException {
-        String kakaoLoginUrl = "https://kauth.kakao.com/oauth/authorize"
-                + "?response_type=code"
-                + "&client_id=" + clientId
-                + "&redirect_uri=" + redirectUri
-                + "&scope=profile_nickname,account_email";
-        response.sendRedirect(kakaoLoginUrl);
-    }
-
-    @GetMapping("/singleSchedule/kakao/callback")
-    public void requestMessage(@RequestParam String code) {
-        String accessToken = messageService.getAccessToken(code);
-        System.out.println(accessToken);
-        messageService.requestMessage(accessToken);
-
     }
 }
 

@@ -47,7 +47,8 @@ public class SingleScheduleService {
                             .startDatetime(singleSchedule.getStartDatetime())
                             .endDatetime(singleSchedule.getEndDatetime())
                             .createdAt(singleSchedule.getCreatedAt())
-                            .updatedAt(singleSchedule.getUpdatedAt());
+                            .updatedAt(singleSchedule.getUpdatedAt())
+                            .notificatedAt(singleSchedule.getNotificatedAt());
 
                     PeriodicSchedule periodicSchedule = singleSchedule.getPeriodicSchedule();
                     if (periodicSchedule != null) {
@@ -90,6 +91,7 @@ public class SingleScheduleService {
                 .petName(request.getPetName())
                 .createdAt(singleSchedule.getCreatedAt())
                 .updatedAt(singleSchedule.getUpdatedAt())
+                .notificatedAt(singleSchedule.getNotificatedAt())
                 .build();
 
         return singleScheduleDTO;
@@ -127,6 +129,7 @@ public class SingleScheduleService {
                 .petName(request.getPetName())
                 .createdAt(singleSchedule.getCreatedAt())
                 .updatedAt(singleSchedule.getUpdatedAt())
+                .notificatedAt(singleSchedule.getNotificatedAt())
                 .build();
 
         return singleScheduleDTO;

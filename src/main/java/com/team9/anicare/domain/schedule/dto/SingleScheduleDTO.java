@@ -20,6 +20,7 @@ public class SingleScheduleDTO {
     private LocalDateTime endDatetime;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime notificatedAt;
 
     @Getter
     public static class AddSingleScheduleDTO {

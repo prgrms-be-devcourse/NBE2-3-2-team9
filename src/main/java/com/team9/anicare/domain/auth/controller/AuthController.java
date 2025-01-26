@@ -5,6 +5,7 @@ import com.team9.anicare.domain.auth.security.CustomUserDetails;
 import com.team9.anicare.domain.auth.security.JwtTokenProvider;
 import com.team9.anicare.domain.auth.service.AuthService;
 import com.team9.anicare.domain.auth.service.KakaoService;
+import com.team9.anicare.domain.schedule.service.RedisService;
 import com.team9.anicare.domain.user.dto.LoginAdminDTO;
 import com.team9.anicare.domain.user.dto.UserResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,16 +23,19 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 
 @Tag(name = "auth", description = "인증 API")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    @Autowired
+    private RedisService redisService;
 
     @Autowired
     private AuthService authService;
-    private  final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
     private final KakaoService kakaoService;
 
     @Value("${kakao.client-id}")
@@ -100,6 +104,11 @@ public class AuthController {
                 "userId", userInfo.getId(),
                 "role" , userInfo.getRole()
         );
+
+        // 6. Redis에 AccessToken 저장
+        String redisKey = String.format("user.%s.access_token", userInfo.getId());
+        redisService.setValues(redisKey, kakaoAccessToken, Duration.ofMinutes(5 * 60 + 50));
+
         return ResponseEntity.ok(responseMap); // ResponseEntity로 반환
     }
 }
