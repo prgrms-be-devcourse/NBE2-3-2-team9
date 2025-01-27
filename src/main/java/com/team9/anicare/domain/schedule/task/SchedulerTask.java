@@ -19,11 +19,10 @@ public class SchedulerTask {
     private SingleScheduleRepository singleScheduleRepository;
     private RedisService redisService;
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60000 * 5)
     public void requestMessage() {
         List<SingleSchedule> lists = singleScheduleRepository.findSchedulesWithinNextTenMinutes(LocalDateTime.now(), LocalDateTime.now().plusMinutes(10));
         for (SingleSchedule schedule : lists) {
-            System.out.println(lists);
             String redisKey = String.format("user.%s.access_token", schedule.getUser().getId());
             String accessToken = redisService.getValues(redisKey);
             messageService.requestMessage(accessToken, schedule);
