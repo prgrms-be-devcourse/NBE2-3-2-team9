@@ -5,6 +5,7 @@ import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageMetaDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
 import com.team9.anicare.domain.chat.dto.ChatRoomCreateRequestDTO;
+import com.team9.anicare.domain.chat.dto.ChatRoomDetailResponseDTO;
 import com.team9.anicare.domain.chat.dto.ChatRoomResponseDTO;
 import com.team9.anicare.domain.chat.entity.ChatMessage;
 import com.team9.anicare.domain.chat.entity.ChatParticipant;
@@ -15,6 +16,7 @@ import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
 import com.team9.anicare.domain.user.model.User;
 import com.team9.anicare.domain.user.repository.UserRepository;
 import com.team9.anicare.domain.user.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -269,7 +271,16 @@ public class ChatRoomService {
         List<ChatRoomResponseDTO> content = chatRoomsPage.map(chatRoom -> convertToDTO(chatRoom, userId)).toList();
 
         PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), chatRoomsPage.getTotalElements());
-        return new PageDTO<>(content, meta);    }
+        return new PageDTO<>(content, meta);
+    }
+
+    @Transactional
+    public ChatRoomDetailResponseDTO getChatRoomDetail(String roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다: " + roomId));
+
+        return new ChatRoomDetailResponseDTO(chatRoom.getRoomName(), chatRoom.getDescription());
+    }
 
 
     /**
