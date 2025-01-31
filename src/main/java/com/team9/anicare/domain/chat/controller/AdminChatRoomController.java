@@ -1,6 +1,5 @@
 package com.team9.anicare.domain.chat.controller;
 
-import com.sun.security.auth.UserPrincipal;
 import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
 import com.team9.anicare.domain.auth.security.CustomUserDetails;
@@ -34,28 +33,23 @@ public class AdminChatRoomController {
     }
 
 
-    @Operation(summary = "채팅방 조회")
+    @Operation(summary = "모든 채팅방 조회")
     @GetMapping("/rooms")
     @PreAuthorize("hasRole('ADMIN')")
-    public PageDTO<ChatRoomResponseDTO> getAllChatRooms(
-            @ModelAttribute PageRequestDTO pageRequestDTO,
-            @AuthenticationPrincipal CustomUserDetails userDetails)
+    public PageDTO<ChatRoomResponseDTO> getAllChatRooms(@ModelAttribute PageRequestDTO pageRequestDTO)
     {
-        Long adminId = userDetails.getUserId(); // 로그인한 관리자의 ID
-        return chatRoomService.getAllChatRooms(adminId, pageRequestDTO);
+        return chatRoomService.getAllChatRooms(pageRequestDTO);
     }
 
 
     @Operation(summary = "채팅방 검색 (Admin)")
     @GetMapping("/rooms/search")
     @PreAuthorize("hasRole('ADMIN')")
-    public PageDTO<ChatRoomResponseDTO> searchAdminChatRooms(
+    public PageDTO<ChatRoomResponseDTO> searchChatRooms(
             @RequestParam String keyword,
-            @ModelAttribute PageRequestDTO pageRequestDTO,
-            @AuthenticationPrincipal CustomUserDetails userDetails)
+            @ModelAttribute PageRequestDTO pageRequestDTO)
     {
-        Long adminId = userDetails.getUserId(); // 로그인한 관리자의 ID
-        return chatRoomService.searchAdminChatRooms(adminId, keyword, pageRequestDTO);
+        return chatRoomService.searchAllChatRooms(keyword, pageRequestDTO);
     }
 
 

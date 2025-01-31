@@ -43,6 +43,4 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
     @Transactional
     @Query("DELETE FROM ChatParticipant p WHERE p.chatRoom = :chatRoom")
     void deleteByChatRoom(@Param("chatRoom") ChatRoom chatRoom);
-
-    List<String> findChatRoomIdsByAdminId(Long adminId);
 }
