@@ -36,9 +36,12 @@ public class AdminChatRoomController {
     @Operation(summary = "모든 채팅방 조회")
     @GetMapping("/rooms")
     @PreAuthorize("hasRole('ADMIN')")
-    public PageDTO<ChatRoomResponseDTO> getAllChatRooms(@ModelAttribute PageRequestDTO pageRequestDTO)
+    public PageDTO<ChatRoomResponseDTO> getAllChatRooms(
+            @ModelAttribute PageRequestDTO pageRequestDTO,
+            @AuthenticationPrincipal CustomUserDetails userDetails)
     {
-        return chatRoomService.getAllChatRooms(pageRequestDTO);
+        Long adminId = userDetails.getUserId();
+        return chatRoomService.getAllChatRooms(adminId, pageRequestDTO);
     }
 
 
