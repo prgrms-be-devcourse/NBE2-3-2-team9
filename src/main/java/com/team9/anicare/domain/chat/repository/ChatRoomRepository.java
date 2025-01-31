@@ -50,6 +50,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Query("DELETE FROM ChatRoom c WHERE c.roomId = :roomId")
     void deleteByRoomId(@Param("roomId") String roomId);
 
-    Page<ChatRoom> findByAdminsContaining(User admin, Pageable pageable);
+    @Query("SELECT cr FROM ChatRoom cr JOIN cr.admins a WHERE a = :admin")
+    Page<ChatRoom> findAdminChatRooms(@Param("admin") User admin, Pageable pageable);
 
 }
