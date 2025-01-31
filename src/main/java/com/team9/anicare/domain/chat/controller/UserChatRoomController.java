@@ -4,6 +4,7 @@ import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
 import com.team9.anicare.domain.auth.security.CustomUserDetails;
 import com.team9.anicare.domain.chat.dto.ChatRoomCreateRequestDTO;
+import com.team9.anicare.domain.chat.dto.ChatRoomDetailResponseDTO;
 import com.team9.anicare.domain.chat.dto.ChatRoomResponseDTO;
 import com.team9.anicare.domain.chat.service.ChatParticipantService;
 import com.team9.anicare.domain.chat.service.ChatRoomService;
@@ -74,6 +75,15 @@ public class UserChatRoomController {
 
         return ResponseEntity.ok("채팅방에 입장했습니다.");
     }
+
+    @Operation(summary = "채팅방 상세 조회", description = "채팅방 ID를 이용해 채팅방 제목과 설명을 조회합니다.")
+    @GetMapping("/rooms/{roomId}/detail")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ChatRoomDetailResponseDTO> getChatRoomDetail(@PathVariable String roomId) {
+        ChatRoomDetailResponseDTO chatRoomDetail = chatRoomService.getChatRoomDetail(roomId);
+        return ResponseEntity.ok(chatRoomDetail);
+    }
+
 
 
     @Operation(summary = "채팅방 퇴장 (User)", description = "사용자가 채팅방에서 나갑니다.")
