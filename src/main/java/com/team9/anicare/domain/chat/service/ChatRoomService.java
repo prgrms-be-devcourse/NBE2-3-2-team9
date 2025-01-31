@@ -134,7 +134,7 @@ public class ChatRoomService {
     public PageDTO<ChatRoomResponseDTO> getAllChatRooms(Long adminId, PageRequestDTO pageRequestDTO) {
         Pageable pageable = pageRequestDTO.toPageRequest();
 
-        // 관리자 User 객체 조회
+        // 관리자 User 객체 조회 (필요한 경우)
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("관리자 정보를 찾을 수 없습니다."));
 
