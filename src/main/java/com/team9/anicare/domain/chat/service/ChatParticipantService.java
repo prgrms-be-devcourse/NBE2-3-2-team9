@@ -3,6 +3,7 @@ package com.team9.anicare.domain.chat.service;
 import com.team9.anicare.domain.chat.entity.ChatMessage;
 import com.team9.anicare.domain.chat.entity.ChatParticipant;
 import com.team9.anicare.domain.chat.entity.ChatRoom;
+import com.team9.anicare.domain.chat.repository.ChatMessageRepository;
 import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
 import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
 import com.team9.anicare.domain.user.model.User;
@@ -19,6 +20,7 @@ public class ChatParticipantService {
 
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final ChatServiceUtil chatServiceUtil;
     private final ChatMessageService chatMessageService;
 
@@ -90,14 +92,36 @@ public class ChatParticipantService {
         participant.setActive(false);
         chatParticipantRepository.save(participant);
 
+        // DB에서 삭제
+        chatParticipantRepository.delete(participant);
+
         // 시스템 메시지 전송
         String content = isAdmin ? "관리자가 퇴장했습니다." : "사용자가 퇴장했습니다.";
-        chatMessageService.sendSystemMessage(content, roomId, ChatMessage.MessageType.EXIT);
+        chatMessageService.sendSystemMessage(content, roomId, ChatMessage.MessageType.SYSTEM);
 
         // 모든 관리자가 나갔는지 확인 후 occupied 상태 변경
         if (isAdmin && chatParticipantRepository.countByChatRoomAndIsAdminTrueAndIsActiveTrue(chatRoom) == 0) {
             chatRoom.setOccupied(false);
             chatRoomRepository.save(chatRoom);
         }
+
+        // 남아 있는 일반 사용자 수 확인
+        int remainingUsers = chatParticipantRepository.countByChatRoomAndIsAdminFalse(chatRoom);
+
+        // 만약 남아 있는 일반 사용자가 0명이면 채팅방 삭제
+        if (remainingUsers == 0) {
+            // 1️⃣ 해당 채팅방의 모든 채팅 메시지 삭제
+            chatMessageRepository.deleteByChatRoom(chatRoom);
+
+            // 2️⃣ 해당 채팅방의 모든 참여자 정보 삭제
+            chatParticipantRepository.deleteByChatRoom(chatRoom);
+
+            // 3️⃣ 채팅방 삭제
+            chatRoomRepository.delete(chatRoom);
+
+            chatMessageService.sendSystemMessage("채팅방이 삭제되었습니다.", roomId, ChatMessage.MessageType.SYSTEM);
+        }
+
+
     }
 }

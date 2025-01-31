@@ -3,7 +3,9 @@ package com.team9.anicare.domain.chat.repository;
 import com.team9.anicare.domain.chat.entity.ChatMessage;
 import com.team9.anicare.domain.chat.entity.ChatRoom;
 import com.team9.anicare.domain.user.model.User;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -31,4 +33,8 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
 
     // 특정 채팅방에서 특정 유형의 메시지 조회 (ENTER, TALK, EXIT)
     List<ChatMessage> findByChatRoomAndType(ChatRoom chatRoom, ChatMessage.MessageType type);
+
+    @Modifying
+    @Transactional
+    void deleteByChatRoom(ChatRoom chatRoom);
 }
