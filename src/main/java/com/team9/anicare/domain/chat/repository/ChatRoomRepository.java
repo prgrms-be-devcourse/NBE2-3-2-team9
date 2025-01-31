@@ -51,4 +51,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     void deleteByRoomId(@Param("roomId") String roomId);
 
     Page<ChatRoom> findByAdminsContaining(User admin, Pageable pageable);
+
 }
