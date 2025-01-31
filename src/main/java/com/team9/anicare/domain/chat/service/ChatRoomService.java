@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -119,6 +120,8 @@ public class ChatRoomService {
 
         chatParticipantRepository.save(adminParticipant);
 
+        chatRoom.getAdmins().add(selectedAdmin);
+
         // 4️⃣ 채팅방 상태 업데이트 (관리자 참여)
         chatRoom.setOccupied(true);
         chatRoomRepository.save(chatRoom);
@@ -145,7 +148,7 @@ public class ChatRoomService {
 
         // DTO 변환
         List<ChatRoomResponseDTO> content = adminChatRooms.getContent().stream()
-                .map(chatRoom -> convertToDTO(chatRoom, adminId))
+                .map(chatRoom -> convertToDTO(chatRoom, admin.getId()))
                 .toList();
 
         // 페이징 메타데이터 생성
