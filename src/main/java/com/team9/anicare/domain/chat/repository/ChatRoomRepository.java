@@ -1,9 +1,13 @@
 package com.team9.anicare.domain.chat.repository;
 
 import com.team9.anicare.domain.chat.entity.ChatRoom;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -39,4 +43,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     // 메시지에 포함된 채팅방 ID로 검색 (페이징 적용)
     Page<ChatRoom> findByRoomIdIn(List<String> roomIds, Pageable pageable);
 
+    // 특정 채팅방 삭제
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM ChatRoom c WHERE c.roomId = :roomId")
+    void deleteByRoomId(@Param("roomId") String roomId);
 }

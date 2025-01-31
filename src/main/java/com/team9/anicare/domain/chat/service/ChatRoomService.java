@@ -75,14 +75,7 @@ public class ChatRoomService {
         // 3️⃣ 랜덤 관리자 배정
         User randomAdmin = assignRandomAdminToRoom(chatRoom);
 
-        // 4️⃣ 시스템 메시지 전송 (채팅방 생성 알림)
-        chatMessageService.sendSystemMessage(
-                String.format("채팅방이 생성되었습니다.<br>방 제목: %s<br>설명: %s", requestDTO.getRoomName(), requestDTO.getDescription()),
-                chatRoom.getRoomId(),
-                ChatMessage.MessageType.SYSTEM
-        );
-
-        // 5️⃣ 시스템 메시지 전송 (관리자 배정 알림)
+        // 4️⃣ 시스템 메시지 전송 (관리자 배정 알림)
         if (randomAdmin != null) {
             chatMessageService.sendSystemMessage(
                     String.format("관리자 %s님이 채팅방에 배정되었습니다.", randomAdmin.getName()),
