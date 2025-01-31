@@ -141,7 +141,7 @@ public class ChatRoomService {
                 .orElseThrow(() -> new IllegalArgumentException("관리자 정보를 찾을 수 없습니다."));
 
         // 관리자가 포함된 채팅방 조회
-        Page<ChatRoom> adminChatRooms = chatRoomRepository.findByAdminsContaining(admin, pageable);
+        Page<ChatRoom> adminChatRooms = chatRoomRepository.findAdminChatRooms(admin, pageable);
 
         // DTO 변환
         List<ChatRoomResponseDTO> content = adminChatRooms.getContent().stream()
