@@ -274,7 +274,7 @@ public class ChatRoomService {
         return new PageDTO<>(content, meta);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ChatRoomDetailResponseDTO getChatRoomDetail(String roomId) {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다: " + roomId));
