@@ -130,6 +130,7 @@ public class ChatRoomService {
     /**
      * 관리자 자신이 참여한 채팅방 조회
      *
+     *
      * @param adminId 관리자 ID
      * @param pageRequestDTO 페이징 요청 정보
      * @return 채팅방 목록 DTO
