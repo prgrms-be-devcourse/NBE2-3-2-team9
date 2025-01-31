@@ -70,7 +70,7 @@ public class InformationService {
         if((speciesName == null || speciesName.isEmpty()) && (breedName == null || breedName.isEmpty())) {
             informationPage = informationRepository.findAllInformation(pageRequest);
         } else if(speciesName == null || speciesName.isEmpty()) {
-            throw new CustomException(ResultCode.NOT_EXISTS_SPECIES);
+            informationPage = informationRepository.findByBreedName(breedName, pageRequest);
         } else if(breedName == null || breedName.isEmpty()) {
             informationPage = informationRepository.findBySpeciesName(speciesName, pageRequest);
         } else {
