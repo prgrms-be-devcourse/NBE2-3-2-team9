@@ -1,6 +1,7 @@
 package com.team9.anicare.domain.chat.repository;
 
 import com.team9.anicare.domain.chat.entity.ChatRoom;
+import com.team9.anicare.domain.user.model.User;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,5 +50,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Query("DELETE FROM ChatRoom c WHERE c.roomId = :roomId")
     void deleteByRoomId(@Param("roomId") String roomId);
 
-    Page<ChatRoom> findByAdminId(Long adminId, Pageable pageable);
+    Page<ChatRoom> findByAdminsContaining(User admin, Pageable pageable);
 }
