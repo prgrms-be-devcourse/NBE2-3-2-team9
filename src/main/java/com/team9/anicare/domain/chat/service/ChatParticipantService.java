@@ -5,6 +5,7 @@ import com.team9.anicare.domain.chat.entity.ChatParticipant;
 import com.team9.anicare.domain.chat.entity.ChatRoom;
 import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
 import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
+import com.team9.anicare.domain.chat.repository.ChatMessageRepository;
 import com.team9.anicare.domain.user.model.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class ChatParticipantService {
 
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final ChatServiceUtil chatServiceUtil;
     private final ChatMessageService chatMessageService;
 
@@ -98,6 +100,16 @@ public class ChatParticipantService {
         if (isAdmin && chatParticipantRepository.countByChatRoomAndIsAdminTrueAndIsActiveTrue(chatRoom) == 0) {
             chatRoom.setOccupied(false);
             chatRoomRepository.save(chatRoom);
+        }
+
+        // 채팅방에 남아 있는 사용자가 없으면 삭제
+        long activeParticipants = chatParticipantRepository.countByChatRoomAndIsActiveTrue(chatRoom);
+        long activeAdmins = chatParticipantRepository.countByChatRoomAndIsAdminTrueAndIsActiveTrue(chatRoom);
+
+        if (activeParticipants == 0 || activeParticipants == activeAdmins) {
+            chatMessageRepository.deleteByChatRoom(chatRoom); // 채팅 메시지 삭제
+            chatParticipantRepository.deleteByChatRoom(chatRoom); // 채팅 참여자 삭제
+            chatRoomRepository.delete(chatRoom); // 채팅방 삭제
         }
     }
 }
