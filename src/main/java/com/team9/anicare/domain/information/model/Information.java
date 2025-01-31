@@ -1,6 +1,8 @@
 package com.team9.anicare.domain.information.model;
 
 import com.team9.anicare.domain.animal.model.Breed;
+import com.team9.anicare.domain.community.dto.CommunityRequestDTO;
+import com.team9.anicare.domain.information.dto.InformationRequestDTO;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,6 +42,18 @@ public class Information {
         this.hit = hit;
     }
 
+    public void updateInformation(InformationRequestDTO requestDTO) {
+        if (requestDTO.getAge() != null) { this.age = requestDTO.getAge(); }
+        if (requestDTO.getWeight() != null) { this.weight = requestDTO.getWeight(); }
+        if (requestDTO.getHeight() != null) { this.height = requestDTO.getHeight(); }
+        if (requestDTO.getGuide() != null) { this.guide = requestDTO.getGuide(); }
+        if (requestDTO.getDescription() != null) { this.description = requestDTO.getDescription(); }
+    }
+
+    public void updatePicture(String picture) {
+        this.picture = picture;
+    }
+    
     public void updateHit(int hit) {
         this.hit = hit;
     }

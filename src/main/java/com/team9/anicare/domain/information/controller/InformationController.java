@@ -2,6 +2,8 @@ package com.team9.anicare.domain.information.controller;
 
 import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
+import com.team9.anicare.domain.community.dto.CommunityRequestDTO;
+import com.team9.anicare.domain.community.dto.CommunityResponseDTO;
 import com.team9.anicare.domain.information.dto.InformationRequestDTO;
 import com.team9.anicare.domain.information.dto.InformationResponseDTO;
 import com.team9.anicare.domain.information.service.InformationService;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,5 +55,28 @@ public class InformationController {
         InformationResponseDTO informationDTO = informationService.getInformationDetail(informationId);
 
         return ResponseEntity.ok(informationDTO);
+    }
+
+    @Operation(summary = "동물 정보 수정",
+            description = "관리자가 정보글을 수정하는 API 입니다. 요청 항목 : 정보글 ID, 수정할 정보글 내용(age, weight, height, guide, description)")
+    @PutMapping(value = "/{informationId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<InformationResponseDTO> updateInformation(
+            @PathVariable Long informationId,
+            @RequestPart(value = "dto") InformationRequestDTO informationRequestDTO,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        InformationResponseDTO informationResponseDTO = informationService.updateInformation(informationId, informationRequestDTO, file);
+
+        return ResponseEntity.ok(informationResponseDTO);
+    }
+
+    @Operation(summary = "동물 정보 삭제",
+            description = "관리자가 정보글을 삭제하는 API 입니다. 요청 항목 : 정보글 ID")
+    @DeleteMapping("/{informationId}")
+    public ResponseEntity<Void> deleteInformation(@PathVariable Long informationId) {
+
+        informationService.deleteInformation(informationId);
+
+        return ResponseEntity.noContent().build();
     }
 }

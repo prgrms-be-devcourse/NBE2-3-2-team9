@@ -96,5 +96,41 @@ public class InformationService {
         return informationMapper.toDto(information);
     }
 
+    public InformationResponseDTO updateInformation(Long informationId, InformationRequestDTO informationRequestDTO, MultipartFile file) {
+        // 정보 조회
+        Information information = informationRepository.findById(informationId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_INFORMATION));
+
+        // 정보 수정
+        information.updateInformation(informationRequestDTO);
+
+        try {
+            // 새로운 파일이 들어왔다면
+            if (file != null && !file.isEmpty()) {
+                information.updatePicture(s3FileService.updateFile(file, information.getPicture(), "information"));
+            }
+        } catch (IOException e) {
+            throw new CustomException(ResultCode.FILE_UPLOAD_ERROR);
+        }
+
+        informationRepository.save(information);
+
+        return informationMapper.toDto(information);
+    }
+
+    public void deleteInformation(Long informationId) {
+        // 정보 존재 여부 확인
+        Information information = informationRepository.findById(informationId)
+                .orElseThrow(() -> new CustomException(ResultCode.NOT_EXISTS_INFORMATION));
+
+        // S3에서 파일 삭제
+        if (information.getPicture() != null) {
+            s3FileService.deleteFile(information.getPicture());
+        }
+
+        // 정보 삭제
+        informationRepository.deleteById(informationId);
+    }
+
 }
 
