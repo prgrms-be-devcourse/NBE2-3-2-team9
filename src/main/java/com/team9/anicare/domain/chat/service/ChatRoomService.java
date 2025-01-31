@@ -18,6 +18,7 @@ import com.team9.anicare.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -133,16 +134,24 @@ public class ChatRoomService {
     public PageDTO<ChatRoomResponseDTO> getAllChatRooms(Long adminId, PageRequestDTO pageRequestDTO) {
         Pageable pageable = pageRequestDTO.toPageRequest();
 
-        // 관리자 User 객체 조회 (필요한 경우)
+        // 관리자 User 객체 조회
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("관리자 정보를 찾을 수 없습니다."));
 
         // 관리자가 포함된 채팅방 조회
         Page<ChatRoom> adminChatRooms = chatRoomRepository.findByAdminsContaining(admin, pageable);
 
-        List<ChatRoomResponseDTO> content = chatRoomsPage.map(chatRoom -> convertToDTO(chatRoom, null)).toList();
+        // DTO 변환
+        List<ChatRoomResponseDTO> content = adminChatRooms.getContent().stream()
+                .map(chatRoom -> convertToDTO(chatRoom, adminId))
+                .toList();
 
-        PageMetaDTO meta = new PageMetaDTO(pageRequestDTO.getPage(), pageRequestDTO.getSize(), chatRoomsPage.getTotalElements());
+        // 페이징 메타데이터 생성
+        PageMetaDTO meta = new PageMetaDTO(
+                pageRequestDTO.getPage(),
+                pageRequestDTO.getSize(),
+                adminChatRooms.getTotalElements()
+        );
 
         return new PageDTO<>(content, meta);
     }
