@@ -13,6 +13,7 @@ import com.team9.anicare.domain.chat.repository.ChatMessageRepository;
 import com.team9.anicare.domain.chat.repository.ChatParticipantRepository;
 import com.team9.anicare.domain.chat.repository.ChatRoomRepository;
 import com.team9.anicare.domain.user.model.User;
+import com.team9.anicare.domain.user.repository.UserRepository;
 import com.team9.anicare.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,7 @@ public class ChatRoomService {
     private final ChatMessageService chatMessageService;
     private final ChatServiceUtil chatServiceUtil;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     private final Random random = new Random();
 
@@ -128,9 +130,15 @@ public class ChatRoomService {
      *
      * @return 전체 채팅방 목록 DTO
      */
-    public PageDTO<ChatRoomResponseDTO> getAllChatRooms(PageRequestDTO pageRequestDTO) {
-        var pageable = pageRequestDTO.toPageRequest();
-        var chatRoomsPage = chatRoomRepository.findAll(pageable);
+    public PageDTO<ChatRoomResponseDTO> getAllChatRooms(Long adminId, PageRequestDTO pageRequestDTO) {
+        Pageable pageable = pageRequestDTO.toPageRequest();
+
+        // 관리자 User 객체 조회 (필요한 경우)
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new IllegalArgumentException("관리자 정보를 찾을 수 없습니다."));
+
+        // 관리자가 포함된 채팅방 조회
+        Page<ChatRoom> adminChatRooms = chatRoomRepository.findByAdminsContaining(admin, pageable);
 
         List<ChatRoomResponseDTO> content = chatRoomsPage.map(chatRoom -> convertToDTO(chatRoom, null)).toList();
 
