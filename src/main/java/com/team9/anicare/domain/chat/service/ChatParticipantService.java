@@ -103,6 +103,8 @@ public class ChatParticipantService {
             chatParticipantRepository.deleteByChatRoom(chatRoom); // 채팅 참여자 삭제
             chatRoomRepository.delete(chatRoom); // 채팅방 삭제
             return;
+        } else {
+            chatParticipantRepository.delete(participant); // 해당 관리자만 삭제
         }
 
         // 모든 관리자가 나갔는지 확인 후 occupied 상태 변경
