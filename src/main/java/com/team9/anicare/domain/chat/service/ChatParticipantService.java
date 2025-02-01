@@ -83,6 +83,7 @@ public class ChatParticipantService {
      * @param userId 퇴장할 사용자 ID
      */
     public void leaveChatRoom(String roomId, Long userId, boolean isAdmin) {
+
         ChatRoom chatRoom = chatServiceUtil.findChatRoomById(roomId);
 
         User user = chatServiceUtil.findUserById(userId);
@@ -94,22 +95,21 @@ public class ChatParticipantService {
 
         // 시스템 메시지 전송
         String content = isAdmin ? "관리자가 퇴장했습니다." : "사용자가 퇴장했습니다.";
-        chatMessageService.sendSystemMessage(content, roomId, ChatMessage.MessageType.EXIT);
+        chatMessageService.sendSystemMessage(content, roomId, ChatMessage.MessageType.SYSTEM);
+
+        // 사용자가 나가면 무조건 삭제
+        if (!isAdmin) {
+            chatMessageRepository.deleteByChatRoom(chatRoom); // 채팅 메시지 삭제
+            chatParticipantRepository.deleteByChatRoom(chatRoom); // 채팅 참여자 삭제
+            chatRoomRepository.delete(chatRoom); // 채팅방 삭제
+            return;
+        }
 
         // 모든 관리자가 나갔는지 확인 후 occupied 상태 변경
-        if (isAdmin && chatParticipantRepository.countByChatRoomAndIsAdminTrueAndIsActiveTrue(chatRoom) == 0) {
+        if (chatParticipantRepository.countByChatRoomAndIsAdminTrueAndIsActiveTrue(chatRoom) == 0) {
             chatRoom.setOccupied(false);
             chatRoomRepository.save(chatRoom);
         }
 
-        // 채팅방에 남아 있는 사용자가 없으면 삭제
-        long activeParticipants = chatParticipantRepository.countByChatRoomAndIsActiveTrue(chatRoom);
-        long activeAdmins = chatParticipantRepository.countByChatRoomAndIsAdminTrueAndIsActiveTrue(chatRoom);
-
-        if (activeParticipants == 0 || activeParticipants == activeAdmins) {
-            chatMessageRepository.deleteByChatRoom(chatRoom); // 채팅 메시지 삭제
-            chatParticipantRepository.deleteByChatRoom(chatRoom); // 채팅 참여자 삭제
-            chatRoomRepository.delete(chatRoom); // 채팅방 삭제
-        }
     }
 }
