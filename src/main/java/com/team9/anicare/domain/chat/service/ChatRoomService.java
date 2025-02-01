@@ -120,6 +120,10 @@ public class ChatRoomService {
 
         chatParticipantRepository.save(adminParticipant);
 
+        if (chatRoom.getAdmins() == null) {
+            chatRoom.setAdmins(new ArrayList<>());
+        }
+        // 이제 안전하게 add() 호출 가능
         chatRoom.getAdmins().add(selectedAdmin);
 
         // 4️⃣ 채팅방 상태 업데이트 (관리자 참여)

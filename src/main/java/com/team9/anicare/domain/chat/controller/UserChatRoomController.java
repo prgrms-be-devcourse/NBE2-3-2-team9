@@ -2,6 +2,8 @@ package com.team9.anicare.domain.chat.controller;
 
 import com.team9.anicare.common.dto.PageDTO;
 import com.team9.anicare.common.dto.PageRequestDTO;
+import com.team9.anicare.common.exception.ResultCode;
+import com.team9.anicare.common.response.Result;
 import com.team9.anicare.domain.auth.security.CustomUserDetails;
 import com.team9.anicare.domain.chat.dto.ChatRoomCreateRequestDTO;
 import com.team9.anicare.domain.chat.dto.ChatRoomDetailResponseDTO;
@@ -88,7 +90,8 @@ public class UserChatRoomController {
 
     @Operation(summary = "채팅방 퇴장 (User)", description = "사용자가 채팅방에서 나갑니다.")
     @DeleteMapping("/rooms/{roomId}/exit")
-    public ResponseEntity<String> exitChatRoom(
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Result<String>> exitChatRoom(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable String roomId) {
 
@@ -96,6 +99,7 @@ public class UserChatRoomController {
 
         chatParticipantService.leaveChatRoom(roomId, userId, false);
 
-        return ResponseEntity.ok("채팅방에서 성공적으로 퇴장했습니다.");
-    }
+        Result<String> response = new Result<>(ResultCode.SUCCESS, "채팅방에서 성공적으로 퇴장했습니다.");
+
+        return ResponseEntity.ok(response);    }
 }
