@@ -88,6 +88,7 @@ public class UserChatRoomController {
 
     @Operation(summary = "채팅방 퇴장 (User)", description = "사용자가 채팅방에서 나갑니다.")
     @DeleteMapping("/rooms/{roomId}/exit")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> exitChatRoom(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable String roomId) {

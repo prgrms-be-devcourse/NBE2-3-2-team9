@@ -63,7 +63,7 @@ public class ChatRoom {
             joinColumns = @JoinColumn(name = "chat_room_id"),
             inverseJoinColumns = @JoinColumn(name = "admin_id")
     )
-    private List<User> admins;  // Role.ADMIN인 User들만 참여
+    private List<User> admins = new ArrayList<>();;  // Role.ADMIN인 User들만 참여
 
     // 마지막으로 전송된 메시지 내용
     @Column(name = "last_message")
