@@ -84,7 +84,7 @@ public class AdminChatRoomController {
      * 관리자 - 채팅방 퇴장
      */
     @Operation(summary = "채팅방 퇴장 (Admin)", description = "관리자가 채팅방에서 나갑니다.")
-    @PostMapping("/rooms/{roomId}/exit")
+    @DeleteMapping("/rooms/{roomId}/exit")
     public ResponseEntity<String> exitChatRoomAsAdmin(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable String roomId) {
